@@ -21,9 +21,12 @@ def ai_query(ts, api_key, model, system_prompt, data_folder, query):
 
     output += f"""
 \n\n__________________________________________________________________________
-Query that was sent to OpenAI...
+# Query that was sent to OpenAI...
+
 OpenAI Model Used: {model}
+
 System Prompt: {system_prompt}
+
 User Query: {query}
 """
 
