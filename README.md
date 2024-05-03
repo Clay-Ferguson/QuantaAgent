@@ -2,15 +2,18 @@
 
 This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that.
 
-This app will scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which can be injected into prompts by using an assigned name you give to each fragment. 
+This app will scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
+
 
 # Simple LLM Prompt Example
 
 Suppose you have a Java file that contains the following:
 
-    // --block.begin Adding_Numbers
-    int total = a + b;
-    // --block.end
+```java
+// block.begin Adding_Numbers
+int total = a + b;
+// block.end
+```
 
 You can run run LLM Prompts/Queries like this:
 
@@ -18,13 +21,30 @@ You can run run LLM Prompts/Queries like this:
 
     ${Adding_Numbers}
 
-So you can see you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code.
+So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block.begin` and `block.end` syntax, to create named blocks which are then template substituded automatically into your prompt.
+
+## Supported syntax
+
+Choose any syntax based on file type. For example Python uses "#", JavaScript/Java uses "//", SQL uses "--"
+
+```txt
+// block.begin ...
+// block.end
+
+-- block.begin ...
+-- block.end
+
+# block.begin ...
+# block.end
+```
+
 
 # Background and Inspiration
 
 There are other coding assistants like Github's Copilot for example, which let you ask arbitrary questions about your codebase, and those tools are very useful. However `Quanta Agent` lets you ask AI questions (i.e. build prompts) in a more flexible, targeted, specific, and repeatable way, and automatically saves the history of all your query outputs into markdown text files. `Quanta Agent` can solve more complex and difficult questions, in a repeatable way that doesn't require lots of developer time spent in building the same (or similar) prompts over and over again.
 
 For example, let's say you have some SQL in your project and some Java Entity beans that go along with your database tables. You might want to be able to alter or add SQL tables and/or automatically create the associated Java Entity beans. To get AI to do this for you, in a way that "fits into" your application architecture perfectly, you would want to create prompts that show examples of how you're doing each of these types of artifacts (the SQL and the Java), and then ask the AI to generate new code following that pattern. `Quanta Agent` helps you build these kinds of complex prompts, and keeps developers from having to construct these prompts manually.
+
 
 # How it Works (Identifying Blocks)
 
@@ -55,6 +75,14 @@ So, in summary, The tool will scan all your source files (inside `source_folder`
 
 
 # Use Cases
+
+## Code Generation
+
+You can use `Blocks` to give specific examples of how your software project architectue does various different things, and then ask the AI to create new objects, code, features, or SQL, or anything else that follows the examples from your own app, so it's much easier to get AI go generate code for you that's fine tuned just for your specific code base.
+
+## Finding Bugs or Getting Recommendations
+
+You can specify `Blocks` or entire files, in your prompt template, and then ask the AI to simply make recommendations of improvements or find bugs.
 
 ## New Employee Training
 
