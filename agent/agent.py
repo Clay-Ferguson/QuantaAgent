@@ -109,4 +109,4 @@ class QuantaAgent:
 
         print(f"AI Prompt: {prompt}")
 
-        # ai_query(self.ts, self.cfg.openai_api_key, self.cfg.openai_model, self.cfg.system_prompt, self.cfg.data_folder, prompt)
+        ai_query(self.ts, self.cfg.openai_api_key, self.cfg.openai_model, self.cfg.system_prompt, self.cfg.data_folder, prompt)
