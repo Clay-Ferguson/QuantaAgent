@@ -1,0 +1,12 @@
+# NOTE: These properties are overridable via command line arguments and/or environment variables, as well as the
+# default assumption that you might have your secrets in a file named "../secrets/secrets.yaml" (outside the project),
+# but you can look at `config.py` to see how the configuration is loaded.
+
+openai_api_key: "your-api-key"
+openai_model: "gpt-4-turbo-2024-04-09"
+
+system_prompt: "You are a helpful assistant."
+
+source_folder: "/home/clay/ferguson/Quantizr/src"
+scan_extensions: ".java, .sql"
+data_folder: "/home/clay/ferguson/QuantaAgent_data"
