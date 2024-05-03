@@ -133,10 +133,21 @@ An example `data_folder` (named `data` in the project root) is included in this 
 The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml`, and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to github
 
 
-# NOTES:
+# Future Features
+
+Improvements being considered, but not yet being worked on are as follows:
+
+## Code Injection Points
+
+We could allow a way to have `Code Injection Points` which are defined blocks in your code where the tool can be instructed to allow the AI to generate code to append into those slots. This would allow for a more structured and automatic way for the AI to directly update your project's files, rather than generating a single response file containing instructions on what to add and where to add it.
+
+## Entire Folders as Blocks
+
+We could allow a syntax like `${/my/folder/name}` to be able to inject the entire content of a directory into a prompt. This would rarely be needed, and would be expensive in terms of flooding the AI context window.
+
+# Notes:
 
 * This project is being developed on Python 3.11.5, and on Linux, but afaik it will run on any other platform with Python.
-
 
 # Resources
 
