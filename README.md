@@ -23,6 +23,12 @@ You can run run LLM Prompts/Queries like this:
 
 So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block.begin` and `block.end` syntax, to create named blocks which are then template substituded automatically into your prompt.
 
+# Simple Example
+
+Example Question and Answer(s) can be found here:
+
+https://github.com/Clay-Ferguson/QuantaAgent/tree/master/data
+
 ## Supported syntax
 
 Choose any syntax based on file type. For example Python uses "#", JavaScript/Java uses "//", SQL uses "--"
