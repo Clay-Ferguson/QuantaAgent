@@ -5,7 +5,7 @@ import re
 import time
 from dataclasses import dataclass
 from app_openai import ai_query
-import config
+import app_config
 
 
 @dataclass
@@ -21,7 +21,7 @@ class QuantaAgent:
 
     blocks = {}
     file_names = []
-    cfg = config.get_config()
+    cfg = app_config.get_config()
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 

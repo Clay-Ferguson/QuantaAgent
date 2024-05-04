@@ -124,16 +124,6 @@ An example `data_folder` (named `data` in the project root) is included in this 
     Don't forget to activate your "quanta_agent" environment in your IDE. IDE's, like VSCode, require you to choose the
     Python interpreter, so simply running 'conda activate quanta_agent' won't be enough.
 
-## Install langchain
-
-    conda install langchain -c conda-forge
-    pip install langchain-openai
-
-## Install Libraries
-
-    pip install ConfigArgParse
-
-
 # Configs
 
 The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml`, and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to github
@@ -151,9 +141,11 @@ We could allow a way to have `Code Injection Points` which are defined blocks in
 
 We could allow a syntax like `${/my/folder/name}` to be able to inject the entire content of a directory into a prompt. This would rarely be needed, and would be expensive in terms of flooding the AI context window.
 
+
 # Notes:
 
 * This project is being developed on Python 3.11.5, and on Linux, but afaik it will run on any other platform with Python.
+
 
 # Resources
 
