@@ -3,19 +3,17 @@
 import os
 import re
 import time
+from dataclasses import dataclass
 from app_openai import ai_query
 import config
 
 
+@dataclass
 class TextBlock:
     """Represents a block of text in a file."""
 
-    def __init__(self, name, content):
-        self.name = name
-        self.content = content
-
-    def __repr__(self):
-        return f"TextBlock(name={self.name}, content={self.content})"
+    name: str
+    content: str
 
 
 class QuantaAgent:
@@ -125,7 +123,7 @@ class QuantaAgent:
                     block = file.read()
                     prompt = prompt.replace(tag, block)
 
-        print(f"AI Prompt: {prompt}")
+        # print(f"AI Prompt: {prompt}")
 
         ai_query(
             self.ts,
