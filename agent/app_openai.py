@@ -13,6 +13,7 @@ class AppOpenAI:
     ):
         """Makes a query to OpenAI's API and writes the response to a file."""
         dry_run = False  # Eventually we'll have dry_run as a config option
+        ret = ""
 
         if dry_run:
             output = "Dry Run: No API call made."
@@ -25,7 +26,8 @@ class AppOpenAI:
             output_parser = StrOutputParser()
             chain = prompt | llm | output_parser
             print("Waiting for OpenAI...")
-            output = chain.invoke({"input": query})
+            ret = chain.invoke({"input": query})
+            output = ret
 
         output += f"""
 \n\n____________________________________________________________________________________
@@ -40,6 +42,7 @@ User Prompt: {query}
 
         # print("Answer: "+output)
         self.write_to_file(data_folder, output_file_name, output)
+        return ret
 
     def write_to_file(self, data_folder, output_file_name, content):
         """Writes the content to a file."""
