@@ -8,7 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 class AppOpenAI:
     """Makes calls to OpenAI"""
 
-    def ai_query(
+    def query(
         self, api_key, model, system_prompt, data_folder, query, output_file_name
     ):
         """Makes a query to OpenAI's API and writes the response to a file."""
@@ -28,7 +28,9 @@ class AppOpenAI:
             output = chain.invoke({"input": query})
 
         output += f"""
-\n\n__________________________________________________________________________
+\n\n____________________________________________________________________________________
+Note: The above content is the response from OpenAI's API using the following prompt:
+
 OpenAI Model Used: {model}
 
 System Prompt: {system_prompt}

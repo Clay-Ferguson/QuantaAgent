@@ -134,7 +134,7 @@ class QuantaAgent:
 
         # print(f"AI Prompt: {prompt}")
 
-        AppOpenAI().ai_query(
+        AppOpenAI().query(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.cfg.system_prompt,
