@@ -4,24 +4,23 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from app_openai import ai_query
-import app_config
-
-
-@dataclass
-class TextBlock:
-    """Represents a block of text in a file."""
-
-    name: str
-    content: str
+from app_openai import AppOpenAI
+from app_config import AppConfig
 
 
 class QuantaAgent:
     """Scans the source code and generates the AI prompt."""
 
+    @dataclass
+    class TextBlock:
+        """Represents a block of text in a file."""
+
+        name: str
+        content: str
+
     blocks = {}
     file_names = []
-    cfg = app_config.get_config()
+    cfg = AppConfig.get_config()
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 
@@ -55,7 +54,7 @@ class QuantaAgent:
                         block = self.blocks[name]
                     else:
                         # print("Creating new block")
-                        block = TextBlock(name, "")
+                        block = self.TextBlock(name, "")
                         self.blocks[name] = block
                 elif (
                     trimmed.startswith("-- block.end")
@@ -80,13 +79,14 @@ class QuantaAgent:
                 if ext.lower() in extensions:
                     # build the full path
                     path = os.path.join(dirpath, filename)
+                    # get the file name relative to the source folder
                     self.file_names.append(path[self.source_folder_len :])
                     # Call the visitor function for each file
                     self.visit_file(path)
 
-    def write_template(self, data_folder, ts, content):
+    def write_template(self, data_folder, output_file_name, content):
         """Writes the template to a file."""
-        filename = f"{data_folder}/{ts}-question.md"
+        filename = f"{data_folder}/{output_file_name}--Q.md"
 
         # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:
@@ -94,6 +94,15 @@ class QuantaAgent:
 
     def run(self):
         """Runs the agent."""
+
+        output_file_name = input(
+            "Enter filename for output (without extension, or path): "
+        )
+
+        # default filename to timestamp if empty
+        if output_file_name == "":
+            output_file_name = self.ts
+
         # Using regex to split and remove spaces
         extensions = re.split(r"\s*,\s*", self.cfg.scan_extensions)
         self.scan_directory(self.cfg.source_folder, extensions)
@@ -107,7 +116,7 @@ class QuantaAgent:
             prompt = file.read()
 
         # Write template before substitutions
-        self.write_template(self.cfg.data_folder, self.ts, prompt)
+        self.write_template(self.cfg.data_folder, output_file_name, prompt)
 
         # Substitute blocks into the prompt
         for key, value in self.blocks.items():
@@ -125,11 +134,11 @@ class QuantaAgent:
 
         # print(f"AI Prompt: {prompt}")
 
-        ai_query(
-            self.ts,
+        AppOpenAI().ai_query(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.cfg.system_prompt,
             self.cfg.data_folder,
             prompt,
+            output_file_name,
         )
