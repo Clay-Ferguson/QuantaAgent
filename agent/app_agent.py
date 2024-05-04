@@ -21,6 +21,9 @@ class QuantaAgent:
     blocks = {}
     file_names = []
     cfg = AppConfig.get_config()
+    # Using regex to split and remove spaces
+    ext_list = re.split(r"\s*,\s*", cfg.scan_extensions)
+    ext_set = set(ext_list)
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 
@@ -66,17 +69,15 @@ class QuantaAgent:
                     if block is not None:
                         block.content += line
 
-    def scan_directory(self, scan_dir, extensions):
+    def scan_directory(self, scan_dir):
         """Scans the directory for files with the specified extensions."""
-        # extensions should be a set for faster lookup
-        extensions = set(extensions)
 
         # Walk through all directories and files in the directory
         for dirpath, _, filenames in os.walk(scan_dir):
             for filename in filenames:
                 # Check the file extension
                 _, ext = os.path.splitext(filename)
-                if ext.lower() in extensions:
+                if ext.lower() in self.ext_set:
                     # build the full path
                     path = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
@@ -103,9 +104,7 @@ class QuantaAgent:
         if output_file_name == "":
             output_file_name = self.ts
 
-        # Using regex to split and remove spaces
-        extensions = re.split(r"\s*,\s*", self.cfg.scan_extensions)
-        self.scan_directory(self.cfg.source_folder, extensions)
+        self.scan_directory(self.cfg.source_folder)
 
         # Print all blocks
         # for key, value in blocks.items():
