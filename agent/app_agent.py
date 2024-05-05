@@ -129,11 +129,12 @@ class QuantaAgent:
         if has_inject:
             prompt += self.get_block_insertion_instructions()
 
-        answer = AppOpenAI().query(
+        answer = AppOpenAI(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.cfg.system_prompt,
             self.cfg.data_folder,
+        ).query(
             prompt,
             output_file_name,
             self.ts,

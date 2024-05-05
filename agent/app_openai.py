@@ -8,10 +8,13 @@ from langchain_core.output_parsers import StrOutputParser
 class AppOpenAI:
     """Makes calls to OpenAI"""
 
-    # TODO: Pass all these args, except for 'query' into a constructor
-    def query(
-        self, api_key, model, system_prompt, data_folder, query, output_file_name, ts
-    ):
+    def __init__(self, api_key, model, system_prompt, data_folder):
+        self.api_key = api_key
+        self.model = model
+        self.system_prompt = system_prompt
+        self.data_folder = data_folder
+
+    def query(self, query, output_file_name, ts):
         """Makes a query to OpenAI's API and writes the response to a file."""
         dry_run = False  # Eventually we'll have dry_run as a config option
         ret = ""
@@ -19,10 +22,10 @@ class AppOpenAI:
         if dry_run:
             output = "Dry Run: No API call made."
         else:
-            llm = ChatOpenAI(model=model, temperature=0.7, api_key=api_key)
+            llm = ChatOpenAI(model=self.model, temperature=0.7, api_key=self.api_key)
 
             prompt = ChatPromptTemplate.from_messages(
-                [("system", system_prompt), ("user", "{input}")]
+                [("system", self.system_prompt), ("user", "{input}")]
             )
             output_parser = StrOutputParser()
             chain = prompt | llm | output_parser
@@ -34,9 +37,9 @@ class AppOpenAI:
 \n\n____________________________________________________________________________________
 Note: The above content is the response from OpenAI's API using the following prompt:
 
-OpenAI Model Used: {model}
+OpenAI Model Used: {self.model}
 
-System Prompt: {system_prompt}
+System Prompt: {self.system_prompt}
 
 Timestamp: {ts}
 
@@ -44,7 +47,7 @@ User Prompt: {query}
 """
 
         # print("Answer: "+output)
-        self.write_to_file(data_folder, output_file_name, output)
+        self.write_to_file(self.data_folder, output_file_name, output)
         return ret
 
     def write_to_file(self, data_folder, output_file_name, content):
