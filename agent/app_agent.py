@@ -4,9 +4,11 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from .app_openai import AppOpenAI
-from .app_config import AppConfig
-from .file_injection import FileInjection
+
+# TODO: VSCode linter is showing these as invalid imports, but they are valid. why?
+from app_openai import AppOpenAI
+from app_config import AppConfig
+from file_injection import FileInjection
 
 
 class QuantaAgent:
@@ -123,7 +125,7 @@ class QuantaAgent:
         for key, value in self.blocks.items():
             prompt = prompt.replace(f"${{{key}}}", value.content)
 
-        # Substitute file contents into the prompt
+        # Substitute entire file contents into the prompt
         for file_name in self.file_names:
             tag = f"${{{file_name}}}"
             if tag in prompt:
@@ -134,6 +136,11 @@ class QuantaAgent:
                     prompt = prompt.replace(tag, block)
 
         # print(f"AI Prompt: {prompt}")
+
+        # If the prompt has block.inject tags, add instructions for how to provide the new code, in a
+        # machine parsable way.
+        if self.has_block_inject(prompt):
+            prompt += self.get_block_insertion_instructions()
 
         answer = AppOpenAI().query(
             self.cfg.openai_api_key,
@@ -146,3 +153,28 @@ class QuantaAgent:
         )
 
         FileInjection().inject(self.cfg.data_folder, self.ext_set, answer, self.ts)
+
+    # TODO: Need to add explanation that the prefix characters in front of 'block.inject' may vary
+    def get_block_insertion_instructions(self):
+        """Returns instructions for providing the new code."""
+
+        return """"
+
+To provide me with the new code, use the following strategy: 
+Notice that there are sections named `// block.inject {Name}` in the code I gave you. 
+I'd like for you to show me just what I need to insert into each of those `block.inject` sections of the code. 
+So when you show code, show only the changes and show the changes like this format in your response:
+
+block.inject.begin {Name}
+...{SomeContent}...
+block.inject.end
+
+You may not need to inject into some of the `block.inject` locations. 
+These `block.inject` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
+"""
+
+    def has_block_inject(self, prompt):
+        """Checks if the prompt has any block.inject tags."""
+
+        # TODO: AI wrote this line for me, and I can use it elsewhere!
+        return re.search(r"(--|//|#) block.inject", prompt) is not None
