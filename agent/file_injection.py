@@ -33,7 +33,7 @@ class FileInjection:
         """
 
         self.parse_injections(content)
-        print("InjectionBlocks: " + str(self.blocks))
+        # print("Injection Blocks: " + str(self.blocks))
         self.scan_directory(source_folder, ext_set, ts)
 
     def parse_injections(self, text):
@@ -78,7 +78,8 @@ class FileInjection:
 
     def visit_file(self, filename, ts):
         """Visit the file, to run all injections on the file"""
-        print("Inject File:", filename)
+
+        # print("Inject File:", filename)
         # we need content to be mutable in the methods we pass it to so we hold in a dict
         content = [""]
         try:
@@ -139,6 +140,7 @@ class FileInjection:
     def scan_directory(self, scan_dir, ext_set, ts):
         """Scans the directory for files with the specified extensions."""
 
+        print(f"Doing Injection Scan on: {scan_dir}")
         # Walk through all directories and files in the directory
         for dirpath, _, filenames in os.walk(scan_dir):
             for filename in filenames:

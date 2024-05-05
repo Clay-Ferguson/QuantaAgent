@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "python3",            
             "args": [
-                "${workspaceFolder}/agent/main.py"  
+                "${workspaceFolder}/main.py"  
             ],
             "group": {
                 "kind": "build",

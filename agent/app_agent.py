@@ -6,9 +6,9 @@ import time
 from dataclasses import dataclass
 
 # TODO: VSCode linter is showing these as invalid imports, but they are valid. why?
-from app_openai import AppOpenAI
-from app_config import AppConfig
-from file_injection import FileInjection
+from agent.app_openai import AppOpenAI
+from agent.app_config import AppConfig
+from agent.file_injection import FileInjection
 
 
 class QuantaAgent:
@@ -139,7 +139,8 @@ class QuantaAgent:
 
         # If the prompt has block.inject tags, add instructions for how to provide the new code, in a
         # machine parsable way.
-        if self.has_block_inject(prompt):
+        has_inject = self.has_block_inject(prompt)
+        if has_inject:
             prompt += self.get_block_insertion_instructions()
 
         answer = AppOpenAI().query(
@@ -152,7 +153,10 @@ class QuantaAgent:
             self.ts,
         )
 
-        FileInjection().inject(self.cfg.data_folder, self.ext_set, answer, self.ts)
+        if has_inject:
+            FileInjection().inject(
+                self.cfg.source_folder, self.ext_set, answer, self.ts
+            )
 
     # TODO: Need to add explanation that the prefix characters in front of 'block.inject' may vary
     def get_block_insertion_instructions(self):
