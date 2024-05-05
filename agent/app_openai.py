@@ -47,13 +47,13 @@ User Prompt: {query}
 """
 
         # print("Answer: "+output)
-        self.write_to_file(self.data_folder, output_file_name, output)
+        self.write_to_file(output_file_name, output)
         return ret
 
-    def write_to_file(self, data_folder, output_file_name, content):
+    def write_to_file(self, output_file_name, content):
         """Writes the content to a file."""
 
-        filename = f"{data_folder}/{output_file_name}--A.md"
+        filename = f"{self.data_folder}/{output_file_name}--A.md"
 
         # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:

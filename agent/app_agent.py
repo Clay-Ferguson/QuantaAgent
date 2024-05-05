@@ -141,9 +141,9 @@ class QuantaAgent:
         )
 
         if has_inject:
-            FileInjection().inject(
+            FileInjection(
                 self.cfg.source_folder, AppConfig.ext_set, answer, self.ts
-            )
+            ).inject()
 
     def get_block_insertion_instructions(self):
         """Returns instructions for providing the new code."""

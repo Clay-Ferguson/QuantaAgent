@@ -1,16 +1,16 @@
 """Test the file injection module."""
 
-import re
 from agent.file_injection import FileInjection
 from agent.app_config import AppConfig
 
 
 def test_simple_injection():
     """Run a self-test."""
-    inst = FileInjection()
-    inst.inject(
-        "test",
-        ["md"],
+
+    cfg = AppConfig.get_config()
+    inst = FileInjection(
+        cfg.source_folder,
+        cfg.ext_set,
         """
 ignore 1
 block.inject.begin UserAccount.Properties
@@ -24,10 +24,8 @@ ignore 3
 """,
         "12345678",
     )
-    cfg = AppConfig.get_config()
-    ext_list = re.split(r"\s*,\s*", cfg.scan_extensions)
-    ext_set = set(ext_list)
-    inst.scan_directory(cfg.source_folder, ext_set, "faketimestamp")
+    inst.inject()
+    inst.scan_directory()
 
     # TODO: This isn't a real test yet.
     assert True

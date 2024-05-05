@@ -16,8 +16,13 @@ class FileInjection:
         name: str
         content: str
 
-    # TODO: pass all these args into a constructor and don't pass around all methods.
-    def inject(self, source_folder, ext_set, content, ts):
+    def __init__(self, source_folder, ext_set, content, ts):
+        self.source_folder = source_folder
+        self.ext_set = ext_set
+        self.content = content
+        self.ts = ts
+
+    def inject(self):
         """Injects content info files by extracting all the named blocks on content that are structured like this:
 
         block.inject.begin <Name>
@@ -32,11 +37,12 @@ class FileInjection:
         # block.inject <Name>
         """
 
-        self.parse_injections(content)
+        self.blocks = {}
+        self.parse_injections()
         # print("Injection Blocks: " + str(self.blocks))
-        self.scan_directory(source_folder, ext_set, ts)
+        self.scan_directory()
 
-    def parse_injections(self, text):
+    def parse_injections(self):
         """
         Parses the given multiline string to find and extract blocks of text
         defined by 'block.inject.begin {Name}' and 'block.inject.end'.
@@ -52,7 +58,7 @@ class FileInjection:
         current_content = []
         collecting = False
 
-        for line in text.splitlines():
+        for line in self.content.splitlines():
             line = line.strip()
 
             if line.startswith("block.inject.begin"):
@@ -109,6 +115,10 @@ class FileInjection:
     def process_replacements(self, content, block, name, ts):
         """Process the replacements for the given block."""
 
+        # Optimization to avoid unnessary cycles
+        if f" block.inject {name}" not in content[0]:
+            return False
+
         # we return true here if we did any replacements
         ret = (
             self.do_replacement("//", content, block, name, ts)
@@ -119,6 +129,7 @@ class FileInjection:
 
     def do_replacement(self, comment_prefix, content, block, name, ts):
         """Process the replacement for the given block and comment prefix."""
+
         found = False
         find = f"{comment_prefix} block.inject {name}"
 
@@ -137,17 +148,17 @@ class FileInjection:
             print("Replaced: " + find)
         return found
 
-    def scan_directory(self, scan_dir, ext_set, ts):
+    def scan_directory(self):
         """Scans the directory for files with the specified extensions."""
 
-        print(f"Doing Injection Scan on: {scan_dir}")
+        print(f"Doing Injection Scan on: {self.source_folder}")
         # Walk through all directories and files in the directory
-        for dirpath, _, filenames in os.walk(scan_dir):
+        for dirpath, _, filenames in os.walk(self.source_folder):
             for filename in filenames:
                 # Check the file extension
                 _, ext = os.path.splitext(filename)
-                if ext.lower() in ext_set:
+                if ext.lower() in self.ext_set:
                     # build the full path
                     path = os.path.join(dirpath, filename)
                     # Call the visitor function for each file
-                    self.visit_file(path, ts)
+                    self.visit_file(path, self.ts)
