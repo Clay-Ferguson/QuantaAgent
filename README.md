@@ -1,8 +1,12 @@
 # About Quanta Agent
 
-This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that.
+This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that. This tool can also implement entire complex features in your code base, using the `Injection Points` capability, mentioned below.
 
-This app will scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
+This tool will scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
+
+So in summary let lets you name sections of your code, in any files inside your project, and then refer those sections by name in prompts, in such a way that the prompt injects the code block wherever you mention it's name. So in this way you can write prompts involving sections of your code without the need to cut-and-paste from your code into the prompt by hand.
+
+There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples (TODO: soon) of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
 
 
 # Simple LLM Prompt Example
@@ -23,7 +27,7 @@ You can run run LLM Prompts/Queries like this:
 
 So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block.begin` and `block.end` syntax, to create named blocks which are then template substituded automatically into your prompt.
 
-# Simple Example
+# Simple Example Files
 
 Example Question and Answer(s) can be found here:
 
