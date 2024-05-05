@@ -22,10 +22,7 @@ class QuantaAgent:
     blocks = {}
     file_names = []
     cfg = AppConfig.get_config()
-    # Using regex to split and remove spaces
-    # TODO: need to put ext_list and ext_set inside 'cfg' object.
-    ext_list = re.split(r"\s*,\s*", cfg.scan_extensions)
-    ext_set = set(ext_list)
+
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 
@@ -42,13 +39,8 @@ class QuantaAgent:
                 # print(line, end='')
 
                 trimmed = line.strip()
-                # different files have different comment syntaxes
-                # (-- is for  SQL, // is for C++/Java/JavaScript, etc.)
-                if (
-                    trimmed.startswith("-- block.begin ")
-                    or trimmed.startswith("// block.begin ")
-                    or trimmed.startswith("# block.begin ")
-                ):
+
+                if self.is_block_line(trimmed, "block.begin"):
                     block = None
                     # remove "-- block.begin " from line (or other comment syntaxes)
                     index = trimmed.find("block.begin ")
@@ -61,11 +53,7 @@ class QuantaAgent:
                         # print("Creating new block")
                         block = self.TextBlock(name, "")
                         self.blocks[name] = block
-                elif (
-                    trimmed.startswith("-- block.end")
-                    or trimmed.startswith("// block.end")
-                    or trimmed.startswith("# block.end")
-                ):
+                elif self.is_block_line(trimmed, "block.end"):
                     block = None
                 else:
                     if block is not None:
@@ -79,7 +67,7 @@ class QuantaAgent:
             for filename in filenames:
                 # Check the file extension
                 _, ext = os.path.splitext(filename)
-                if ext.lower() in self.ext_set:
+                if ext.lower() in AppConfig.ext_set:
                     # build the full path
                     path = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
@@ -137,7 +125,7 @@ class QuantaAgent:
 
         # If the prompt has block.inject tags, add instructions for how to provide the new code, in a
         # machine parsable way.
-        has_inject = self.has_block_inject(prompt)
+        has_inject = self.has_block_inject(prompt, "block.inject")
         if has_inject:
             prompt += self.get_block_insertion_instructions()
 
@@ -153,10 +141,9 @@ class QuantaAgent:
 
         if has_inject:
             FileInjection().inject(
-                self.cfg.source_folder, self.ext_set, answer, self.ts
+                self.cfg.source_folder, AppConfig.ext_set, answer, self.ts
             )
 
-    # TODO: Need to add explanation that the prefix characters in front of 'block.inject' may vary
     def get_block_insertion_instructions(self):
         """Returns instructions for providing the new code."""
 
@@ -171,12 +158,25 @@ block.inject.begin {Name}
 ...{SomeContent}...
 block.inject.end
 
+Note that the `//` in `// block.inject {Name}` is there becasue that example is for Java style comments; however, you may also find 
+`-- block.inject {Name}` for SQL style comments, or `# block.inject {Name}` for Python style comments, and you will handle those also.
 You may not need to inject into some of the `block.inject` locations. 
 These `block.inject` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
 """
 
-    def has_block_inject(self, prompt):
+    def has_block_inject(self, prompt, tag):
         """Checks if the prompt has any block.inject tags."""
 
-        # TODO: AI wrote this line for me, and I can use it elsewhere!
-        return re.search(r"(--|//|#) block.inject", prompt) is not None
+        # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
+        pattern = rf"(--|//|#) {re.escape(tag)} "
+        return re.search(pattern, prompt) is not None
+
+    def is_block_line(self, line, tag):
+        """Checks if the line is a line like
+        `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
+        or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`
+        """
+
+        # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
+        pattern = rf"^(--|//|#) {re.escape(tag)} "
+        return re.search(pattern, line) is not None

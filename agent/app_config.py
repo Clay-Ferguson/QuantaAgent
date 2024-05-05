@@ -1,11 +1,15 @@
 """Loads configuration from config.yaml and secrets.yaml files."""
 
 import os
+import re
 import configargparse
 
 
 class AppConfig:
     """Loads configuration from config.yaml and secrets.yaml files."""
+
+    ext_list = []
+    ext_set = set()
 
     @classmethod
     def get_config(cls):
@@ -48,4 +52,7 @@ class AppConfig:
         )
 
         options = p.parse_args()
+
+        AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
+        AppConfig.ext_set = set(AppConfig.ext_list)
         return options
