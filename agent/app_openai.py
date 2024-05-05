@@ -8,8 +8,9 @@ from langchain_core.output_parsers import StrOutputParser
 class AppOpenAI:
     """Makes calls to OpenAI"""
 
+    # TODO: Pass all these args, except for 'query' into a constructor
     def query(
-        self, api_key, model, system_prompt, data_folder, query, output_file_name
+        self, api_key, model, system_prompt, data_folder, query, output_file_name, ts
     ):
         """Makes a query to OpenAI's API and writes the response to a file."""
         dry_run = False  # Eventually we'll have dry_run as a config option
@@ -36,6 +37,8 @@ Note: The above content is the response from OpenAI's API using the following pr
 OpenAI Model Used: {model}
 
 System Prompt: {system_prompt}
+
+Timestamp: {ts}
 
 User Prompt: {query}
 """

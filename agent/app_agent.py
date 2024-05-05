@@ -6,6 +6,7 @@ import time
 from dataclasses import dataclass
 from app_openai import AppOpenAI
 from app_config import AppConfig
+from file_injection import FileInjection
 
 
 class QuantaAgent:
@@ -22,6 +23,7 @@ class QuantaAgent:
     file_names = []
     cfg = AppConfig.get_config()
     # Using regex to split and remove spaces
+    # TODO: need to put ext_list and ext_set inside 'cfg' object.
     ext_list = re.split(r"\s*,\s*", cfg.scan_extensions)
     ext_set = set(ext_list)
     source_folder_len = len(cfg.source_folder)
@@ -133,11 +135,14 @@ class QuantaAgent:
 
         # print(f"AI Prompt: {prompt}")
 
-        AppOpenAI().query(
+        answer = AppOpenAI().query(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.cfg.system_prompt,
             self.cfg.data_folder,
             prompt,
             output_file_name,
+            self.ts,
         )
+
+        FileInjection().inject(self.cfg.data_folder, self.ext_set, answer, self.ts)
