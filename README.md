@@ -9,6 +9,15 @@ So in summary let lets you name sections of your code, in any files inside your 
 There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples (TODO: soon) of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
 
 
+# Comparison to other AI Coding Assistants
+
+* Q: How does `Quanta Agent` compare to other `AI Coding Assistants` like Devin, Pythagora (GPT Pilot), and MetaGPT?
+
+* A: `Quanta Agent` is a tiny project that does a more targeted and specific analysis on your software project than the other tools, which results in less API token consumption and therefore lowers Cloud API costs. This is because `Quanta Agent` will only be able to see the parts of your code that you're referencing in your prompt, and it will only try to make modifications in those areas of the code. So not only is `Quanta Agent` very cheap due to using fewer tokens, but you will also get the best possible results from LLMs by keeping your prompts down to where they contain only the exact relevant parts of your codebase. That is, smaller shorter prompts always give the best results. 
+
+`Quanta Agent` is also only for use by actual software developers, rather than a higher level of say a software manager role. This is because `Quanta Agent` expects you to know exactly what parts of your code you need to ask questions about or modify. `Quanta Agent` is like a software developer who needs to be told which parts of the code to look at, before he gets started working. So `Quanta Agent` isn't really for building projects from scratch, but it's more of a tool for making code modifications to large projects that already exist, and making modifications into only the specific allowed bounded areas. Depending on how you look at it, `Quanta Agent` is both dumber than, and smarter than, the other tools. However, I will be so bold as to say there's not a cheaper (in dollar costs) or a simpler way to accomplish what `Quanta Agent` is doing!
+
+
 # Simple LLM Prompt Example
 
 Suppose you have a Java file that contains the following:
@@ -156,4 +165,3 @@ We could allow a syntax like `${/my/folder/name}` to be able to inject the entir
 https://python.langchain.com/docs/get_started/introduction/
 
 https://python.langchain.com/docs/integrations/chat/openai/
-
