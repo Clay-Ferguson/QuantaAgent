@@ -9,6 +9,18 @@ So in summary let lets you name sections of your code, in any files inside your 
 There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples (TODO: soon) of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
 
 
+# Tool Usage Summary
+
+To use this tool you will do these steps:
+
+1) Edit the `config.yaml` to make it point to a software project folder you want to analyze.
+2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
+3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
+4) Put a `question.md` file (your AI Prompt) into your data folder.
+6) Run `main.py`, make up some arbitrary filename when prompted for one.
+6) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had `Injection Points` specified in your code that you asked about then your actual software project files will have been updated/edited as well!
+
+
 # Comparison to other AI Coding Assistants
 
 * Q: How does `Quanta Agent` compare to other `AI Coding Assistants` like Devin, Pythagora (GPT Pilot), and MetaGPT?
