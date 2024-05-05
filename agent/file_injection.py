@@ -149,7 +149,5 @@ class FileInjection:
                 if ext.lower() in ext_set:
                     # build the full path
                     path = os.path.join(dirpath, filename)
-                    # get the file name relative to the source folder
-                    # self.file_names.append(path[self.source_folder_len :])
                     # Call the visitor function for each file
                     self.visit_file(path, ts)
