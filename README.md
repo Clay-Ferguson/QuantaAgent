@@ -159,6 +159,7 @@ Improvements being considered, but not yet being worked on are as follows:
 
 * **Entire Folders as Blocks** - We could allow a syntax like `${/my/folder/}` to be able to inject the entire content of a directory into a prompt. This would rarely be needed, and would be expensive in terms of flooding the AI context window. However, once LLMs are powerful and cheap enough this feature would let you sort of use your *entire* code base in a single prompt, and also get the AI to make modifications into any file at all as long as there's an `Injection Point` wherever you want new code to go in.
 * **HTTP API** - It would be nice if we could call this tool via an HTTP API in addition to the command line, so it can be built into web apps.
+* **DIFF Responses** - Need to investigate if LLMs are smart enough to know how to take an entire input source file, and make some code modification to it, as specified in a prompt, and return the Unified Diff format (often denoted by the .diff or .patch extension) for super efficient way for the response to send back essentially a new version of the edited file just by sending the changes.
 
 
 # Resources
