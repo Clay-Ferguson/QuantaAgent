@@ -4,9 +4,9 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from app_openai import AppOpenAI
-from app_config import AppConfig
-from file_injection import FileInjection
+from .app_openai import AppOpenAI
+from .app_config import AppConfig
+from .file_injection import FileInjection
 
 
 class QuantaAgent:
