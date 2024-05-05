@@ -6,7 +6,7 @@ This tool will scan your project and extract named snippets (or sections) of cod
 
 So in summary let lets you name sections of your code, in any files inside your project, and then refer those sections by name in prompts, in such a way that the prompt injects the code block wherever you mention it's name. So in this way you can write prompts involving sections of your code without the need to cut-and-paste from your code into the prompt by hand.
 
-There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples (TODO: soon) of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
+There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
 
 
 # Tool Usage

@@ -4,8 +4,6 @@ import os
 import re
 import time
 from dataclasses import dataclass
-
-# TODO: VSCode linter is showing these as invalid imports, but they are valid. why?
 from agent.app_openai import AppOpenAI
 from agent.app_config import AppConfig
 from agent.file_injection import FileInjection

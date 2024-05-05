@@ -22,7 +22,7 @@ This is some test content (b).
 block.inject.end
 ignore 3
 """,
-        "faketimestamp",
+        "12345678",
     )
     cfg = AppConfig.get_config()
     ext_list = re.split(r"\s*,\s*", cfg.scan_extensions)
