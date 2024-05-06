@@ -21,7 +21,7 @@ class QuantaAgent:
 
     blocks = {}
     file_names = []
-    cfg = AppConfig.get_config()
+    cfg = AppConfig.get_config(None)
 
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))

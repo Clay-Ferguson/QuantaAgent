@@ -23,7 +23,7 @@ class FileInjection:
         self.ts = ts
 
     def inject(self):
-        """Injects content info files by extracting all the named blocks on content that are structured like this:
+        """Injects content into files by extracting all the named blocks on content that are structured like this:
 
         block.inject.begin <Name>
         ...content to be injected...

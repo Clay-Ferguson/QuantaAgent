@@ -12,12 +12,13 @@ class AppConfig:
     ext_set = set()
 
     @classmethod
-    def get_config(cls):
+    def get_config(cls, config_file=None):
         """Loads configuration from config.yaml and secrets.yaml files."""
 
         # Both of these config files are optional, because the ArgParser can load
         # from command line arguments or environment variables as well.
-        config_file = "config/config.yaml"
+        if config_file is None:
+            config_file = "config/config.yaml"
         secrets_file = "../secrets/secrets.yaml"
 
         if not os.path.exists(config_file):
@@ -27,6 +28,15 @@ class AppConfig:
             print(f"WARNING: File not found: {secrets_file}")
 
         p = configargparse.ArgParser(default_config_files=[config_file, secrets_file])
+        p.add_argument(
+            "-v", "--verbose", action="store_true", help="Enable verbose output"
+        )
+        p.add_argument(
+            "-s",
+            "--capture-output",
+            action="store_true",
+            help="Disable capturing of stdout/stderr",
+        )
         p.add_argument(
             "-c",
             "--config",
@@ -55,4 +65,5 @@ class AppConfig:
 
         AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
         AppConfig.ext_set = set(AppConfig.ext_list)
+        print(f"Config loaded: {config_file}")
         return options
