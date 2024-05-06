@@ -5,11 +5,9 @@ from dataclasses import dataclass
 from agent.string_utils import StringUtils
 from agent.tags import (
     TAG_BLOCK_INJECT,
-    TAG_BLOCK_INJECT_BEGIN,
-    TAG_BLOCK_INJECT_END,
-    TAG_BLOCK_INJECT_BEGIN_LEN,
-    TAG_INJECT_BEGIN,
     TAG_INJECT_END,
+    TAG_INJECT_BEGIN,
+    TAG_INJECT_BEGIN_LEN,
 )
 
 
@@ -35,9 +33,9 @@ class FileInjection:
     def inject(self):
         """Injects content into files by extracting all the named blocks on content that are structured like this:
 
-        block.inject.begin <Name>
+        inject.begin <Name>
         ...content to be injected...
-        block.inject.end
+        inject.end
 
         And inserting into the proper source file injection site identifieid in the code by:
         // block.inject <Name>
@@ -55,7 +53,7 @@ class FileInjection:
     def parse_injections(self):
         """
         Parses the given multiline string to find and extract blocks of text
-        defined by 'block.inject.begin {Name}' and 'block.inject.end'.
+        defined by 'inject.begin {Name}' and 'inject.end'.
 
         Args:
         text (str): The multiline string containing the text blocks.
@@ -71,15 +69,15 @@ class FileInjection:
         for line in self.content.splitlines():
             line = line.strip()
 
-            if line.startswith(TAG_BLOCK_INJECT_BEGIN):
+            if line.startswith(TAG_INJECT_BEGIN):
                 # Start of a new block
                 current_block_name = (
-                    line[TAG_BLOCK_INJECT_BEGIN_LEN:].strip().strip("{}").strip()
+                    line[TAG_INJECT_BEGIN_LEN:].strip().strip("{}").strip()
                 )
                 collecting = True
                 current_content = []
 
-            elif line.startswith(TAG_BLOCK_INJECT_END):
+            elif line.startswith(TAG_INJECT_END):
                 # End of the current block
                 if current_block_name and collecting:
                     self.blocks[current_block_name] = self.TextBlock(
@@ -145,7 +143,8 @@ class FileInjection:
     def do_replacement(self, comment_prefix, content, block, name, ts):
         """Process the replacement for the given block and comment prefix.
 
-        We replace the first element of the dict content with the new content, so we're treating 'content' as a mutable object.
+        We replace the first element of the dict content with the new content, so we're treating 'content'
+        as a mutable object.
         """
 
         found = False

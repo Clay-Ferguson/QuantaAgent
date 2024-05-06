@@ -11,9 +11,9 @@ from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
     TAG_BLOCK_INJECT,
-    TAG_BLOCK_INJECT_BEGIN,
-    TAG_BLOCK_INJECT_END,
     TAG_BLOCK_BEGIN_LEN,
+    TAG_INJECT_BEGIN,
+    TAG_INJECT_END,
 )
 
 
@@ -193,9 +193,9 @@ Notice that there are sections named `// {TAG_BLOCK_INJECT} {{Name}}` in the cod
 I'd like for you to show me just what I need to insert into each of those `{TAG_BLOCK_INJECT}` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:
 
-{TAG_BLOCK_INJECT_BEGIN} {{Name}}
+{TAG_INJECT_BEGIN} {{Name}}
 ...{{SomeContent}}...
-{TAG_BLOCK_INJECT_END} 
+{TAG_INJECT_END} 
 
 Note that the `//` in `// {TAG_BLOCK_INJECT} {{Name}}` is there becasue that example is for Java style comments; however, you may also find 
 `-- {TAG_BLOCK_INJECT} {{Name}}` for SQL style comments, or `# {TAG_BLOCK_INJECT} {{Name}}` for Python style comments, and you will handle those also.

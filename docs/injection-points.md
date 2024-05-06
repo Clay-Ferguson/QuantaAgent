@@ -185,19 +185,19 @@ To add the new `signupDate` property to your `UserAccount` entity, you will need
 Here are the changes you should inject into each respective block:
 
 ```java
-block.inject.begin UserAccount.Imports
+inject.begin UserAccount.Imports
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-block.inject.end
+inject.end
 
-block.inject.begin UserAccount.Properties
+inject.begin UserAccount.Properties
 @Column(name = "signup_date")
 @Temporal(TemporalType.DATE)
 private Date signupDate;
-block.inject.end
+inject.end
 
-block.inject.begin UserAccount.Methods
+inject.begin UserAccount.Methods
 public Date getSignupDate() {
     return signupDate;
 }
@@ -205,7 +205,7 @@ public Date getSignupDate() {
 public void setSignupDate(Date signupDate) {
     this.signupDate = signupDate;
 }
-block.inject.end
+inject.end
 ```
 
 These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block.inject` comments are located. This will effectively add the new `signupDate` property to your entity.
@@ -224,7 +224,7 @@ User Prompt: [omitted, you saw it above]
 
 *END*
 
-As you can see, it gave the full description of what happened, and what it put into each `Injection Point` of your code. You can ignore the `block.inject.begin` and `block.inject.end` because those tags were what the AI was instructed to put in it's answer to make the answer machine parsable, which is how this tool knows what to insert in your code and where. The timestamp is inserted as the same timestamp across all modifications for any given run of this tool, so there's a full audit trail for everything that ever happens!
+As you can see, it gave the full description of what happened, and what it put into each `Injection Point` of your code. You can ignore the `inject.begin` and `inject.end` because those tags were what the AI was instructed to put in it's answer to make the answer machine parsable, which is how this tool knows what to insert in your code and where. The timestamp is inserted as the same timestamp across all modifications for any given run of this tool, so there's a full audit trail for everything that ever happens!
 
 ## Summary
 
