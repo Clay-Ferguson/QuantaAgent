@@ -2,6 +2,7 @@
 
 import os
 from dataclasses import dataclass
+from agent.string_utils import StringUtils
 
 
 class FileInjection:
@@ -16,10 +17,11 @@ class FileInjection:
         name: str
         content: str
 
-    def __init__(self, source_folder, ext_set, content, ts):
+    def __init__(self, source_folder, ext_set, content, ts, suffix):
         self.source_folder = source_folder
         self.ext_set = ext_set
         self.content = content
+        self.suffix = suffix
         self.ts = ts
 
     def inject(self):
@@ -104,7 +106,12 @@ class FileInjection:
 
             # Write the modified content back to the file
             if found:
-                with open(filename, "w", encoding="utf-8") as file:
+                out_file = (
+                    StringUtils.inject_suffix(filename, self.suffix)
+                    if self.suffix
+                    else filename
+                )
+                with open(out_file, "w", encoding="utf-8") as file:
                     file.write(content[0])
 
         except FileNotFoundError:
@@ -128,7 +135,10 @@ class FileInjection:
         return ret
 
     def do_replacement(self, comment_prefix, content, block, name, ts):
-        """Process the replacement for the given block and comment prefix."""
+        """Process the replacement for the given block and comment prefix.
+
+        We replace the first element of the dict content with the new content, so we're treating 'content' as a mutable object.
+        """
 
         found = False
         find = f"{comment_prefix} block.inject {name}"
@@ -137,12 +147,10 @@ class FileInjection:
             found = True
             content[0] = content[0].replace(
                 find,
-                f"""
-{comment_prefix} block.inject {name}
+                f"""{comment_prefix} block.inject {name}
 {comment_prefix} inject.begin {ts}
 {block.content}
-{comment_prefix} inject.end
-""",
+{comment_prefix} inject.end""",
             )
         if found:
             print("Replaced: " + find)

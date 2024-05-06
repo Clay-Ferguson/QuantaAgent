@@ -7,6 +7,7 @@ openai_model: "gpt-4-turbo-2024-04-09"
 
 system_prompt: "You are a helpful assistant."
 
-source_folder: "/home/clay/ferguson/Quantizr/src"
+# For testing we use the test_project folder in this project
+source_folder: "test_project"
 scan_extensions: ".java, .py, .sql"
 data_folder: "/home/clay/ferguson/QuantaAgent_data"

@@ -142,7 +142,7 @@ class QuantaAgent:
 
         if has_inject:
             FileInjection(
-                self.cfg.source_folder, AppConfig.ext_set, answer, self.ts
+                self.cfg.source_folder, AppConfig.ext_set, answer, self.ts, None
             ).inject()
 
     def get_block_insertion_instructions(self):
