@@ -27,14 +27,20 @@ class QuantaAgent:
         name: str
         content: str
 
+    # Dictionary to store TextBlock objects keyed by 'name'
     blocks = {}
+    # All filen names encountered during the scan, relative to the source folder
     file_names = []
+
     cfg = AppConfig.get_config(None)
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 
     def visit_file(self, path):
-        """Visits a file and extracts text blocks."""
+        """Visits a file and extracts text blocks into `blocks`. So we're just
+        scanning the file for the block.begin and block.end tags, and extracting the content between them
+        and saving that text for later use
+        """
         # print("File:", file_path)
 
         # Open the file using 'with' which ensures the file is closed after reading
@@ -44,14 +50,11 @@ class QuantaAgent:
             for line in file:
                 # Print each line; using end='' to avoid adding extra newline
                 # print(line, end='')
-
                 trimmed = line.strip()
 
                 if self.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
                     block = None
-                    # remove "-- block.begin " from line (or other comment syntaxes)
-                    index = trimmed.find(f"{TAG_BLOCK_BEGIN} ")
-                    name = trimmed[index + TAG_BLOCK_BEGIN_LEN :].strip()
+                    name = self.parse_block_name_from_line(trimmed)
                     # print(f"Block Name: {name}")
                     if name in self.blocks:
                         # print("Found existing block")
@@ -66,10 +69,19 @@ class QuantaAgent:
                     if block is not None:
                         block.content += line
 
+    def parse_block_name_from_line(self, line):
+        """Parses the block name from the `block.begin` line."""
+        index = line.find(f"{TAG_BLOCK_BEGIN} ")
+        return line[index + TAG_BLOCK_BEGIN_LEN :].strip()
+
     def scan_directory(self, scan_dir):
-        """Scans the directory for files with the specified extensions."""
+        """Scans the directory for files with the specified extensions. The purpose of this scan
+        is to build up the 'blocks' dictionary with the content of the blocks in the files, and also
+        to collect all the filenames into `file_names`
+        """
 
         # Walk through all directories and files in the directory
+        # TODO: this scanning logic is in two placesl I think so we can write a reusable function for this
         for dirpath, _, filenames in os.walk(scan_dir):
             for filename in filenames:
                 # Check the file extension
@@ -93,6 +105,8 @@ class QuantaAgent:
     def run(self):
         """Runs the agent."""
 
+        # Ask for the output file name. They can enter any filename they want. The result will be that after the tool
+        # runs, the output will be in the data folder with the name they provided (both a question file and an answer file)
         output_file_name = input(
             "Enter filename for output (without extension, or path): "
         )
@@ -101,6 +115,7 @@ class QuantaAgent:
         if output_file_name == "":
             output_file_name = self.ts
 
+        # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
 
         # Print all blocks
@@ -111,22 +126,13 @@ class QuantaAgent:
         with open(f"{self.cfg.data_folder}/question.md", "r", encoding="utf-8") as file:
             prompt = file.read()
 
-        # Write template before substitutions
+        # Write template before substitutions. This is really essentially a snapshot of what the 'question.md' file
+        # contained when the tool was ran, which is important because users will edit the question.md file
+        # every time they want to ask another AI question, and we want to keep a record of what the question was.
         self.write_template(self.cfg.data_folder, output_file_name, prompt)
 
-        # Substitute blocks into the prompt
-        for key, value in self.blocks.items():
-            prompt = prompt.replace(f"${{{key}}}", value.content)
-
-        # Substitute entire file contents into the prompt
-        for file_name in self.file_names:
-            tag = f"${{{file_name}}}"
-            if tag in prompt:
-                with open(
-                    self.cfg.source_folder + file_name, "r", encoding="utf-8"
-                ) as file:
-                    block = file.read()
-                    prompt = prompt.replace(tag, block)
+        prompt = self.insert_blocks_into_prompt(prompt)
+        prompt = self.insert_files_into_prompt(prompt)
 
         # print(f"AI Prompt: {prompt}")
 
@@ -151,6 +157,31 @@ class QuantaAgent:
             FileInjection(
                 self.cfg.source_folder, AppConfig.ext_set, answer, self.ts, None
             ).inject()
+
+    def insert_blocks_into_prompt(self, prompt):
+        """
+        Substitute blocks into the prompt. Prompts can conatin ${BlockName} tags, which will be replaced with the
+        content of the block with the name 'BlockName'
+        """
+        for key, value in self.blocks.items():
+            prompt = prompt.replace(f"${{{key}}}", value.content)
+        return prompt
+
+    def insert_files_into_prompt(self, prompt):
+        """
+        Substitute entire file contents into the prompt. Prompts can contain ${FileName} tags,
+        which will be replaced with the content of the file with the name 'FileName'
+        """
+        for file_name in self.file_names:
+            tag = f"${{{file_name}}}"
+            if tag in prompt:
+                with open(
+                    self.cfg.source_folder + file_name, "r", encoding="utf-8"
+                ) as file:
+                    content = file.read()
+                    prompt = prompt.replace(tag, content)
+
+        return prompt
 
     def get_block_insertion_instructions(self):
         """Returns instructions for providing the new code."""
