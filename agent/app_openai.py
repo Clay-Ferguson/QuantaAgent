@@ -34,7 +34,8 @@ class AppOpenAI:
             output = ret
 
         output += f"""
-\n\n____________________________________________________________________________________
+
+____________________________________________________________________________________
 Note: The above content is the response from OpenAI's API using the following prompt:
 
 OpenAI Model Used: {self.model}

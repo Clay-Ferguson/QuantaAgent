@@ -7,6 +7,14 @@ from dataclasses import dataclass
 from agent.app_openai import AppOpenAI
 from agent.app_config import AppConfig
 from agent.file_injection import FileInjection
+from agent.tags import (
+    TAG_BLOCK_BEGIN,
+    TAG_BLOCK_END,
+    TAG_BLOCK_INJECT,
+    TAG_BLOCK_INJECT_BEGIN,
+    TAG_BLOCK_INJECT_END,
+    TAG_BLOCK_BEGIN_LEN,
+)
 
 
 class QuantaAgent:
@@ -22,7 +30,6 @@ class QuantaAgent:
     blocks = {}
     file_names = []
     cfg = AppConfig.get_config(None)
-
     source_folder_len = len(cfg.source_folder)
     ts = str(int(time.time() * 1000))
 
@@ -40,11 +47,11 @@ class QuantaAgent:
 
                 trimmed = line.strip()
 
-                if self.is_block_line(trimmed, "block.begin"):
+                if self.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
                     block = None
                     # remove "-- block.begin " from line (or other comment syntaxes)
-                    index = trimmed.find("block.begin ")
-                    name = trimmed[index + 11 :].strip()
+                    index = trimmed.find(f"{TAG_BLOCK_BEGIN} ")
+                    name = trimmed[index + TAG_BLOCK_BEGIN_LEN :].strip()
                     # print(f"Block Name: {name}")
                     if name in self.blocks:
                         # print("Found existing block")
@@ -53,7 +60,7 @@ class QuantaAgent:
                         # print("Creating new block")
                         block = self.TextBlock(name, "")
                         self.blocks[name] = block
-                elif self.is_block_line(trimmed, "block.end"):
+                elif self.is_tag_line(trimmed, TAG_BLOCK_END):
                     block = None
                 else:
                     if block is not None:
@@ -125,7 +132,7 @@ class QuantaAgent:
 
         # If the prompt has block.inject tags, add instructions for how to provide the new code, in a
         # machine parsable way.
-        has_inject = self.has_block_inject(prompt, "block.inject")
+        has_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
         if has_inject:
             prompt += self.get_block_insertion_instructions()
 
@@ -148,31 +155,31 @@ class QuantaAgent:
     def get_block_insertion_instructions(self):
         """Returns instructions for providing the new code."""
 
-        return """"
+        return f"""
 
 To provide me with the new code, use the following strategy: 
-Notice that there are sections named `// block.inject {Name}` in the code I gave you. 
-I'd like for you to show me just what I need to insert into each of those `block.inject` sections of the code. 
+Notice that there are sections named `// {TAG_BLOCK_INJECT} {{Name}}` in the code I gave you. 
+I'd like for you to show me just what I need to insert into each of those `{TAG_BLOCK_INJECT}` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:
 
-block.inject.begin {Name}
-...{SomeContent}...
-block.inject.end
+{TAG_BLOCK_INJECT_BEGIN} {{Name}}
+...{{SomeContent}}...
+{TAG_BLOCK_INJECT_END} 
 
-Note that the `//` in `// block.inject {Name}` is there becasue that example is for Java style comments; however, you may also find 
-`-- block.inject {Name}` for SQL style comments, or `# block.inject {Name}` for Python style comments, and you will handle those also.
-You may not need to inject into some of the `block.inject` locations. 
-These `block.inject` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
+Note that the `//` in `// {TAG_BLOCK_INJECT} {{Name}}` is there becasue that example is for Java style comments; however, you may also find 
+`-- {TAG_BLOCK_INJECT} {{Name}}` for SQL style comments, or `# {TAG_BLOCK_INJECT} {{Name}}` for Python style comments, and you will handle those also.
+You may not need to inject into some of the `{TAG_BLOCK_INJECT}` locations. 
+These `{TAG_BLOCK_INJECT}` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
 """
 
-    def has_block_inject(self, prompt, tag):
+    def has_tag_lines(self, prompt, tag):
         """Checks if the prompt has any block.inject tags."""
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
         pattern = rf"(--|//|#) {re.escape(tag)} "
         return re.search(pattern, prompt) is not None
 
-    def is_block_line(self, line, tag):
+    def is_tag_line(self, line, tag):
         """Checks if the line is a line like
         `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
         or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`

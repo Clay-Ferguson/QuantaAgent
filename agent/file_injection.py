@@ -3,6 +3,14 @@
 import os
 from dataclasses import dataclass
 from agent.string_utils import StringUtils
+from agent.tags import (
+    TAG_BLOCK_INJECT,
+    TAG_BLOCK_INJECT_BEGIN,
+    TAG_BLOCK_INJECT_END,
+    TAG_BLOCK_INJECT_BEGIN_LEN,
+    TAG_INJECT_BEGIN,
+    TAG_INJECT_END,
+)
 
 
 class FileInjection:
@@ -63,15 +71,15 @@ class FileInjection:
         for line in self.content.splitlines():
             line = line.strip()
 
-            if line.startswith("block.inject.begin"):
+            if line.startswith(TAG_BLOCK_INJECT_BEGIN):
                 # Start of a new block
                 current_block_name = (
-                    line[len("block.inject.begin") :].strip().strip("{}").strip()
+                    line[TAG_BLOCK_INJECT_BEGIN_LEN:].strip().strip("{}").strip()
                 )
                 collecting = True
                 current_content = []
 
-            elif line.startswith("block.inject.end"):
+            elif line.startswith(TAG_BLOCK_INJECT_END):
                 # End of the current block
                 if current_block_name and collecting:
                     self.blocks[current_block_name] = self.TextBlock(
@@ -123,7 +131,7 @@ class FileInjection:
         """Process the replacements for the given block."""
 
         # Optimization to avoid unnessary cycles
-        if f" block.inject {name}" not in content[0]:
+        if f" {TAG_BLOCK_INJECT} {name}" not in content[0]:
             return False
 
         # we return true here if we did any replacements
@@ -141,16 +149,16 @@ class FileInjection:
         """
 
         found = False
-        find = f"{comment_prefix} block.inject {name}"
+        find = f"{comment_prefix} {TAG_BLOCK_INJECT} {name}"
 
         if find in content[0]:
             found = True
             content[0] = content[0].replace(
                 find,
-                f"""{comment_prefix} block.inject {name}
-{comment_prefix} inject.begin {ts}
+                f"""{find}
+{comment_prefix} {TAG_INJECT_BEGIN} {ts}
 {block.content}
-{comment_prefix} inject.end""",
+{comment_prefix} {TAG_INJECT_END}""",
             )
         if found:
             print("Replaced: " + find)
