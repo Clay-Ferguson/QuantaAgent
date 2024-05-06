@@ -185,19 +185,19 @@ To add the new `signupDate` property to your `UserAccount` entity, you will need
 Here are the changes you should inject into each respective block:
 
 ```java
-inject.begin UserAccount.Imports
+// inject.begin UserAccount.Imports
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-inject.end
+// inject.end
 
-inject.begin UserAccount.Properties
+// inject.begin UserAccount.Properties
 @Column(name = "signup_date")
 @Temporal(TemporalType.DATE)
 private Date signupDate;
-inject.end
+// inject.end
 
-inject.begin UserAccount.Methods
+// inject.begin UserAccount.Methods
 public Date getSignupDate() {
     return signupDate;
 }
@@ -205,7 +205,7 @@ public Date getSignupDate() {
 public void setSignupDate(Date signupDate) {
     this.signupDate = signupDate;
 }
-inject.end
+// inject.end
 ```
 
 These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block.inject` comments are located. This will effectively add the new `signupDate` property to your entity.

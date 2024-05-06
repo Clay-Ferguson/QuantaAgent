@@ -11,10 +11,10 @@ from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
     TAG_BLOCK_INJECT,
-    TAG_BLOCK_BEGIN_LEN,
     TAG_INJECT_BEGIN,
     TAG_INJECT_END,
 )
+from agent.utils import Utils
 
 
 class QuantaAgent:
@@ -52,9 +52,9 @@ class QuantaAgent:
                 # print(line, end='')
                 trimmed = line.strip()
 
-                if self.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
+                if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
                     block = None
-                    name = self.parse_block_name_from_line(trimmed)
+                    name = Utils.parse_block_name_from_line(trimmed, TAG_BLOCK_BEGIN)
                     # print(f"Block Name: {name}")
                     if name in self.blocks:
                         # print("Found existing block")
@@ -63,16 +63,11 @@ class QuantaAgent:
                         # print("Creating new block")
                         block = self.TextBlock(name, "")
                         self.blocks[name] = block
-                elif self.is_tag_line(trimmed, TAG_BLOCK_END):
+                elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     block = None
                 else:
                     if block is not None:
                         block.content += line
-
-    def parse_block_name_from_line(self, line):
-        """Parses the block name from the `block.begin` line."""
-        index = line.find(f"{TAG_BLOCK_BEGIN} ")
-        return line[index + TAG_BLOCK_BEGIN_LEN :].strip()
 
     def scan_directory(self, scan_dir):
         """Scans the directory for files with the specified extensions. The purpose of this scan
@@ -193,14 +188,18 @@ Notice that there are sections named `// {TAG_BLOCK_INJECT} {{Name}}` in the cod
 I'd like for you to show me just what I need to insert into each of those `{TAG_BLOCK_INJECT}` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:
 
-{TAG_INJECT_BEGIN} {{Name}}
-...{{SomeContent}}...
-{TAG_INJECT_END} 
+// {TAG_INJECT_BEGIN} {{Name}}
+... the code to insert ...
+// {TAG_INJECT_END} 
 
 Note that the `//` in `// {TAG_BLOCK_INJECT} {{Name}}` is there becasue that example is for Java style comments; however, you may also find 
 `-- {TAG_BLOCK_INJECT} {{Name}}` for SQL style comments, or `# {TAG_BLOCK_INJECT} {{Name}}` for Python style comments, and you will handle those also.
 You may not need to inject into some of the `{TAG_BLOCK_INJECT}` locations. 
 These `{TAG_BLOCK_INJECT}` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
+
+In the format example above, for the `{TAG_INJECT_BEGIN}` and `{TAG_INJECT_END}` lines, I've given `//` as the comment prefix in the example, 
+but you should use whatever comment prefix is appropriate based on the language (or file format) you're working with. 
+If there's no comment prefix for the language, just use `//` for the prefix.
 """
 
     def has_tag_lines(self, prompt, tag):
@@ -209,13 +208,3 @@ These `{TAG_BLOCK_INJECT}` points are just for you to refer to which places the 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
         pattern = rf"(--|//|#) {re.escape(tag)} "
         return re.search(pattern, prompt) is not None
-
-    def is_tag_line(self, line, tag):
-        """Checks if the line is a line like
-        `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
-        or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`
-        """
-
-        # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern = rf"^(--|//|#) {re.escape(tag)} "
-        return re.search(pattern, line) is not None

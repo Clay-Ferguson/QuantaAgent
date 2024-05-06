@@ -7,8 +7,8 @@ from agent.tags import (
     TAG_BLOCK_INJECT,
     TAG_INJECT_END,
     TAG_INJECT_BEGIN,
-    TAG_INJECT_BEGIN_LEN,
 )
+from agent.utils import Utils
 
 
 class FileInjection:
@@ -33,9 +33,9 @@ class FileInjection:
     def inject(self):
         """Injects content into files by extracting all the named blocks on content that are structured like this:
 
-        inject.begin <Name>
+        // inject.begin <Name>
         ...content to be injected...
-        inject.end
+        // inject.end
 
         And inserting into the proper source file injection site identifieid in the code by:
         // block.inject <Name>
@@ -53,7 +53,7 @@ class FileInjection:
     def parse_injections(self):
         """
         Parses the given multiline string to find and extract blocks of text
-        defined by 'inject.begin {Name}' and 'inject.end'.
+        defined by '// inject.begin {Name}' and '// inject.end'.
 
         Args:
         text (str): The multiline string containing the text blocks.
@@ -68,21 +68,26 @@ class FileInjection:
 
         for line in self.content.splitlines():
             line = line.strip()
+            # print(f"Line: [{line}]")
 
-            if line.startswith(TAG_INJECT_BEGIN):
+            if Utils.is_tag_line(line, TAG_INJECT_BEGIN):
                 # Start of a new block
-                current_block_name = (
-                    line[TAG_INJECT_BEGIN_LEN:].strip().strip("{}").strip()
+                current_block_name = Utils.parse_block_name_from_line(
+                    line, TAG_INJECT_BEGIN
                 )
+                # print(f"Found Block: {current_block_name}")
                 collecting = True
                 current_content = []
 
-            elif line.startswith(TAG_INJECT_END):
+            elif Utils.is_tag_line(line, TAG_INJECT_END):
+                # print("End of Block")
                 # End of the current block
                 if current_block_name and collecting:
                     self.blocks[current_block_name] = self.TextBlock(
                         name=current_block_name, content="\n".join(current_content)
                     )
+                else:
+                    print("No block name or not collecting")
                 collecting = False
                 current_block_name = None
 
@@ -90,10 +95,16 @@ class FileInjection:
                 # Collect the content of the block
                 current_content.append(line)
 
+        # print("blocks created: " + str(self.blocks))
+
     def visit_file(self, filename, ts):
         """Visit the file, to run all injections on the file"""
 
-        # print("Inject File:", filename)
+        if self.blocks is None or len(self.blocks) == 0:
+            print("No blocks to inject")
+            return
+
+        # print("Inject Into File:", filename)
         # we need content to be mutable in the methods we pass it to so we hold in a dict
         content = [""]
         try:
@@ -128,8 +139,10 @@ class FileInjection:
     def process_replacements(self, content, block, name, ts):
         """Process the replacements for the given block."""
 
+        # print("replacing: name=" + name)
         # Optimization to avoid unnessary cycles
         if f" {TAG_BLOCK_INJECT} {name}" not in content[0]:
+            # print("Skipping: " + name)
             return False
 
         # we return true here if we did any replacements

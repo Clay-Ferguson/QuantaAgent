@@ -18,9 +18,9 @@ def test_simple_injection():
         cfg.source_folder,
         AppConfig.ext_set,
         """
-    inject.begin InsertTarget
-    # comment to be inserted
-    inject.end
+# inject.begin InsertTarget
+# comment to be inserted
+# inject.end
     """,
         ts,
         f"-{ts}",
