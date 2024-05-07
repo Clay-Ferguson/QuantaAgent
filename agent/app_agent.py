@@ -78,7 +78,6 @@ class QuantaAgent:
         """
 
         # Walk through all directories and files in the directory
-        # TODO: this scanning logic is in two places and I think so we can write a reusable function for this
         for dirpath, _, filenames in os.walk(scan_dir):
             for filename in filenames:
                 # Check the file extension

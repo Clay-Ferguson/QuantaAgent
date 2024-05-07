@@ -21,6 +21,8 @@ class AppOpenAI:
         ret = ""
 
         if dry_run:
+            # If dry_run is True, we simulate the AI response by reading from a file
+            # if we canfind that file or else we return a default response.
             answer_file = f"{self.data_folder}/dry-run-answer.md"
 
             # TODO: explain this dry-run-answer.md file in the README (or docs)

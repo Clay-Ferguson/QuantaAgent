@@ -30,13 +30,16 @@ Note 2: The /data/convert-to-class*.md files in this project are the logs genera
 
 To use this tool you will do these steps:
 
-1) Edit the `config.yaml` to make it point to a software project folder you want to analyze.
+1) Edit the `config.yaml` to make it point to a software project folder you want to analyze, and other options.
 2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
 4) Put a `question.md` file (your AI Prompt) into your data folder.
 5) Run `main.py`, make up some arbitrary filename when prompted for one.
 6) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had `Injection Points` specified in your code that you asked about then your actual software project files will have been updated/edited as well!
 
+### update_strategy Option
+
+NOTE: The default config setting for the `update_strategy` config option is `whole_file` (not `injection_points`). When you run the tool you have to set this option to tell it whether it should try to update files based on `Injection Points` (explained later) or `Whole Files`. The `whole_file` option lets you ask the AI to essentially edit one or more files for you and it will overwrite your existing file(s) with new content as it sees fit based on what you asked it to do in your prompt.
 
 # Comparison to other AI Coding Assistants
 
