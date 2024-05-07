@@ -23,7 +23,7 @@ class AppOpenAI:
         if dry_run:
             answer_file = f"{self.data_folder}/dry-run-answer.md"
 
-            # TODO: explain this answer file logic capability in the README (or docs)
+            # TODO: explain this dry-run-answer.md file in the README (or docs)
             # if the answer file exists, read it
             if os.path.exists(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")

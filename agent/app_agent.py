@@ -13,6 +13,8 @@ from agent.tags import (
     TAG_BLOCK_INJECT,
     TAG_INJECT_BEGIN,
     TAG_INJECT_END,
+    TAG_FILE_BEGIN,
+    TAG_FILE_END,
 )
 from agent.utils import Utils
 
@@ -76,7 +78,7 @@ class QuantaAgent:
         """
 
         # Walk through all directories and files in the directory
-        # TODO: this scanning logic is in two placesl I think so we can write a reusable function for this
+        # TODO: this scanning logic is in two places and I think so we can write a reusable function for this
         for dirpath, _, filenames in os.walk(scan_dir):
             for filename in filenames:
                 # Check the file extension
@@ -159,7 +161,6 @@ class QuantaAgent:
         )
 
         if (
-            # TODO: put these in constants file
             self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
             or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
@@ -207,9 +208,9 @@ class QuantaAgent:
                     prompt = prompt.replace(
                         tag,
                         f"""
-file_begin ${{{file_name}}}
+{TAG_FILE_BEGIN} ${{{file_name}}}
 {content}
-file_end ${{{file_name}}}
+{TAG_FILE_END} ${{{file_name}}}
 """,
                     )
 
@@ -218,19 +219,19 @@ file_end ${{{file_name}}}
     def get_file_insertion_instructions(self):
         """Returns instructions for providing the new code."""
 
-        return """
+        return f"""
 If I have sent you individual file(s) and asked you to modify them, in the prompt text above,
-then each file is delimited with `file_begin ${FileName}` and `file_end ${FileName}` tags, so you can see what the full content of each file is. 
-Note that the actual file content for each file begins on the next line AFTER the `file_begin` line, and ends on the line BEFORE the `file_end` line.
+then each file is delimited with `{TAG_FILE_BEGIN} ${{FileName}}` and `{TAG_FILE_END} ${{FileName}}` tags, so you can see what the full content of each file is. 
+Note that the actual file content for each file begins on the next line AFTER the `{TAG_FILE_BEGIN}` line, and ends on the line BEFORE the `{TAG_FILE_END}` line.
 
 Please provide me with the new version(s) of the file(s) by using the following format:
 
-// file_begin FileName
+// {TAG_FILE_BEGIN} FileName
 ... the new content of the file ...
-// file_end FileName
+// {TAG_FILE_END} FileName
 
 If you didn't find it necessary to edit a file, you can just omit it from your response. 
-If I wasn't asking you to modify any code at all don't include the file_beign or file_end blocks in your response.
+If I wasn't asking you to modify any code at all don't include the {TAG_FILE_BEGIN} or {TAG_FILE_END} blocks in your response.
 """
 
     def get_block_insertion_instructions(self):

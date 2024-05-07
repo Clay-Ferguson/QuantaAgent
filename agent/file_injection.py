@@ -7,6 +7,8 @@ from agent.tags import (
     TAG_BLOCK_INJECT,
     TAG_INJECT_END,
     TAG_INJECT_BEGIN,
+    TAG_FILE_BEGIN,
+    TAG_FILE_END,
 )
 from agent.utils import Utils
 from agent.app_config import AppConfig
@@ -24,14 +26,13 @@ class FileInjection:
         name: str
         content: str
 
-    # TODO: need to rename 'content' here to 'ai_answer'
-    def __init__(self, update_strategy, source_folder, ext_set, content, ts, suffix):
+    def __init__(self, update_strategy, source_folder, ext_set, ai_answer, ts, suffix):
         """Initializes the FileInjection object."""
         self.update_strategy = update_strategy
         self.source_folder = source_folder
         self.source_folder_len = len(source_folder)
         self.ext_set = ext_set
-        self.content = content
+        self.ai_answer = ai_answer
         self.suffix = suffix
         self.ts = ts
 
@@ -73,7 +74,7 @@ class FileInjection:
         current_content = []
         collecting = False
 
-        for line in self.content.splitlines():
+        for line in self.ai_answer.splitlines():
             line = line.strip()
             # print(f"Line: [{line}]")
 
@@ -118,13 +119,11 @@ class FileInjection:
             modified = False
 
             # Check if we have a diff for this file
-            # TODO: During the initial scan we should've recorded whether each given file was using
-            # Injection Points or Whole File Replacement. This way this logic here can be more efficient
             rel_filename = filename[self.source_folder_len :]
             new_content = None
 
             if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-                new_content = self.parse_modified_file(self.content, rel_filename)
+                new_content = self.parse_modified_file(self.ai_answer, rel_filename)
 
             if new_content is not None:
                 content[0] = new_content
@@ -157,7 +156,7 @@ class FileInjection:
 
     def parse_modified_file(self, ai_answer, rel_filename):
         """Extract the new content for the given file from the AI answer."""
-        if f"""file_begin {rel_filename}""" not in ai_answer:
+        if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
             return
 
         # Scan all the lines in content one by one and extract the new content
@@ -165,14 +164,13 @@ class FileInjection:
         started = False
         for line in ai_answer.splitlines():
             if started:
-                if Utils.is_tag_line(line, "file_end"):
+                if Utils.is_tag_line(line, TAG_FILE_END):
                     break
                 new_content.append(line)
-            # TODO: this can be a little cleaner because its ugly to cram the filename into the tag, but this will work
-            elif Utils.is_tag_line(line, f"file_begin {rel_filename}"):
+            elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):
                 if len(new_content) > 0:
                     print(
-                        f"Error: file_begin {rel_filename} exists multiple times in ai response. The LLM itself is failing."
+                        f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing."
                     )
                     exit(1)
                 started = True

@@ -7,6 +7,17 @@ class Utils:
     """Utilities Class"""
 
     @staticmethod
+    def is_tag_and_name_line(line, tag, name):
+        """Checks if the line is a line like
+        `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
+        or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`
+        """
+
+        # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
+        pattern = rf"^(--|//|#) {re.escape(tag)} {name}"
+        return re.search(pattern, line) is not None
+
+    @staticmethod
     def is_tag_line(line, tag):
         """Checks if the line is a line like
         `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
