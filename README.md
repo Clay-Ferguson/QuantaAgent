@@ -9,7 +9,7 @@ So in summary let lets you name sections of your code, in any files inside your 
 There's also a way to desginate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
 
 
-# Simplest Possible Example
+# Example 1. Simplest Possible Example
 
 The simplest possible example (to put in `question.md` as your prompt) would be this:
 
@@ -35,7 +35,7 @@ To use this tool you will do these steps:
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
 4) Put a `question.md` file (your AI Prompt) into your data folder.
 5) Run `main.py`, make up some arbitrary filename when prompted for one.
-6) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had `Injection Points` specified in your code that you asked about then your actual software project files will have been updated/edited as well!
+6) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had `Injection Points` specified in your code that you asked about then your actual software project files will have been updated/edited as well, potentially with code inserted at those `Injection Points`
 
 ### update_strategy Option
 
@@ -49,9 +49,11 @@ NOTE: The default config setting for the `update_strategy` config option is `who
 `Quanta Agent` is also only for use by actual software developers, rather than a higher level of say a software manager role. This is because `Quanta Agent` expects you to know exactly what parts of your code you need to ask questions about or modify. `Quanta Agent` is like a software developer who needs to be told which parts of the code to look at, before he gets started working. So `Quanta Agent` isn't really for building projects from scratch, but it's more of a tool for making code modifications to large projects that already exist, and making modifications into only the specific allowed bounded areas. Depending on how you look at it, `Quanta Agent` is both dumber than, and smarter than, the other tools. However, I will be so bold as to say there's not a cheaper (in dollar costs) or a simpler way to accomplish what `Quanta Agent` is doing!
 
 
-# Simple LLM Prompt Example
+# More Examples
 
-Suppose you have a Java file that contains the following:
+## Example 2: Ask Question about a Named Block
+
+Suppose you have a Java file that contains the following, somewhere (anywhere) in your project:
 
 ```java
 // block_begin Adding_Numbers
@@ -59,7 +61,7 @@ int total = a + b;
 // block_end
 ```
 
-You can run run LLM Prompts/Queries like this:
+You can run an LLM Prompts/Queries like this:
 
     What is happening in the following code:
 
@@ -67,7 +69,38 @@ You can run run LLM Prompts/Queries like this:
 
 So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block_begin` and `block_end` syntax, to create named blocks which are then template substituded automatically into your prompt.
 
-# Simple Example Files
+## Example 3: Simple Code Injection Example
+ 
+Suppose you have a Python file anywhere in you project that contains this:
+
+    # block_begin MyTestBlock
+    print("This is a test block")
+    # block_inject NewCodeHere
+    # block_end
+
+We can run this prompt:
+
+    Add some code that does the same thing as this line but includes a timestamp in the output as well.
+
+    ```py
+    ${MyTestBlock}
+    ```
+
+And the result will be that you new content in the file will be this:
+
+    # block_begin MyTestBlock
+    print("This is a test block")
+    # block_inject NewCodeHere
+    # inject_begin 1715123264447
+    from datetime import datetime
+    print(f"This is a test block at {datetime.now()}")
+    # inject_end
+    # block_end
+
+Note that the `inject_begin` and `inject_end` is wrapping the injected content, and it went inright at the injection point. This was a contrived simple example but it shows the mechanics of asking questions about code, and getting new code generated into only specific specified locations. If you have have several places inside a file that need to be modified and you want to let the AI do that you would wrap the entier file in a `block_begin/block_end`, and put as many `block_inject` locations as you want, and the AI will try to insert the correct content into the correct slot. All you really need to do is make sure each slot (i.e. `Injection Point`) has a unique name, and it doesn't even matter what the name is.
+
+
+# Simple Example Output Log Files
 
 Example Question and Answer(s) can be found here:
 

@@ -10,4 +10,6 @@ system_prompt: "You are a helpful assistant."
 source_folder: "test_project"
 scan_extensions: ".java.sql, .py"
 data_folder: "data"
-update_strategy: "whole_file" # or "injection_points" or "none"
+
+# update_strategy: "whole_file" 
+update_strategy: "injection_points"

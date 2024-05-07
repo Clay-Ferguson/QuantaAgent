@@ -24,3 +24,9 @@ else:
 
 # Display the converted temperature in the specified output convention
 print("The temperature in", o_convention, "is", result, "degrees.")
+
+
+# block_begin MyTestBlock
+print("This is a test block")
+# block_inject NewCodeHere
+# block_end

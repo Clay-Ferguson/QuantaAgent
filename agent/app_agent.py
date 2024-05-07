@@ -114,11 +114,6 @@ class QuantaAgent:
         # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
 
-        # Print all blocks
-        # for key, value in blocks.items():
-        #    print(f"Block: {key}")
-        #    print(f"Content: {value.content}\n"
-
         with open(f"{self.cfg.data_folder}/question.md", "r", encoding="utf-8") as file:
             prompt = file.read()
 
@@ -240,7 +235,7 @@ If I wasn't asking you to modify any code at all don't include any {TAG_FILE_BEG
 
         return f"""
 
-If I was asking you to modify any code, in the prompt above, then to provide me with the new code, use the following strategy: 
+If I was asking you to add some new code, in the prompt above, then to provide me with the new code, use the following strategy: 
 Notice that there are sections named `// {TAG_BLOCK_INJECT} {{Name}}` in the code I gave you. 
 I'd like for you to show me just what I need to insert into each of those `{TAG_BLOCK_INJECT}` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:
