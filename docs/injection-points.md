@@ -14,7 +14,7 @@ Let's say we have a Java file named `UserAccount.java` in our project (i.e. some
 @Entity
 @Table(name = "user_accnt")
 public class UserAccount {
-    // block.inject UserAccount.Properties
+    // block_inject UserAccount.Properties
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +40,7 @@ public class UserAccount {
         this.userName = userName;
     }
 
-    // block.inject UserAccount.Methods
+    // block_inject UserAccount.Methods
 
     public Long getId() {
         return id;
@@ -54,7 +54,7 @@ public class UserAccount {
 }
 ```
 
-Note that there are two defined injection points (lines with `// block.inject {name}`) in the file that we've added so this tool can edit the file for us. We can use whatever `{name}` we want as long as each name is unique across the entire project. 
+Note that there are two defined injection points (lines with `// block_inject {name}`) in the file that we've added so this tool can edit the file for us. We can use whatever `{name}` we want as long as each name is unique across the entire project. 
 
 ## Prompt File
 
@@ -97,23 +97,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-// block.inject UserAccount.Imports
-// inject.begin 1714886674112
+// block_inject UserAccount.Imports
+// inject_begin 1714886674112
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-// inject.end
+// inject_end
 
 @Entity
 @Table(name = "user_accnt")
 public class UserAccount {
     
-    // block.inject UserAccount.Properties
-    // inject.begin 1714886674112
+    // block_inject UserAccount.Properties
+    // inject_begin 1714886674112
     @Column(name = "signup_date")
     @Temporal(TemporalType.DATE)
     private Date signupDate;
-    // inject.end
+    // inject_end
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -139,8 +139,8 @@ public class UserAccount {
         this.userName = userName;
     }
 
-    // block.inject UserAccount.Methods
-    // inject.begin 1714886674112
+    // block_inject UserAccount.Methods
+    // inject_begin 1714886674112
     public Date getSignupDate() {
     return signupDate;
     }
@@ -148,7 +148,7 @@ public class UserAccount {
     public void setSignupDate(Date signupDate) {
     this.signupDate = signupDate;
     }
-    // inject.end
+    // inject_end
 
     public Long getId() {
         return id;
@@ -161,7 +161,7 @@ public class UserAccount {
 }
 ```
 
-Note that the `inject.begin` and `inject.end` lines indicate exactly where the tool inserted stuff into your code along with a timestamp for auditing purposes. This will be made optional, but for now is always there.
+Note that the `inject_begin` and `inject_end` lines indicate exactly where the tool inserted stuff into your code along with a timestamp for auditing purposes. This will be made optional, but for now is always there.
 
 ## Prompt Input/Output Logs
 
@@ -185,19 +185,19 @@ To add the new `signupDate` property to your `UserAccount` entity, you will need
 Here are the changes you should inject into each respective block:
 
 ```java
-// inject.begin UserAccount.Imports
+// inject_begin UserAccount.Imports
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-// inject.end
+// inject_end
 
-// inject.begin UserAccount.Properties
+// inject_begin UserAccount.Properties
 @Column(name = "signup_date")
 @Temporal(TemporalType.DATE)
 private Date signupDate;
-// inject.end
+// inject_end
 
-// inject.begin UserAccount.Methods
+// inject_begin UserAccount.Methods
 public Date getSignupDate() {
     return signupDate;
 }
@@ -205,10 +205,10 @@ public Date getSignupDate() {
 public void setSignupDate(Date signupDate) {
     this.signupDate = signupDate;
 }
-// inject.end
+// inject_end
 ```
 
-These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block.inject` comments are located. This will effectively add the new `signupDate` property to your entity.
+These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block_inject` comments are located. This will effectively add the new `signupDate` property to your entity.
 
 
 ____________________________________________________________________________________
@@ -224,7 +224,7 @@ User Prompt: [omitted, you saw it above]
 
 *END*
 
-As you can see, it gave the full description of what happened, and what it put into each `Injection Point` of your code. You can ignore the `inject.begin` and `inject.end` because those tags were what the AI was instructed to put in it's answer to make the answer machine parsable, which is how this tool knows what to insert in your code and where. The timestamp is inserted as the same timestamp across all modifications for any given run of this tool, so there's a full audit trail for everything that ever happens!
+As you can see, it gave the full description of what happened, and what it put into each `Injection Point` of your code. You can ignore the `inject_begin` and `inject_end` because those tags were what the AI was instructed to put in it's answer to make the answer machine parsable, which is how this tool knows what to insert in your code and where. The timestamp is inserted as the same timestamp across all modifications for any given run of this tool, so there's a full audit trail for everything that ever happens!
 
 ## Summary
 

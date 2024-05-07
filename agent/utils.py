@@ -9,8 +9,8 @@ class Utils:
     @staticmethod
     def is_tag_and_name_line(line, tag, name):
         """Checks if the line is a line like
-        `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
-        or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`
+        `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
+        or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
         """
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
@@ -20,8 +20,8 @@ class Utils:
     @staticmethod
     def is_tag_line(line, tag):
         """Checks if the line is a line like
-        `-- block.begin {Name}` or `// block.begin {Name}` or `# block.begin {Name}`
-        or `-- block.end {Name}` or `// block.end {Name}` or `# block.end {Name}`
+        `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
+        or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
 
         Notice that we only check for the tag, not the block name.
         """

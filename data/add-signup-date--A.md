@@ -7,19 +7,19 @@ To add the new `signupDate` property to your `UserAccount` entity, you will need
 Here are the changes you should inject into each respective block:
 
 ```java
-// inject.begin UserAccount.Imports
+// inject_begin UserAccount.Imports
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-// inject.end
+// inject_end
 
-// inject.begin UserAccount.Properties
+// inject_begin UserAccount.Properties
 @Column(name = "signup_date")
 @Temporal(TemporalType.DATE)
 private Date signupDate;
-// inject.end
+// inject_end
 
-// inject.begin UserAccount.Methods
+// inject_begin UserAccount.Methods
 public Date getSignupDate() {
     return signupDate;
 }
@@ -27,10 +27,10 @@ public Date getSignupDate() {
 public void setSignupDate(Date signupDate) {
     this.signupDate = signupDate;
 }
-// inject.end
+// inject_end
 ```
 
-These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block.inject` comments are located. This will effectively add the new `signupDate` property to your entity.
+These snippets should be placed into the respective sections of your `UserAccount` entity code, where the `block_inject` comments are located. This will effectively add the new `signupDate` property to your entity.
 
 
 ____________________________________________________________________________________
@@ -45,7 +45,7 @@ Timestamp: 1714886674112
 User Prompt: Here's a Java entity bean in my app:
 
 ```java
-// block.begin UserAccount_Entity
+// block_begin UserAccount_Entity
 package quanta.postgres.table;
 
 import java.util.List;
@@ -57,14 +57,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-// block.inject UserAccount.Imports
+// block_inject UserAccount.Imports
 
 
 @Entity
 @Table(name = "user_accnt")
 public class UserAccount {
 
-    // block.inject UserAccount.Properties
+    // block_inject UserAccount.Properties
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -90,7 +90,7 @@ public class UserAccount {
         this.userName = userName;
     }
 
-    // block.inject UserAccount.Methods
+    // block_inject UserAccount.Methods
 
     public Long getId() {
         return id;
@@ -130,14 +130,14 @@ public class UserAccount {
 Add the changes to my entity bean for a new User Account property called "signupDate", which will be a date type. Be sure to add any new imports that are needed too."
 
 To provide me with the new code, use the following strategy: 
-Notice that there are sections named `// block.inject {Name}` in the code I gave you. 
-I'd like for you to show me just what I need to insert into each of those `block.inject` sections of the code. 
+Notice that there are sections named `// block_inject {Name}` in the code I gave you. 
+I'd like for you to show me just what I need to insert into each of those `block_inject` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:
 
-// inject.begin {Name}
+// inject_begin {Name}
 ...{SomeContent}...
-// inject.end
+// inject_end
 
-You may not need to inject into some of the `block.inject` locations. 
-These `block.inject` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
+You may not need to inject into some of the `block_inject` locations. 
+These `block_inject` points are just for you to refer to which places the code needs to be inserted, and to provide it back to me in a machine parsable way.
 

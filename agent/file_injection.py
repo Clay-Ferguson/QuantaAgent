@@ -39,16 +39,16 @@ class FileInjection:
     def inject(self):
         """Injects content into files by extracting all the named blocks on content that are structured like this:
 
-        // inject.begin <Name>
+        // inject_begin <Name>
         ...content to be injected...
-        // inject.end
+        // inject_end
 
         And inserting into the proper source file injection site identifieid in the code by:
-        // block.inject <Name>
+        // block_inject <Name>
         or
-        -- block.inject <Name>
+        -- block_inject <Name>
         or
-        # block.inject <Name>
+        # block_inject <Name>
         """
 
         self.blocks = {}
@@ -61,7 +61,7 @@ class FileInjection:
     def parse_injections(self):
         """
         Parses the ai prompt to find and extract blocks of text
-        defined by '// inject.begin {Name}' and '// inject.end'.
+        defined by '// inject_begin {Name}' and '// inject_end'.
 
         Args:
         text (str): The multiline string containing the text blocks.
@@ -131,7 +131,7 @@ class FileInjection:
             # else if no new content, so we try any injections
             else:
                 if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
-                    # Perform all injections but keep the 'block.inject' lines
+                    # Perform all injections but keep the 'block_inject' lines
                     for name, block in self.blocks.items():
                         if self.process_replacements(content, block, name, ts):
                             modified = True

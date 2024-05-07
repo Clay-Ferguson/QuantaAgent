@@ -1,5 +1,3 @@
-# block.inject InsertTarget
-
 # Prompt the user to input a temperature in the format (e.g., 45F, 102C, etc.)
 temp = input("Input the temperature you like to convert? (e.g., 45F, 102C etc.) : ")
 

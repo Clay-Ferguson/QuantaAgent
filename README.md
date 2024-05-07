@@ -51,9 +51,9 @@ To use this tool you will do these steps:
 Suppose you have a Java file that contains the following:
 
 ```java
-// block.begin Adding_Numbers
+// block_begin Adding_Numbers
 int total = a + b;
-// block.end
+// block_end
 ```
 
 You can run run LLM Prompts/Queries like this:
@@ -62,7 +62,7 @@ You can run run LLM Prompts/Queries like this:
 
     ${Adding_Numbers}
 
-So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block.begin` and `block.end` syntax, to create named blocks which are then template substituded automatically into your prompt.
+So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block_begin` and `block_end` syntax, to create named blocks which are then template substituded automatically into your prompt.
 
 # Simple Example Files
 
@@ -75,14 +75,14 @@ https://github.com/Clay-Ferguson/QuantaAgent/tree/master/data
 Choose any syntax based on file type. For example Python uses "#", JavaScript/Java uses "//", SQL uses "--"
 
 ```txt
-// block.begin ...
-// block.end
+// block_begin ...
+// block_end
 
--- block.begin ...
--- block.end
+-- block_begin ...
+-- block_end
 
-# block.begin ...
-# block.end
+# block_begin ...
+# block_end
 ```
 
 
@@ -98,22 +98,22 @@ For example, let's say you have some SQL in your project and some Java Entity be
 In summary `Quanta Agent` allows you to define named blocks inside any of you files like this:
 
 ```sql
--- block.begin SQL_Scripts
+-- block_begin SQL_Scripts
 ...all the scripts
--- block.end 
+-- block_end 
 ```
 
 --or--
 
 ```java
-// block.begin My_Java
+// block_begin My_Java
 ...all the code
-// block.end 
+// block_end 
 ```
 
-and then use the named blocks in AI prompts, to insert the entire content of the block from the file. The text that comes after the `block.begin` is considered the `Block Name` and, as shown in the example above, the `Block Names` are usable in prompts. So `${SQL_Scripts}` and `${My_Java}` when used in a prompt will be replaced with the block content in the final prompt sent to the LLM.
+and then use the named blocks in AI prompts, to insert the entire content of the block from the file. The text that comes after the `block_begin` is considered the `Block Name` and, as shown in the example above, the `Block Names` are usable in prompts. So `${SQL_Scripts}` and `${My_Java}` when used in a prompt will be replaced with the block content in the final prompt sent to the LLM.
 
-Note: If only `block.begin` exists and `block.end` doesn't exist, the block will end at the end of the file.
+Note: If only `block_begin` exists and `block_end` doesn't exist, the block will end at the end of the file.
 
 Note: The relative filename is also a valid "block name" and will insert the entire content of the specified file into the prompt. So you can simply put `${/path/to/my/file.md}` in a prompt, and it will inject the entire content of the file into the prompt. Note that the configured `source_folder` is the assumed prefix (base folder) for all of these kinds of file names.
 

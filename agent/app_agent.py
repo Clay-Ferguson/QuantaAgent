@@ -40,7 +40,7 @@ class QuantaAgent:
 
     def visit_file(self, path):
         """Visits a file and extracts text blocks into `blocks`. So we're just
-        scanning the file for the block.begin and block.end tags, and extracting the content between them
+        scanning the file for the block_begin and block_end tags, and extracting the content between them
         and saving that text for later use
         """
         # print("File:", file_path)
@@ -133,7 +133,7 @@ class QuantaAgent:
 
         # print(f"AI Prompt: {prompt}")
 
-        # If the prompt has block.inject tags, add instructions for how to provide the
+        # If the prompt has block_inject tags, add instructions for how to provide the
         # new code, in a machine parsable way.
         has_block_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
         if (
@@ -165,7 +165,7 @@ class QuantaAgent:
             or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
             if has_block_inject or has_filename_inject:
-                # If the prompt has block.inject tags, add instructions for how to provide the
+                # If the prompt has block_inject tags, add instructions for how to provide the
                 # new code, in a machine parsable way.
                 FileInjection(
                     self.cfg.update_strategy,
@@ -261,7 +261,7 @@ If there's no comment prefix for the language, just use `//` for the prefix.
 """
 
     def has_tag_lines(self, prompt, tag):
-        """Checks if the prompt has any block.inject tags."""
+        """Checks if the prompt has any block_inject tags."""
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
         pattern = rf"(--|//|#) {re.escape(tag)} "
