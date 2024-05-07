@@ -177,10 +177,11 @@ class QuantaAgent:
                 ).inject()
 
     def has_filename_injects(self, prompt):
-        ### scan all filenames for this pattern: "${filename}" and return True if found"""
+        """Returns True if the prompt has any file content injection."""
         for file_name in self.file_names:
-            tag = f"${{{file_name}}}"
-            if tag in prompt:
+            tag_begin = f"{TAG_FILE_BEGIN} {file_name}"
+            tag_end = f"{TAG_FILE_END} {file_name}"
+            if tag_begin in prompt and tag_end in prompt:
                 return True
         return False
 
@@ -208,9 +209,9 @@ class QuantaAgent:
                     prompt = prompt.replace(
                         tag,
                         f"""
-{TAG_FILE_BEGIN} ${{{file_name}}}
+{TAG_FILE_BEGIN} {file_name}
 {content}
-{TAG_FILE_END} ${{{file_name}}}
+{TAG_FILE_END} {file_name}
 """,
                     )
 
@@ -221,17 +222,18 @@ class QuantaAgent:
 
         return f"""
 If I have sent you individual file(s) and asked you to modify them, in the prompt text above,
-then each file is delimited with `{TAG_FILE_BEGIN} ${{FileName}}` and `{TAG_FILE_END} ${{FileName}}` tags, so you can see what the full content of each file is. 
+then each file is delimited with `{TAG_FILE_BEGIN} ${{FileName}}` and `{TAG_FILE_END} ${{FileName}}` tags, so you can see what the full content of each file is along with it's filename.
 Note that the actual file content for each file begins on the next line AFTER the `{TAG_FILE_BEGIN}` line, and ends on the line BEFORE the `{TAG_FILE_END}` line.
 
-Please provide me with the new version(s) of the file(s) by using the following format:
+Please provide me with the new version(s) of the file(s) by using the following format, where you replace the `... the new content of the file ...` with the new content of the file, and put the filename
+in place of `FileName` without the `${{}}` tags. Do not alter the filenames at all, or remove any leading slashes.
 
 // {TAG_FILE_BEGIN} FileName
 ... the new content of the file ...
 // {TAG_FILE_END} FileName
 
 If you didn't find it necessary to edit a file, you can just omit it from your response. 
-If I wasn't asking you to modify any code at all don't include the {TAG_FILE_BEGIN} or {TAG_FILE_END} blocks in your response.
+If I wasn't asking you to modify any code at all don't include any {TAG_FILE_BEGIN} or {TAG_FILE_END} blocks in your response.
 """
 
     def get_block_insertion_instructions(self):
