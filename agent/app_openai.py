@@ -1,5 +1,6 @@
 """Makes a query to OpenAI's API and writes the response to a file."""
 
+import os
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -20,9 +21,20 @@ class AppOpenAI:
         ret = ""
 
         if dry_run:
-            output = "Dry Run: No API call made."
+            answer_file = f"{self.data_folder}/dry-run-answer.md"
+
+            # TODO: explain this answer file logic capability in the README (or docs)
+            # if the answer file exists, read it
+            if os.path.exists(answer_file):
+                print(f"Simulating AI Response by reading answer from {answer_file}")
+                with open(answer_file, "r", encoding="utf-8") as file:
+                    ret = file.read()
+            else:
+                ret = "Dry Run: No API call made."
         else:
-            llm = ChatOpenAI(model=self.model, temperature=0.7, api_key=self.api_key)
+            llm = ChatOpenAI(
+                model=self.model, temperature=0.000001, api_key=self.api_key
+            )
 
             prompt = ChatPromptTemplate.from_messages(
                 [("system", self.system_prompt), ("user", "{input}")]
@@ -31,10 +43,9 @@ class AppOpenAI:
             chain = prompt | llm | output_parser
             print("Waiting for OpenAI...")
             ret = chain.invoke({"input": query})
-            output = ret
 
-        output += f"""
-
+        output = f"""
+{ret}
 ____________________________________________________________________________________
 Note: The above content is the response from OpenAI's API using the following prompt:
 

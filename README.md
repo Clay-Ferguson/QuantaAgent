@@ -1,12 +1,29 @@
 # About Quanta Agent
 
-This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that. This tool can also implement entire complex features in your code base, using the `Injection Points` capability, mentioned below.
+This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that. This tool can also implement entire complex features in your code base, using the `Injection Points` capability, mentioned below, to add code to specific locations in specific files as directed by you. In addition to `Injection Points` you can use the simpler approach of referring to files by name in your prompt (using `${/my/file.md}` syntax) and request for the AI to make modifications directly to those files and make arbitrary code refactorings that you ask for in your prompt!
 
-This tool will scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
+This tool will [optionally] scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
 
-So in summary let lets you name sections of your code, in any files inside your project, and then refer those sections by name in prompts, in such a way that the prompt injects the code block wherever you mention it's name. So in this way you can write prompts involving sections of your code without the need to cut-and-paste from your code into the prompt by hand.
+So in summary let lets you name sections of your code, in any files inside your project, and then refer those sections by name in prompts, in such a way that the prompt injects the code block wherever you mention it's name. So in this way you can write prompts involving sections of your code without the need to cut-and-paste from your code into the prompt by hand, and without referencing the entire file in your prompt (which causes the entier file to be included in the prompt)
 
-There's also a way to desginate `Injection Points` anywhere inside these blocks in your actual source files you're analyzing, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README (to keep it simpler) but you can find full examples of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
+There's also a way to desginate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
+
+
+# Simplest Possible Example
+
+The simplest possible example (to put in `question.md` as your prompt) would be this:
+
+```txt
+Modify the following Python file, so that it's using a class that has a public static `run` method to do what it does.
+
+${/temperature_convert.py}
+```
+
+In the above prompt we're using the syntax to inject the entire `temperature_convert.py` file into the prompt, and the tool is smart enough to actually *do* what you're asking *to* the actual file when you run the tool! The default `config.yaml` already points to the `test_project` folder, which does contain a `temperature_convert.py` which is not implemented as a class. So running this example will update the actual python file and make it into a class.
+
+Note 1: that the above example didn't use `Code Blocks` or `Injection Points` features, which are more advanced features. The simplest way to use the tool is to just request a refactoring to be done on one or more files, which is what we did in the above example.
+
+Note 2: The /data/convert-to-class*.md files in this project are the logs generated from an actual run of the above prompt exactly as described.
 
 
 # Tool Usage
@@ -160,7 +177,6 @@ Improvements being considered, but not yet being worked on are as follows:
 
 * **Entire Folders as Blocks** - We could allow a syntax like `${/my/folder/}` to be able to inject the entire content of a directory into a prompt. This would rarely be needed, and would be expensive in terms of flooding the AI context window. However, once LLMs are powerful and cheap enough this feature would let you sort of use your *entire* code base in a single prompt, and also get the AI to make modifications into any file at all as long as there's an `Injection Point` wherever you want new code to go in.
 * **HTTP API** - It would be nice if we could call this tool via an HTTP API in addition to the command line, so it can be built into web apps.
-* **DIFF Responses** - Even older LLMs (like ChatGPT-3.5) are smart enough to know how to take an entire input source file, and make some code modification to it, as specified in a prompt, and return the Unified Diff format (often denoted by the .diff or .patch extension) for super efficient way for the response to send back essentially a new version of the edited file just by sending the changes. So we can theoretically use this as a way to get modifications made to files or even blocks of text without having to use `Injection Points`, although `Injection Points` will still be a valuable tool when directing specific changes be made to specific spots.
 * **VSCode Plugin** - We will be adding a VSCode plugin to go along with this tool, which will let you right click any file in and simply type in a kind of refactoring you'd like to do to the file, and get the chagnes made directly to your file itself.
 
 

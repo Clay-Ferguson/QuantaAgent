@@ -131,11 +131,15 @@ class QuantaAgent:
 
         # print(f"AI Prompt: {prompt}")
 
-        # If the prompt has block.inject tags, add instructions for how to provide the new code, in a
-        # machine parsable way.
-        has_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
-        if has_inject:
+        # If the prompt has block.inject tags, add instructions for how to provide the
+        # new code, in a machine parsable way.
+        has_block_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
+        if has_block_inject:
             prompt += self.get_block_insertion_instructions()
+
+        has_filename_inject = self.has_filename_injects(prompt)
+        if has_filename_inject:
+            prompt += self.get_file_insertion_instructions()
 
         answer = AppOpenAI(
             self.cfg.openai_api_key,
@@ -148,10 +152,20 @@ class QuantaAgent:
             self.ts,
         )
 
-        if has_inject:
+        if has_block_inject or has_filename_inject:
+            # If the prompt has block.inject tags, add instructions for how to provide the
+            # new code, in a machine parsable way.
             FileInjection(
                 self.cfg.source_folder, AppConfig.ext_set, answer, self.ts, None
             ).inject()
+
+    def has_filename_injects(self, prompt):
+        ### scan all filenames for this pattern: "${filename}" and return True if found"""
+        for file_name in self.file_names:
+            tag = f"${{{file_name}}}"
+            if tag in prompt:
+                return True
+        return False
 
     def insert_blocks_into_prompt(self, prompt):
         """
@@ -174,9 +188,34 @@ class QuantaAgent:
                     self.cfg.source_folder + file_name, "r", encoding="utf-8"
                 ) as file:
                     content = file.read()
-                    prompt = prompt.replace(tag, content)
+                    prompt = prompt.replace(
+                        tag,
+                        f"""
+file_begin ${{{file_name}}}
+{content}
+file_end ${{{file_name}}}
+""",
+                    )
 
         return prompt
+
+    def get_file_insertion_instructions(self):
+        """Returns instructions for providing the new code."""
+
+        return """
+I have sent you individual file(s) which you can edit as needed to accomplish the task.
+
+Each file is delimited with `file_begin ${FileName}` and `file_end ${FileName}` tags, so you can see what the full content of each file is. 
+Note that the actual file content for each file begins on the next line AFTER the `file_begin` line, and ends on the line BEFORE the `file_end` line.
+
+Please provide me with the new version(s) of the file(s) by using the following format:
+
+// file_begin FileName
+... the new content of the file ...
+// file_end FileName
+
+If you didn't find it necessary to edit a file, you can just omit it from your response.
+"""
 
     def get_block_insertion_instructions(self):
         """Returns instructions for providing the new code."""

@@ -23,8 +23,10 @@ class FileInjection:
         name: str
         content: str
 
+    # TODO: need to rename 'content' here to 'ai_answer'
     def __init__(self, source_folder, ext_set, content, ts, suffix):
         self.source_folder = source_folder
+        self.source_folder_len = len(source_folder)
         self.ext_set = ext_set
         self.content = content
         self.suffix = suffix
@@ -100,10 +102,6 @@ class FileInjection:
     def visit_file(self, filename, ts):
         """Visit the file, to run all injections on the file"""
 
-        if self.blocks is None or len(self.blocks) == 0:
-            print("No blocks to inject")
-            return
-
         # print("Inject Into File:", filename)
         # we need content to be mutable in the methods we pass it to so we hold in a dict
         content = [""]
@@ -112,19 +110,30 @@ class FileInjection:
             with open(filename, "r", encoding="utf-8") as file:
                 content[0] = file.read()
 
-            found = False
-            # Perform all injections but keep the 'block.inject' lines
-            for name, block in self.blocks.items():
-                if self.process_replacements(content, block, name, ts):
-                    found = True
+            modified = False
 
-            if found:
+            # Check if we have a diff for this file
+            # TODO: During the initial scan we should've recorded whether each given file was using
+            # Injection Points or Whole File Replacement. This way this logic here can be more efficient
+            rel_filename = filename[self.source_folder_len :]
+            new_content = self.parse_modified_file(self.content, rel_filename)
+            if new_content is not None:
+                content[0] = new_content
+                modified = True
+            # else if no new content, so we try any injections
+            else:
+                # Perform all injections but keep the 'block.inject' lines
+                for name, block in self.blocks.items():
+                    if self.process_replacements(content, block, name, ts):
+                        modified = True
+
+            if modified:
                 print("File: " + filename + "\nFinal Content: " + content[0])
 
             # Write the modified content back to the file
-            if found:
+            if modified:
                 out_file = (
-                    StringUtils.inject_suffix(filename, self.suffix)
+                    StringUtils.add_filename_suffix(filename, self.suffix)
                     if self.suffix
                     else filename
                 )
@@ -135,6 +144,35 @@ class FileInjection:
             print(f"The file {filename} does not exist.")
         except IOError:
             print("An error occurred while reading or writing to the file.")
+
+    def parse_modified_file(self, ai_answer, rel_filename):
+        """Extract the new content for the given file from the AI answer."""
+        if f"""file_begin {rel_filename}""" not in ai_answer:
+            print(f"file_begin not found in ai response: {ai_answer}")
+            return
+
+        # Scan all the lines in content one by one and extract the new content
+        new_content = []
+        started = False
+        for line in ai_answer.splitlines():
+            if started:
+                if Utils.is_tag_line(line, "file_end"):
+                    break
+                new_content.append(line)
+            # TODO: this can be a little cleaner because its ugly to cram the filename into the tag, but this will work
+            elif Utils.is_tag_line(line, f"file_begin {rel_filename}"):
+                if len(new_content) > 0:
+                    print(
+                        f"Error: file_begin {rel_filename} exists multiple times in ai response. The LLM itself is failing."
+                    )
+                    exit(1)
+                started = True
+
+        if len(new_content) == 0:
+            return None
+
+        ret = "\n".join(new_content)
+        return ret
 
     def process_replacements(self, content, block, name, ts):
         """Process the replacements for the given block."""

@@ -5,7 +5,7 @@ class StringUtils:
     """String Utilities Class"""
 
     @staticmethod
-    def inject_suffix(filename, suffix):
+    def add_filename_suffix(filename, suffix):
         """Inject a suffix into a filename."""
 
         parts = filename.split(".")
