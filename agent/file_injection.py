@@ -9,6 +9,7 @@ from agent.tags import (
     TAG_INJECT_BEGIN,
 )
 from agent.utils import Utils
+from agent.app_config import AppConfig
 
 
 class FileInjection:
@@ -24,7 +25,9 @@ class FileInjection:
         content: str
 
     # TODO: need to rename 'content' here to 'ai_answer'
-    def __init__(self, source_folder, ext_set, content, ts, suffix):
+    def __init__(self, update_strategy, source_folder, ext_set, content, ts, suffix):
+        """Initializes the FileInjection object."""
+        self.update_strategy = update_strategy
         self.source_folder = source_folder
         self.source_folder_len = len(source_folder)
         self.ext_set = ext_set
@@ -48,13 +51,15 @@ class FileInjection:
         """
 
         self.blocks = {}
-        self.parse_injections()
+        # Put this string in a constants file
+        if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
+            self.parse_injections()
         # print("Injection Blocks: " + str(self.blocks))
         self.scan_directory()
 
     def parse_injections(self):
         """
-        Parses the given multiline string to find and extract blocks of text
+        Parses the ai prompt to find and extract blocks of text
         defined by '// inject.begin {Name}' and '// inject.end'.
 
         Args:
@@ -116,19 +121,24 @@ class FileInjection:
             # TODO: During the initial scan we should've recorded whether each given file was using
             # Injection Points or Whole File Replacement. This way this logic here can be more efficient
             rel_filename = filename[self.source_folder_len :]
-            new_content = self.parse_modified_file(self.content, rel_filename)
+            new_content = None
+
+            if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+                new_content = self.parse_modified_file(self.content, rel_filename)
+
             if new_content is not None:
                 content[0] = new_content
                 modified = True
             # else if no new content, so we try any injections
             else:
-                # Perform all injections but keep the 'block.inject' lines
-                for name, block in self.blocks.items():
-                    if self.process_replacements(content, block, name, ts):
-                        modified = True
+                if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
+                    # Perform all injections but keep the 'block.inject' lines
+                    for name, block in self.blocks.items():
+                        if self.process_replacements(content, block, name, ts):
+                            modified = True
 
             if modified:
-                print("File: " + filename + "\nFinal Content: " + content[0])
+                print(f"Updated File: {filename}")
 
             # Write the modified content back to the file
             if modified:
@@ -148,7 +158,6 @@ class FileInjection:
     def parse_modified_file(self, ai_answer, rel_filename):
         """Extract the new content for the given file from the AI answer."""
         if f"""file_begin {rel_filename}""" not in ai_answer:
-            print(f"file_begin not found in ai response: {ai_answer}")
             return
 
         # Scan all the lines in content one by one and extract the new content

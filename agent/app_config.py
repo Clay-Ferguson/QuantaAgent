@@ -11,6 +11,9 @@ class AppConfig:
     ext_list = []
     ext_set = set()
 
+    STRATEGY_WHOLE_FILE = "whole_file"
+    STRATEGY_INJECTION_POINTS = "injection_points"
+
     @classmethod
     def get_config(cls, config_file=None):
         """Loads configuration from config.yaml and secrets.yaml files."""
@@ -60,10 +63,16 @@ class AppConfig:
         p.add_argument(
             "--source_folder", required=True, help="Folder with source files to scan"
         )
+        p.add_argument(
+            "--update_strategy",
+            required=True,
+            help="Update strategy for the files (whole_file or injection_points)",
+        )
 
         options = p.parse_args()
 
         AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
         AppConfig.ext_set = set(AppConfig.ext_list)
         print(f"Config loaded: {config_file}")
+        print(f"Update strategy: {options.update_strategy}")
         return options

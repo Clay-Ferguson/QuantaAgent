@@ -134,11 +134,17 @@ class QuantaAgent:
         # If the prompt has block.inject tags, add instructions for how to provide the
         # new code, in a machine parsable way.
         has_block_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
-        if has_block_inject:
+        if (
+            has_block_inject
+            and self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
+        ):
             prompt += self.get_block_insertion_instructions()
 
         has_filename_inject = self.has_filename_injects(prompt)
-        if has_filename_inject:
+        if (
+            has_filename_inject
+            and self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+        ):
             prompt += self.get_file_insertion_instructions()
 
         answer = AppOpenAI(
@@ -152,12 +158,22 @@ class QuantaAgent:
             self.ts,
         )
 
-        if has_block_inject or has_filename_inject:
-            # If the prompt has block.inject tags, add instructions for how to provide the
-            # new code, in a machine parsable way.
-            FileInjection(
-                self.cfg.source_folder, AppConfig.ext_set, answer, self.ts, None
-            ).inject()
+        if (
+            # TODO: put these in constants file
+            self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
+            or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+        ):
+            if has_block_inject or has_filename_inject:
+                # If the prompt has block.inject tags, add instructions for how to provide the
+                # new code, in a machine parsable way.
+                FileInjection(
+                    self.cfg.update_strategy,
+                    self.cfg.source_folder,
+                    AppConfig.ext_set,
+                    answer,
+                    self.ts,
+                    None,
+                ).inject()
 
     def has_filename_injects(self, prompt):
         ### scan all filenames for this pattern: "${filename}" and return True if found"""
@@ -203,9 +219,8 @@ file_end ${{{file_name}}}
         """Returns instructions for providing the new code."""
 
         return """
-I have sent you individual file(s) which you can edit as needed to accomplish the task.
-
-Each file is delimited with `file_begin ${FileName}` and `file_end ${FileName}` tags, so you can see what the full content of each file is. 
+If I have sent you individual file(s) and asked you to modify them, in the prompt text above,
+then each file is delimited with `file_begin ${FileName}` and `file_end ${FileName}` tags, so you can see what the full content of each file is. 
 Note that the actual file content for each file begins on the next line AFTER the `file_begin` line, and ends on the line BEFORE the `file_end` line.
 
 Please provide me with the new version(s) of the file(s) by using the following format:
@@ -214,7 +229,8 @@ Please provide me with the new version(s) of the file(s) by using the following 
 ... the new content of the file ...
 // file_end FileName
 
-If you didn't find it necessary to edit a file, you can just omit it from your response.
+If you didn't find it necessary to edit a file, you can just omit it from your response. 
+If I wasn't asking you to modify any code at all don't include the file_beign or file_end blocks in your response.
 """
 
     def get_block_insertion_instructions(self):
@@ -222,7 +238,7 @@ If you didn't find it necessary to edit a file, you can just omit it from your r
 
         return f"""
 
-To provide me with the new code, use the following strategy: 
+If I was asking you to modify any code, in the prompt above, then to provide me with the new code, use the following strategy: 
 Notice that there are sections named `// {TAG_BLOCK_INJECT} {{Name}}` in the code I gave you. 
 I'd like for you to show me just what I need to insert into each of those `{TAG_BLOCK_INJECT}` sections of the code. 
 So when you show code, show only the changes and show the changes like this format in your response:

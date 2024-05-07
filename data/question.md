@@ -1,3 +1,3 @@
-Modify the following Python file, so that it's using a class that has a public static `run` method to do what it does.
+Update this Python file to where it uses a class and exposes it's functionality in a method. Keep the commands verbatim, and keep the exact comments too. Just make it into a class.
 
 ${/temperature_convert.py}

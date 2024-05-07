@@ -15,6 +15,7 @@ def test_simple_injection():
     ts = str(int(time.time() * 1000))
     cfg = AppConfig.get_config("config/config_test.yaml")
     inst = FileInjection(
+        cfg.update_strategy,
         cfg.source_folder,
         AppConfig.ext_set,
         """
