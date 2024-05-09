@@ -35,3 +35,10 @@ class Utils:
         """Parses the block name from a `// {tag} {name}` formatted line."""
         index = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
+
+    @staticmethod
+    def fail_app(msg):
+        """Exits the application with a fail message"""
+
+        print(f"Error: {msg}")
+        exit(1)

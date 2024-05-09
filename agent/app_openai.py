@@ -34,9 +34,7 @@ class AppOpenAI:
             else:
                 ret = "Dry Run: No API call made."
         else:
-            llm = ChatOpenAI(
-                model=self.model, temperature=0.000001, api_key=self.api_key
-            )
+            llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key)
 
             prompt = ChatPromptTemplate.from_messages(
                 [("system", self.system_prompt), ("user", "{input}")]

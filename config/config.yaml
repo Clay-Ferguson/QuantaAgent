@@ -11,5 +11,5 @@ source_folder: "test_project"
 scan_extensions: ".java.sql, .py"
 data_folder: "data"
 
-# update_strategy: "whole_file" 
-update_strategy: "injection_points"
+update_strategy: "whole_file" 
+# update_strategy: "injection_points"

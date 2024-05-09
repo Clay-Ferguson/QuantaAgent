@@ -169,10 +169,9 @@ class FileInjection:
                 new_content.append(line)
             elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):
                 if len(new_content) > 0:
-                    print(
+                    Utils.fail_app(
                         f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing."
                     )
-                    exit(1)
                 started = True
 
         if len(new_content) == 0:

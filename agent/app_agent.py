@@ -33,6 +33,7 @@ class QuantaAgent:
     blocks = {}
     # All filen names encountered during the scan, relative to the source folder
     file_names = []
+    folder_names = []
 
     cfg = AppConfig.get_config(None)
     source_folder_len = len(cfg.source_folder)
@@ -55,17 +56,19 @@ class QuantaAgent:
                 trimmed = line.strip()
 
                 if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
-                    block = None
                     name = Utils.parse_block_name_from_line(trimmed, TAG_BLOCK_BEGIN)
                     # print(f"Block Name: {name}")
                     if name in self.blocks:
-                        # print("Found existing block")
-                        block = self.blocks[name]
+                        Utils.fail_app(f"Duplicate Block Name {name}")
                     else:
                         # print("Creating new block")
                         block = self.TextBlock(name, "")
                         self.blocks[name] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
+                    if block is None:
+                        Utils.fail_app(
+                            f"""Encountered {TAG_BLOCK_END} without a corresponding {TAG_BLOCK_BEGIN}"""
+                        )
                     block = None
                 else:
                     if block is not None:
@@ -79,6 +82,14 @@ class QuantaAgent:
 
         # Walk through all directories and files in the directory
         for dirpath, _, filenames in os.walk(scan_dir):
+            # Get the relative path of the directory, root folder is the source folder and will be "" (empty string) here
+            # as the relative path of the source folder is the root folder
+            short_dir = dirpath[self.source_folder_len :]
+
+            # If not, add it to the set and list
+            # print(f"Dir: {short_dir}")
+            self.folder_names.append(short_dir)
+
             for filename in filenames:
                 # Check the file extension
                 _, ext = os.path.splitext(filename)
@@ -124,7 +135,7 @@ class QuantaAgent:
 
         prompt = self.insert_blocks_into_prompt(prompt)
         prompt = self.insert_files_into_prompt(prompt)
-
+        prompt = self.insert_folders_into_prompt(prompt)
         # print(f"AI Prompt: {prompt}")
 
         # If the prompt has block_inject tags, add instructions for how to provide the
@@ -137,8 +148,10 @@ class QuantaAgent:
             prompt += self.get_block_insertion_instructions()
 
         has_filename_inject = self.has_filename_injects(prompt)
+        has_folder_inject = self.has_folder_injects(prompt)
         if (
             has_filename_inject
+            or has_folder_inject
             and self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
             prompt += self.get_file_insertion_instructions()
@@ -158,7 +171,7 @@ class QuantaAgent:
             self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
             or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
-            if has_block_inject or has_filename_inject:
+            if has_block_inject or has_filename_inject or has_folder_inject:
                 # If the prompt has block_inject tags, add instructions for how to provide the
                 # new code, in a machine parsable way.
                 FileInjection(
@@ -176,6 +189,15 @@ class QuantaAgent:
             tag_begin = f"{TAG_FILE_BEGIN} {file_name}"
             tag_end = f"{TAG_FILE_END} {file_name}"
             if tag_begin in prompt and tag_end in prompt:
+                return True
+        return False
+
+    def has_folder_injects(self, prompt):
+        """Returns True if the prompt has any folder content injection."""
+        for folder_name in self.folder_names:
+            tag = f"${{{folder_name}/}}"
+            if tag in prompt:
+                print(f"Found folder inject tag: {tag}")
                 return True
         return False
 
@@ -211,6 +233,49 @@ class QuantaAgent:
 
         return prompt
 
+    def insert_folders_into_prompt(self, prompt):
+        """
+        Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
+        which will be replaced with the content of the files inside the folder
+        """
+        for folder_name in self.folder_names:
+            tag = f"${{{folder_name}/}}"
+            # print(f"Checking for folder tag: {tag}")
+            if tag in prompt:
+                # build the content of the folder (that -1 is removing the trailing slash from the folder name)
+                content = self.build_folder_content(
+                    self.cfg.source_folder + folder_name
+                )
+                prompt = prompt.replace(tag, content)
+
+        return prompt
+
+    def build_folder_content(self, folder_path):
+        """Builds the content of a folder. Which will contain all the filenames and their content."""
+        print(f"Building content for folder: {folder_path}")
+
+        content = f"""Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
+        """
+        for dirpath, _, filenames in os.walk(folder_path):
+            for filename in filenames:
+                # Check the file extension
+                _, ext = os.path.splitext(filename)
+                if ext.lower() in AppConfig.ext_set:
+                    # build the full path
+                    path = os.path.join(dirpath, filename)
+                    # get the file name relative to the source folder
+                    file_name = path[self.source_folder_len :]
+                    with open(path, "r", encoding="utf-8") as file:
+                        file_content = file.read()
+                        content += f"""
+{TAG_FILE_BEGIN} {file_name}
+{file_content}
+{TAG_FILE_END} {file_name}
+
+"""
+        return content
+
+    # TODO: Put these instructions in a separate file named prompt_templates.py
     def get_file_insertion_instructions(self):
         """Returns instructions for providing the new code."""
 
@@ -219,11 +284,11 @@ If I have sent you individual file(s) and asked you to modify them, in the promp
 then each file is delimited with `{TAG_FILE_BEGIN} ${{FileName}}` and `{TAG_FILE_END} ${{FileName}}` tags, so you can see what the full content of each file is along with it's filename.
 Note that the actual file content for each file begins on the next line AFTER the `{TAG_FILE_BEGIN}` line, and ends on the line BEFORE the `{TAG_FILE_END}` line.
 
-Please provide me with the new version(s) of the file(s) by using the following format, where you replace the `... the new content of the file ...` with the new content of the file, and put the filename
-in place of `FileName` without the `${{}}` tags. Do not alter the filenames at all, or remove any leading slashes.
+Please provide me with the new version(s) of the file(s) by using the following format, where you replace {{new_content}} with the new content of the file, and put the filename
+in place of `FileName` without the `${{}}` tags. Do not alter the filenames at all, or remove any leading slashes. 
 
 // {TAG_FILE_BEGIN} FileName
-... the new content of the file ...
+{{new_content}}
 // {TAG_FILE_END} FileName
 
 If you didn't find it necessary to edit a file, you can just omit it from your response. 
