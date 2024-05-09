@@ -1,17 +1,65 @@
 # About Quanta Agent
 
-This is a tool to automate querying AIs (LLMs) about your codebase. That is, if you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about very specific parts of your code this tool helps do that. This tool can also implement entire complex features in your code base, using the `Injection Points` capability, mentioned below, to add code to specific locations in specific files as directed by you. In addition to `Injection Points` you can use the simpler approach of referring to files by name in your prompt (using `${/my/file.md}` syntax) and request for the AI to make modifications directly to those files and make arbitrary code refactorings that you ask for in your prompt!
-
-This tool will [optionally] scan your project and extract named snippets (or sections) of code called `blocks` (i.e. fragments of files, that you identify using structured comments, described below) which are then automatically injected into your prompts (prompt template) by using an assigned name you give to each fragment. 
-
-So in summary let lets you name sections of your code, in any files inside your project, and then refer those sections by name in prompts, in such a way that the prompt injects the code block wherever you mention it's name. So in this way you can write prompts involving sections of your code without the need to cut-and-paste from your code into the prompt by hand, and without referencing the entire file in your prompt (which causes the entier file to be included in the prompt)
-
-There's also a way to desginate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to litterally implement entire features in your code. The `Injection Points` capability is not discussed in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the this file `/docs/injection-points.md` 
+A tool to automate querying AIs (LLMs) about your codebase, which can also automatically refactor your actual project files, from high level human language instructions of what changes you'd like to make. 
 
 
-# Example 1. Simplest Possible Example
+# Tool Features
 
-The simplest possible example (to put in `question.md` as your prompt) would be this:
+* Answers questions about software projects
+* Refactor files or entire projects (Currently limited to only updating existing files, not creating new files)
+* Answers questions specifically about named blocks of your code
+* Updates targeted specific ares of your code for refactoring
+
+# Project Summary
+
+* Written 100% in Python
+* Open Source Python (MIT License)
+* Uses the Python Langchain giving you flexibility about which LLM you use, including either locally hosted LLMs or Cloud Services.
+
+*Note: Current codebase only includes OpenAI connectivity, but with Langchain it's almost trivial to add support for the other Cloud AIs or Local LLMS.*
+
+If you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about your code, this tool helps do that. This tool can also implement entire complex features in your code base, by updating existing entire files, or by using the `Injection Points` capability, mentioned below, to add code to specific locations in specific files as directed by you. 
+
+To ask questions about or request refactorings inside specific files or folders you simply refer to them by name in your prompt using the following syntax (*folders must end with a slash*):
+
+For Files: `${/my/file.py}`
+For Foders: `${/my/project/folder/}`
+
+You can mention specific files and/or folders in your prompt to request for the AI to make modifications directly to those files and make arbitrary code refactorings that you ask for in your prompt!
+
+
+# Tool Usage
+
+To use this tool, follow these steps:
+
+1) Edit the `config.yaml` to make it point to a software project folder you want to analyze.
+2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
+3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
+4) Make sure your `config.yaml` has `update_strategy: "whole_file"` if you're wanting the tool to be free to update any of your files in their entirety, or set `update_strategy: "injection_points"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `whole_file`.
+5) Put a `question.md` file (your AI Prompt) into your data folder.
+6) Run `main.py`
+7) ake up some arbitrary filename when prompted for one.
+8) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated, to accomplish whatever you asked for.
+
+*Tip: When requesting project refactorings, it's best to be in a clean project version, so that if you don't like the changes the tool made to your code you can roll them back easily, using `git`.
+
+
+# Advanced Optional Features
+
+## Named Blocks
+
+You can define `Named Blocks` in your code, to identify specific areas which you'd like to ask questions about by name, to save you from having to continually paste those sections into AI prompts. Here are the docs on [Named Blocks](./docs/named-blocks.md)
+
+## Injection Points
+
+There's also a way to designate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to implement refactoring in your code. The `Injection Points` capability is not discussed at length in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the [injection-points docs](./docs/injection-points.md). 
+
+*Note: Now that we have the `whole_file` mode (described elsewhere), you would never need to use Injection Points feature unless your files are so massive it's too costly to use the `whole_file` approach. The `whole_file` option is a setting that makes the AI aware of entire files or folders in a way that it can arbitrarily refactor those files based on your prompts, whereas the `Injection Points` gives you a way to more precisely tell the AI where you'd like it to make changes.*
+
+
+# Example 1. Trivial Refactoring
+
+The simplest possible refactoring prompt would be something like this:
 
 ```txt
 Modify the following Python file, so that it's using a class that has a public static `run` method to do what it does.
@@ -19,32 +67,15 @@ Modify the following Python file, so that it's using a class that has a public s
 ${/temperature_convert.py}
 ```
 
-In the above prompt we're using the syntax to inject the entire `temperature_convert.py` file into the prompt, and the tool is smart enough to actually *do* what you're asking *to* the actual file when you run the tool! The default `config.yaml` already points to the `test_project` folder, which does contain a `temperature_convert.py` which is not implemented as a class. So running this example will update the actual python file and make it into a class.
+In the above prompt we're using the syntax to inject the entire `temperature_convert.py` file into the prompt, and the tool will actually *do* what you're asking *to* the actual file when you run the tool! The default `config.yaml` already points to the `test_project` folder, which contains a `temperature_convert.py` which is not implemented as a class. So running this example will update the actual python file and make it into a class as the prompt requested it to do.
 
-Note 1: that the above example didn't use `Code Blocks` or `Injection Points` features, which are more advanced features. The simplest way to use the tool is to just request a refactoring to be done on one or more files, which is what we did in the above example.
+Note 2: The `/data/convert-to-class*.md` files in this project are the logs generated from an actual run of the above prompt exactly as described. There are lots of other examples in the `data` folder.
 
-Note 2: The /data/convert-to-class*.md files in this project are the logs generated from an actual run of the above prompt exactly as described.
-
-
-# Tool Usage
-
-To use this tool you will do these steps:
-
-1) Edit the `config.yaml` to make it point to a software project folder you want to analyze, and other options.
-2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
-3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
-4) Put a `question.md` file (your AI Prompt) into your data folder.
-5) Run `main.py`, make up some arbitrary filename when prompted for one.
-6) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had `Injection Points` specified in your code that you asked about then your actual software project files will have been updated/edited as well, potentially with code inserted at those `Injection Points`
-
-### update_strategy Option
-
-NOTE: The default config setting for the `update_strategy` config option is `whole_file` (not `injection_points`). When you run the tool you have to set this option to tell it whether it should try to update files based on `Injection Points` (explained later) or `Whole Files`. The `whole_file` option lets you ask the AI to essentially edit one or more files for you and it will overwrite your existing file(s) with new content as it sees fit based on what you asked it to do in your prompt.
 
 # Comparison to other AI Coding Assistants
 
 * Q: How does `Quanta Agent` compare to other `AI Coding Assistants` like Devin, Pythagora (GPT Pilot), and MetaGPT?
-* A: `Quanta Agent` is a tiny project that does a more targeted and specific analysis on your software project than the other tools, which results in less API token consumption and therefore lowers Cloud API costs. This is because `Quanta Agent` will only be able to see the parts of your code that you're referencing in your prompt, and it will only try to make modifications in those areas of the code. So not only is `Quanta Agent` very cheap due to using fewer tokens, but you will also get the best possible results from LLMs by keeping your prompts down to where they contain only the exact relevant parts of your codebase. That is, smaller shorter prompts always give the best results. 
+* A: `Quanta Agent` does a more targeted and specific analysis on your software project than the other tools, which results in less API token consumption and therefore lowers Cloud API costs. This is because `Quanta Agent` will only be able to see the parts of your code that you're referencing in your prompt, and it will only try to make modifications in those areas of the code. So not only is `Quanta Agent` very cheap due to using fewer tokens, but you will also get the best possible results from LLMs by keeping your prompts down to where they contain only the relevant parts of your codebase. That is, smaller shorter prompts always give the best results. 
 
 `Quanta Agent` is also only for use by actual software developers, rather than a higher level of say a software manager role. This is because `Quanta Agent` expects you to know exactly what parts of your code you need to ask questions about or modify. `Quanta Agent` is like a software developer who needs to be told which parts of the code to look at, before he gets started working. So `Quanta Agent` isn't really for building projects from scratch, but it's more of a tool for making code modifications to large projects that already exist, and making modifications into only the specific allowed bounded areas. Depending on how you look at it, `Quanta Agent` is both dumber than, and smarter than, the other tools. However, I will be so bold as to say there's not a cheaper (in dollar costs) or a simpler way to accomplish what `Quanta Agent` is doing!
 
@@ -67,59 +98,12 @@ You can run an LLM Prompts/Queries like this:
 
     ${Adding_Numbers}
 
-So you're basically labeling (or naming) arbitrary sections of your code (or other text files) in such a way that this tool can build queries out of templates that refrence the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block_begin` and `block_end` syntax, to create named blocks which are then template substituded automatically into your prompt.
-
-## Example 3: Simple Code Injection Example
- 
-Suppose you have a Python file anywhere in you project that contains this:
-
-    # block_begin MyTestBlock
-    print("This is a test block")
-    # block_inject NewCodeHere
-    # block_end
-
-We can run this prompt:
-
-    Add some code that does the same thing as this line but includes a timestamp in the output as well.
-
-    ```py
-    ${MyTestBlock}
-    ```
-
-And the result will be that you new content in the file will be this:
-
-    # block_begin MyTestBlock
-    print("This is a test block")
-    # block_inject NewCodeHere
-    # inject_begin 1715123264447
-    from datetime import datetime
-    print(f"This is a test block at {datetime.now()}")
-    # inject_end
-    # block_end
-
-Note that the `inject_begin` and `inject_end` is wrapping the injected content, and it went inright at the injection point. This was a contrived simple example but it shows the mechanics of asking questions about code, and getting new code generated into only specific specified locations. If you have have several places inside a file that need to be modified and you want to let the AI do that you would wrap the entier file in a `block_begin/block_end`, and put as many `block_inject` locations as you want, and the AI will try to insert the correct content into the correct slot. All you really need to do is make sure each slot (i.e. `Injection Point`) has a unique name, and it doesn't even matter what the name is.
+So you're basically labeling (or naming) specific sections of your code (or other text files) in such a way that this tool can build queries out of templates that reference the named blocks of code. You can go anywhere in your codebase and wrap sections of code with this `block_begin` and `block_end` syntax, to create named blocks which are then template substituded automatically into your prompt.
 
 
 # Simple Example Output Log Files
 
-Example Question and Answer(s) can be found here:
-
-https://github.com/Clay-Ferguson/QuantaAgent/tree/master/data
-
-## Supported syntax
-
-Choose any syntax based on file type. For example Python uses "#", JavaScript/Java uses "//", SQL uses "--"
-
-```txt
-// block_begin ...
-// block_end
-
--- block_begin ...
--- block_end
-
-# block_begin ...
-# block_end
-```
+Example Question and Answers can be found in this project's [Data Folder](/data)
 
 
 # Background and Inspiration
@@ -129,64 +113,40 @@ There are other coding assistants like Github's Copilot for example, which let y
 For example, let's say you have some SQL in your project and some Java Entity beans that go along with your database tables. You might want to be able to alter or add SQL tables and/or automatically create the associated Java Entity beans. To get AI to do this for you, in a way that "fits into" your application architecture perfectly, you would want to create prompts that show examples of how you're doing each of these types of artifacts (the SQL and the Java), and then ask the AI to generate new code following that pattern. `Quanta Agent` helps you build these kinds of complex prompts, and keeps developers from having to construct these prompts manually.
 
 
-# How it Works (Identifying Blocks)
-
-In summary `Quanta Agent` allows you to define named blocks inside any of you files like this:
-
-```sql
--- block_begin SQL_Scripts
-...all the scripts
--- block_end 
-```
-
---or--
-
-```java
-// block_begin My_Java
-...all the code
-// block_end 
-```
-
-and then use the named blocks in AI prompts, to insert the entire content of the block from the file. The text that comes after the `block_begin` is considered the `Block Name` and, as shown in the example above, the `Block Names` are usable in prompts. So `${SQL_Scripts}` and `${My_Java}` when used in a prompt will be replaced with the block content in the final prompt sent to the LLM.
-
-Note: If only `block_begin` exists and `block_end` doesn't exist, the block will end at the end of the file.
-
-Note: The relative filename is also a valid "block name" and will insert the entire content of the specified file into the prompt. So you can simply put `${/path/to/my/file.md}` in a prompt, and it will inject the entire content of the file into the prompt. Note that the configured `source_folder` is the assumed prefix (base folder) for all of these kinds of file names.
-
-So, in summary, The tool will scan all your source files (inside `source_folder`) and collect all these "Named Blocks" of code, and then you can just use the names themselvels in your prompts templates, to inject the block content.
-
-
-
 # Use Cases
 
 ## Code Generation
 
-You can use `Blocks` to give specific examples of how your software project architectue does various different things, and then ask the AI to create new objects, code, features, or SQL, or anything else that follows the examples from your own app, so it's much easier to get AI go generate code for you that's fine tuned just for your specific code base.
+You can use `Named Blocks` to give specific examples of how your software project architectue does various different things, and then ask the AI to create new objects, code, features, or SQL, or anything else that follows the examples from your own app, so it's much easier to get AI to generate code for you that's fine tuned just for your specific code base.
 
 ## Finding Bugs or Getting Recommendations
 
-You can specify `Blocks` or entire files, in your prompt template, and then ask the AI to simply make recommendations of improvements or find bugs.
+You can specify `Named Blocks` or entire files, in your prompt template, and then ask the AI to simply make recommendations of improvements or find bugs.
 
 ## New Employee Training
 
-If you decorate specific sections (or blocks) of your company's codebase with these kinds of named blocks, then you can write prompts that are constructed to ask a question about a set of `blocks` that will be super inforformative to new employees learning the codebase, and able to be very specific questions about architecture that really cannot be replicated with tools like Github Copilot.
+If you annotate specific sections (or blocks) of your company's codebase with these kinds of named blocks, then you can write prompts that are constructed to ask a question about a set of `blocks` that will be super informative to new employees learning the codebase, and able to be very specific questions about architecture that really cannot be replicated with tools like Github Copilot.
 
-## Adding new Features or Altering Code
+## Adding new Features or Refactoring Code
 
-The hard part about adding new features to most codebases is remembering all the different locations in the codebase that might need to be altered in order to get the new feature working, and because every app is a little bit different, a tool like this is really the only way to have prompts that are good enough to make complex changes, that would otherwise require a true AGI. For example, if you need to add a new feature, it might require a new Button on the GUI, new POJOs, new SQL, new API calls, etc. So with a tool like `Quanta Agent` you can sort of package up a prompt that grabs from all these various parts of a codebase to perhaps show an example of how one feature is done, just including precisely only the relevent chunks of code, and then do a prompt like "Using all the example code as your architectural example to follow, create a new feature that does ${feature_description}." So the context for all the aforementioned example code would just be build using the code chunks from various snippets all around the codebase.
+The hard part about adding new features to most codebases is remembering all the different locations in the codebase that might need to be altered in order to get the new feature working, and because every app is a little bit different, a tool like this is really the only way to have prompts that are good enough to make complex changes, that would otherwise require a true AGI. 
+
+For example, if you need to add a new feature, it might require a new Button on the GUI, new POJOs, new SQL, new API calls, etc. So with a tool like `Quanta Agent` you can sort of package up a prompt that grabs from all these various parts of a codebase to show the AI an example of how one feature is done, just including precisely only the relevent chunks of code, and then do a prompt like "Using all the example code as your architectural example to follow, create a new feature that does ${feature_description}." So the context for all the aforementioned example code would just be build using the code chunks from various snippets all around the codebase.
 
 ## Code Reviews
 
-Developer teams could theoretically use a standard where (perhaps only temporarily) specific block names are required to be put in the code around all changes or specific types of changes. Then you can use AI to run various kinds of automated code reviews (security audits, code correctness audits, AI suggestions for improvements) that specifically look at all the parts of the code involved in any but fix or new feature.
+Developer teams can theoretically use a standard where (perhaps only temporarily) specific block names are required to be put in the code around all changes or specific types of changes. Then you can use AI to run various kinds of automated code reviews, security audits, code correctness audits, AI suggestions for improvement that specifically look at all the parts of the code involved in any bug fix or new feature that has been implemented and idenfified using `Named Blocks` syntax.
 
 
 # Configuration and Usage Flow
 
-To run this tool, you should create some data folder and then point the `/config/config.yaml data_folder` to that folder location. This folder will be where the input (the LLM Prompt) is read from and also where the output (AI Generated Responses) are written to. For ease of use in this prototype app we just always expect the prompt itself to be in `${data_folder}\question.md`. So when you run this app it assumes that you have created a file named `question.md` that contains your prompt. As you edit your `question.md` file and then run the tool to generate answers you don't need to worry about maintaining a history of the questions, becasue they're all stored as part of the output. So you can just resave your next question.md file before you run the tool, and it's a fairly good user experience. This app will eventually have a GUI and/or an HTTP API, but for now feeding in prompts via question.md file is idea..
+To run this tool, you should create some data folder and then point the `/config/config.yaml data_folder` to that folder location. This folder will be where the input (the LLM Prompt) is read from and also where the output (AI Generated Responses) are written to. For ease of use in this prototype app we just always expect the prompt itself to be in `${data_folder}\question.md`. So when you run this app it assumes that you have created a file named `question.md` that contains your prompt. 
 
-When you run this app, first all your source is scanned (i.e. `source_folder` config property), to build up your named blocks of code. Then your `question.md` file is read, and all the template substitutions are made in it (leaving the `question.md` itself as is), and then the call to OpenAI is made to generate the response. The response file is then written into the output folder, in a timestamped file, so you will have your entire history of questions & answers saved permanently in your `data_folder`.
+As you edit your `question.md` file and then run the tool to generate answers you don't need to worry about maintaining a history of the questions and answers, because they're all stored as part of the output. So you can just resave your next question.md file before you run the tool, and it's a fairly good user experience, even without a GUI. This app will eventually have a GUI and/or an HTTP API, but for now feeding in prompts via question.md file is idea.
 
-An example `data_folder` (named `data` in the project root) is included in this project so you can see examples, to get a better more undersanding of how this tool works.
+When you run this app, first all your source is scanned (i.e. `source_folder` config property), to build up your named blocks of code. Then your `question.md` file is read, and all the template substitutions are made in it (leaving the `question.md` itself as is), and then the call to OpenAI is made to generate the response. The response file is then written into the output folder, so you will have your entire history of questions & answers saved permanently in your `data_folder`.
+
+An example `data_folder` (named `data` in the project root) is included in this project so you can see examples, to get a better undersanding of how this tool works.
 
 
 # Project Setup Tips (Development Environment)
@@ -198,25 +158,26 @@ An example `data_folder` (named `data` in the project root) is included in this 
     conda create -n quanta_agent python=3.11.5
     conda activate quanta_agent
 
-    Don't forget to activate your "quanta_agent" environment in your IDE. IDE's, like VSCode, require you to choose the
-    Python interpreter, so simply running 'conda activate quanta_agent' won't be enough.
+Don't forget to activate your "quanta_agent" environment in your IDE. IDE's like VSCode, require you to choose the Python interpreter, so simply running 'conda activate quanta_agent' won't be enough.
 
 
 # Configs
 
-The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml`, and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to github
+The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml` (outside this project), and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to github
+
+## update_strategy Option
+
+NOTE: The default config setting for the `update_strategy` config option is `whole_file` (not `injection_points`). When you run the tool you have to set this option to tell it whether it should try to update files based on `Injection Points` or `Whole Files`. The `whole_file` option lets you ask the AI to essentially edit one or more files for you and it will overwrite your existing file(s) with new content as it sees fit based on what you asked it to do in your prompt.
 
 
-# Future Features
+# Future Plans
 
 Improvements being considered, but not yet being worked on are as follows:
 
-* **Entire Folders as Blocks** - We could allow a syntax like `${/my/folder/}` to be able to inject the entire content of a directory into a prompt. This would rarely be needed, and would be expensive in terms of flooding the AI context window. However, once LLMs are powerful and cheap enough this feature would let you sort of use your *entire* code base in a single prompt, and also get the AI to make modifications into any file at all as long as there's an `Injection Point` wherever you want new code to go in.
 * **HTTP API** - It would be nice if we could call this tool via an HTTP API in addition to the command line, so it can be built into web apps.
-* **VSCode Plugin** - We will be adding a VSCode plugin to go along with this tool, which will let you right click any file in and simply type in a kind of refactoring you'd like to do to the file, and get the chagnes made directly to your file itself.
 
 
-# Resources
+# Python & Langchain Resources
 
 https://python.langchain.com/docs/get_started/introduction/
 
