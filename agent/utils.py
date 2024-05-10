@@ -1,6 +1,7 @@
 """Utilities Module"""
 
 import re
+import os
 
 
 class Utils:
@@ -32,7 +33,7 @@ class Utils:
 
     @staticmethod
     def parse_block_name_from_line(line, tag):
-        """Parses the block name from a `// {tag} {name}` formatted line."""
+        """Parses the block name from a `... {tag} {name}` formatted line."""
         index = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
 
@@ -42,3 +43,10 @@ class Utils:
 
         print(f"Error: {msg}")
         exit(1)
+
+    @staticmethod
+    def ensure_folder_exists(file_path):
+        """Ensures that the folder for the file exists."""
+        directory = os.path.dirname(file_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)

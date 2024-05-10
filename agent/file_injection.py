@@ -9,6 +9,8 @@ from agent.tags import (
     TAG_INJECT_BEGIN,
     TAG_FILE_BEGIN,
     TAG_FILE_END,
+    TAG_NEW_FILE_BEGIN,
+    TAG_NEW_FILE_END,
 )
 from agent.utils import Utils
 from agent.app_config import AppConfig
@@ -55,6 +57,9 @@ class FileInjection:
         # Put this string in a constants file
         if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
             self.parse_injections()
+        elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+            self.parse_new_files()
+
         # print("Injection Blocks: " + str(self.blocks))
         self.scan_directory()
 
@@ -65,9 +70,6 @@ class FileInjection:
 
         Args:
         text (str): The multiline string containing the text blocks.
-
-        Returns:
-        dict: A dictionary where keys are block names and values are TextBlock instances.
         """
         self.blocks = {}
         current_block_name = None
@@ -79,6 +81,9 @@ class FileInjection:
             # print(f"Line: [{line}]")
 
             if Utils.is_tag_line(line, TAG_INJECT_BEGIN):
+                if collecting:
+                    Utils.fail_app("Found Inject Begin tag while still collecting")
+
                 # Start of a new block
                 current_block_name = Utils.parse_block_name_from_line(
                     line, TAG_INJECT_BEGIN
@@ -104,6 +109,59 @@ class FileInjection:
                 current_content.append(line)
 
         # print("blocks created: " + str(self.blocks))
+
+    def parse_new_files(self):
+        """
+        Parses the ai prompt to find and extract new files content
+        defined by '// new_file_begin {Name}' and '// new_file_end'.
+
+        Args:
+        text (str): The multiline string containing the file content
+        """
+        file_name = None
+        file_content = []
+        collecting = False
+
+        for line in self.ai_answer.splitlines():
+            line = line.strip()
+            # print(f"Line: [{line}]")
+
+            if line.startswith(f"""{TAG_NEW_FILE_BEGIN} /"""):
+                if collecting:
+                    Utils.fail_app("Found New File Begin tag while still collecting")
+
+                # Start of a new file
+                file_name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
+                # print(f"Found New File: {file_name}")
+                collecting = True
+                file_content = []
+
+            elif line.startswith(f"""{TAG_NEW_FILE_END} /"""):
+                # print("End of File")
+                # End of the current file
+                if file_name and collecting:
+                    full_file_name = self.source_folder + file_name
+
+                    # fail if file already exists
+                    if os.path.exists(full_file_name):
+                        Utils.fail_app("File already exists: " + full_file_name)
+
+                    # Ensure folder exisits
+                    Utils.ensure_folder_exists(full_file_name)
+
+                    # write the new file
+                    print("Writing new file: " + full_file_name)
+                    with open(full_file_name, "w", encoding="utf-8") as file:
+                        file.write("\n".join(file_content))
+                else:
+                    print("No file_name or not collecting")
+
+                collecting = False
+                file_name = None
+
+            elif collecting:
+                # Collect the content of the file
+                file_content.append(line)
 
     def visit_file(self, filename, ts):
         """Visit the file, to run all injections on the file"""
