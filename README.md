@@ -1,20 +1,20 @@
 # About Quanta Agent
 
-A tool to automate querying AIs (LLMs) about your codebase, which can also automatically refactor your actual project files, from high level human language instructions of what changes you'd like to make. 
+A tool to automate querying AIs (LLMs) about your codebase, which can also automatically refactor your actual project files, from high level human language instructions of what changes you'd like to make. You can ask the tool anything about your project, ask for any kind of refactoring you'd like to do in your project, or even ask the tool to create entirely new projects all on it's own.
 
 
 # Tool Features
 
 * Answers questions about software projects
-* Refactor files or entire projects (Currently limited to only updating existing files, not creating new files)
+* Refactor files or entire projects 
 * Answers questions specifically about named blocks of your code
-* Updates targeted specific ares of your code for refactoring
+* Create new Software Projects based on a description/prompt.
 
 # Project Summary
 
 * Written 100% in Python
 * Open Source Python (MIT License)
-* Uses Python Langchain giving you flexibility about which LLM you use, including either locally hosted LLMs or Cloud Services.
+* Uses Python Langchain giving you flexibility in which LLM you use, including either locally hosted LLMs or Cloud AI Services.
 
 *Note: Current codebase only includes OpenAI connectivity, but with Langchain it's easy to add support for the other Cloud AIs or Local LLMS.*
 
