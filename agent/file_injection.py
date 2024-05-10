@@ -67,9 +67,6 @@ class FileInjection:
         """
         Parses the ai prompt to find and extract blocks of text
         defined by '// inject_begin {Name}' and '// inject_end'.
-
-        Args:
-        text (str): The multiline string containing the text blocks.
         """
         self.blocks = {}
         current_block_name = None
