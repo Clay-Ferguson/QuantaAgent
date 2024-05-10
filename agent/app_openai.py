@@ -9,6 +9,8 @@ from langchain_core.output_parsers import StrOutputParser
 class AppOpenAI:
     """Makes calls to OpenAI"""
 
+    dry_run = False
+
     def __init__(self, api_key, model, system_prompt, data_folder):
         self.api_key = api_key
         self.model = model
@@ -17,16 +19,13 @@ class AppOpenAI:
 
     def query(self, query, output_file_name, ts):
         """Makes a query to OpenAI's API and writes the response to a file."""
-        dry_run = False  # Eventually we'll have dry_run as a config option
         ret = ""
 
-        if dry_run:
+        if self.dry_run:
             # If dry_run is True, we simulate the AI response by reading from a file
             # if we canfind that file or else we return a default response.
             answer_file = f"{self.data_folder}/dry-run-answer.md"
 
-            # TODO: explain this dry-run-answer.md file in the README (or docs)
-            # if the answer file exists, read it
             if os.path.exists(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")
                 with open(answer_file, "r", encoding="utf-8") as file:
