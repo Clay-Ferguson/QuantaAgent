@@ -54,7 +54,7 @@ You can define `Named Blocks` in your code, to identify specific areas which you
 
 ## Injection Points
 
-There's also a way to designate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to implement refactoring. The `Injection Points` capability is not discussed at length in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the [injection-points docs](./docs/injection-points.md). 
+There's also a way to designate `Injection Points` anywhere inside the source folder structure you're working with, and the tool will be able to automatically update your code to implement refactoring. The `Injection Points` capability is not discussed at length in this README, but you can find full examples of `Injection Points` use cases, and associated documentation in the [Injection Points](./docs/injection-points.md) docs. 
 
 *Note: Now that we have the `whole_file` mode (described elsewhere), you would never need to use `Injection Points` feature unless your files are so massive it's too costly to use the `whole_file` approach. The `whole_file` option is a setting that makes the AI aware of entire files or folders (by sending them as part of the final prompt) in a way that it can arbitrarily refactor those files based on your prompts, whereas the `Injection Points` gives you a way to more precisely tell the AI where you'd like it to make changes.*
 
@@ -107,6 +107,8 @@ So you're basically labeling (or naming) specific sections of your code (or othe
 
 Example Question and Answers can be found in this project's [Data Folder](/data)
 
+*Note: The files in that `data` folder really shouldn't be named as `.md` (markdown), and you should view them in RAW mode in Github, for a sensible view of them. (We will soon fix this file name extention in the code, and make it `.txt` instead)
+
 
 # Background and Inspiration
 
@@ -155,25 +157,9 @@ When you run this app, first all your source is scanned (i.e. `source_folder` co
 An example `data_folder` (named `data` in the project root) is included in this project so you can see examples, to get a better undersanding of how this tool works.
 
 
-# Project Setup Tips (Development Environment)
+# Project Documentation
 
-## Create a conda environment
-
-    We recommend 'conda' (specifically miniconda) but that's optional of course. All that's really required is Python.
-
-    conda create -n quanta_agent python=3.11.5
-    conda activate quanta_agent
-
-Don't forget to activate your "quanta_agent" environment in your IDE. IDE's like VSCode, require you to choose the Python interpreter, so simply running 'conda activate quanta_agent' won't be enough.
-
-
-# Config File
-
-The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml` (outside this project), and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to the repository.
-
-## update_strategy Option
-
-NOTE: The default config setting for the `update_strategy` config option is `whole_file` (not `injection_points`). When you run the tool you have to set this option to tell it whether it should try to update files based on `Injection Points` or `Whole Files`. The `whole_file` option lets you ask the AI to essentially edit one or more files for you and it will overwrite your existing file(s) with new content as it sees fit based on what you asked it to do in your prompt, where as `injection_points` tells the tool to only insert code where you've defined an injection point in the code.
+Be sure to check the  [Docs Folder](/docs) for more information about this project and how to use it.
 
 
 # Future Plans
@@ -181,10 +167,3 @@ NOTE: The default config setting for the `update_strategy` config option is `who
 Improvements to this tool currently being considered:
 
 * **HTTP API** - It would be nice if we could call this tool via an HTTP API in addition to the command line, so it can be built into web apps.
-
-
-# Python & Langchain Resources
-
-https://python.langchain.com/docs/get_started/introduction/
-
-https://python.langchain.com/docs/integrations/chat/openai/
