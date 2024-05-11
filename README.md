@@ -107,8 +107,6 @@ So you're basically labeling (or naming) specific sections of your code (or othe
 
 Example Question and Answers can be found in this project's [Data Folder](/data)
 
-*Note: The files in that `data` folder really shouldn't be named as `.md` (markdown), and you should view them in RAW mode in Github, for a sensible view of them. (We will soon fix this file name extention in the code, and make it `.txt` instead)
-
 
 # Background and Inspiration
 
