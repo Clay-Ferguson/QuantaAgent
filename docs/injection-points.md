@@ -93,7 +93,7 @@ Note that there are two defined injection points (lines with `// block_inject {n
 
 ## Prompt File
 
-Now we're going to put in our `/data/question.md` the following (the content between *BEGIN* and *END*), which will be the Prompt (actually a template of a prompt) to the AI:
+Now we're going to put in our `/data/question.txt` the following (the content between *BEGIN* and *END*), which will be the Prompt (actually a template of a prompt) to the AI:
 
 *BEGIN*
 
@@ -196,11 +196,11 @@ Note that the `inject_begin` and `inject_end` lines indicate exactly where the t
 
 ## Prompt Input/Output Logs
 
-To see the actual AI Question and Answer files that were used to accomplish the above, there's a copy of them here, in this project (named below). The tool always generates these two files using the name you entered when you ran the tool. There is a question file and an answer file (--Q.md and --A.md)
+To see the actual AI Question and Answer files that were used to accomplish the above, there's a copy of them here, in this project (named below). The tool always generates these two files using the name you entered when you ran the tool. There is a question file and an answer file (--Q.txt and --A.txt)
 
-* [Question Log File](/data/add-signup-date--Q.md)
-* [Answer Log File](data/add-signup-date--A.md)
+* [Question Log File](/data/add-signup-date--Q.txt)
+* [Answer Log File](data/add-signup-date--A.txt)
 
 
-If you have a large software project, you can write prompts to accomplish virtually any type of code modification you want involving multiple files. For example, if I had wanted the AI to also update my SQL files to go along with adding the new `date` property from the example above, all I would've needed to do was reference a `Block Name` or `File Name` (that encapsulated the SQL as well) in my `question.md` prompt, and the tool would've made not only the changes to the Java but also the correct associated SQL ALTER TABLE command in the SQL file!
+If you have a large software project, you can write prompts to accomplish virtually any type of code modification you want involving multiple files. For example, if I had wanted the AI to also update my SQL files to go along with adding the new `date` property from the example above, all I would've needed to do was reference a `Block Name` or `File Name` (that encapsulated the SQL as well) in my `question.txt` prompt, and the tool would've made not only the changes to the Java but also the correct associated SQL ALTER TABLE command in the SQL file!
 

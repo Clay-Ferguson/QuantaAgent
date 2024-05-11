@@ -24,7 +24,7 @@ class AppOpenAI:
         if self.dry_run:
             # If dry_run is True, we simulate the AI response by reading from a file
             # if we canfind that file or else we return a default response.
-            answer_file = f"{self.data_folder}/dry-run-answer.md"
+            answer_file = f"{self.data_folder}/dry-run-answer.txt"
 
             if os.path.exists(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")
@@ -64,7 +64,7 @@ User Prompt: {query}
     def write_to_file(self, output_file_name, content):
         """Writes the content to a file."""
 
-        filename = f"{self.data_folder}/{output_file_name}--A.md"
+        filename = f"{self.data_folder}/{output_file_name}--A.txt"
 
         # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:

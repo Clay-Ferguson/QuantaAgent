@@ -22,7 +22,7 @@ NOTE: The default config setting for the `update_strategy` config option is `who
 
 # AI Dry-Run Testing
 
-If you want to run the app to do development/testing without making actual calls to OpenAI, you can set `dry_run=True` in `app_openai.py` and then put into your `[data_folder]/dry-run-answer.md` whatever you want to simulate as an answer gotten back from the AI, and the tool will automatically use that answer file content instead of calling the OpenAI API
+If you want to run the app to do development/testing without making actual calls to OpenAI, you can set `dry_run=True` in `app_openai.py` and then put into your `[data_folder]/dry-run-answer.txt` whatever you want to simulate as an answer gotten back from the AI, and the tool will automatically use that answer file content instead of calling the OpenAI API
 
 
 # pytest Testing

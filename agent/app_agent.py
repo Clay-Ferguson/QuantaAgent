@@ -104,7 +104,7 @@ class QuantaAgent:
 
     def write_template(self, data_folder, output_file_name, content):
         """Writes the template to a file."""
-        filename = f"{data_folder}/{output_file_name}--Q.md"
+        filename = f"{data_folder}/{output_file_name}--Q.txt"
 
         # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:
@@ -126,11 +126,13 @@ class QuantaAgent:
         # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
 
-        with open(f"{self.cfg.data_folder}/question.md", "r", encoding="utf-8") as file:
+        with open(
+            f"{self.cfg.data_folder}/question.txt", "r", encoding="utf-8"
+        ) as file:
             prompt = file.read()
 
-        # Write template before substitutions. This is really essentially a snapshot of what the 'question.md' file
-        # contained when the tool was ran, which is important because users will edit the question.md file
+        # Write template before substitutions. This is really essentially a snapshot of what the 'question.txt' file
+        # contained when the tool was ran, which is important because users will edit the question.txt file
         # every time they want to ask another AI question, and we want to keep a record of what the question was.
         self.write_template(self.cfg.data_folder, output_file_name, prompt)
 

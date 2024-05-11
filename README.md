@@ -36,7 +36,7 @@ To use this tool, follow these steps:
 2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
 4) Make sure your `config.yaml` has `update_strategy: "whole_file"` if you want the tool to be free to update any of your files in their entirety, or set `update_strategy: "injection_points"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `whole_file`.
-5) Put a `question.md` file (your AI Prompt) into your data folder. This is the file where you enter your AI prompt before you run the tool.
+5) Put a `question.txt` file (your AI Prompt) into your data folder. This is the file where you enter your AI prompt before you run the tool.
 6) Run `quanta-agent.py`
 7) ake up some arbitrary filename when prompted for one.
 8) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated, to accomplish whatever you asked for.
@@ -148,11 +148,11 @@ Developer teams can theoretically use a standard where (perhaps only temporarily
 
 # Configuration and Usage Flow
 
-To run this tool, you should create a data folder and then point the `/config/config.yaml data_folder` to that folder location. This folder will be where the input (the LLM Prompt) is read from and also where the output (AI generated responses) are written to. For ease of use in this prototype app, we always expect the prompt itself to be in `${data_folder}\question.md`. When you run this app it assumes that you have created a file named `question.md` that contains your prompt. 
+To run this tool, you should create a data folder and then point the `/config/config.yaml data_folder` to that folder location. This folder will be where the input (the LLM Prompt) is read from and also where the output (AI generated responses) are written to. For ease of use in this prototype app, we always expect the prompt itself to be in `${data_folder}\question.txt`. When you run this app it assumes that you have created a file named `question.txt` that contains your prompt. 
 
-As you edit your `question.md` file and then run the tool to generate answers you don't need to worry about maintaining a history of the questions and answers, because they're all stored as part of the output in the `data_folder` folder. So you can just resave your next question.md file before you run the tool, and it's a fairly good user experience, even without a GUI. This app will eventually have a GUI and/or an HTTP API, but for now feeding in prompts via `question.md` file is ideal.
+As you edit your `question.txt` file and then run the tool to generate answers you don't need to worry about maintaining a history of the questions and answers, because they're all stored as part of the output in the `data_folder` folder. So you can just resave your next question.txt file before you run the tool, and it's a fairly good user experience, even without a GUI. This app will eventually have a GUI and/or an HTTP API, but for now feeding in prompts via `question.txt` file is ideal.
 
-When you run this app, first all your source is scanned (i.e. `source_folder` config property), to build up your named blocks of code. Then your `question.md` file is read, and all the template substitutions are made in it (leaving the `question.md` file as is), and then the call to OpenAI is made to generate the response. The response file is then written into the output folder, so you will have your entire history of questions & answers saved permanently in your `data_folder`. If your prompt had requested any code changes then your actual project files will have been automatically edited to accomplish what you asked for.
+When you run this app, first all your source is scanned (i.e. `source_folder` config property), to build up your named blocks of code. Then your `question.txt` file is read, and all the template substitutions are made in it (leaving the `question.txt` file as is), and then the call to OpenAI is made to generate the response. The response file is then written into the output folder, so you will have your entire history of questions & answers saved permanently in your `data_folder`. If your prompt had requested any code changes then your actual project files will have been automatically edited to accomplish what you asked for.
 
 An example `data_folder` (named `data` in the project root) is included in this project so you can see examples, to get a better undersanding of how this tool works.
 

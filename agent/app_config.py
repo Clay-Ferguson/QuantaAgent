@@ -58,7 +58,7 @@ class AppConfig:
         p.add_argument(
             "--data_folder",
             required=True,
-            help="Holds the question.md file and also all generated response files",
+            help="Holds the question.txt file and also all generated response files",
         )
         p.add_argument(
             "--source_folder", required=True, help="Folder with source files to scan"
