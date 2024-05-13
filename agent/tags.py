@@ -1,5 +1,7 @@
 """Tags for the agent module."""
 
+DIVIDER = "\n----\n"
+
 TAG_BLOCK_BEGIN = "block_begin"
 TAG_BLOCK_END = "block_end"
 TAG_BLOCK_INJECT = "block_inject"

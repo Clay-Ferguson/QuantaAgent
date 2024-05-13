@@ -4,6 +4,7 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain.schema import HumanMessage, AIMessage
 
 
 class AppOpenAI:
@@ -17,7 +18,7 @@ class AppOpenAI:
         self.system_prompt = system_prompt
         self.data_folder = data_folder
 
-    def query(self, query, output_file_name, ts):
+    def query(self, messages, query, output_file_name, ts):
         """Makes a query to OpenAI's API and writes the response to a file."""
         ret = ""
 
@@ -35,13 +36,22 @@ class AppOpenAI:
         else:
             llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key)
 
-            prompt = ChatPromptTemplate.from_messages(
-                [("system", self.system_prompt), ("user", "{input}")]
-            )
-            output_parser = StrOutputParser()
-            chain = prompt | llm | output_parser
-            print("Waiting for OpenAI...")
-            ret = chain.invoke({"input": query})
+            # messages is none this is a one-shot query with no prior context
+            if messages is None:
+                prompt = ChatPromptTemplate.from_messages(
+                    [("system", self.system_prompt), ("user", "{input}")]
+                )
+                output_parser = StrOutputParser()
+                chain = prompt | llm | output_parser
+                print("Waiting for OpenAI...")
+                ret = chain.invoke({"input": query})
+            else:
+                # Else we're doing a chat with context, so we append the question and also the answer, and leave
+                # the self.chat_response as the last response.
+                messages.append(HumanMessage(content=query))
+                response = llm(list(messages))
+                ret = response.content
+                messages.append(AIMessage(content=response.content))
 
         output = f"""
 {ret}

@@ -2,11 +2,29 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Quanta Agent", 
+            "label": "Run Quanta Agent - CMD", 
             "type": "shell",
             "command": "python3",            
             "args": [
                 "${workspaceFolder}/quanta-agent.py"  
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Quanta Agent - GUI", 
+            "type": "shell",
+            "command": "streamlit",            
+            "args": [
+                "run",
+                "${workspaceFolder}/quanta-agent-gui.py"  
             ],
             "group": {
                 "kind": "build",

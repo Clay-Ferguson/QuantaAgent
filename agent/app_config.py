@@ -73,6 +73,6 @@ class AppConfig:
 
         AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
         AppConfig.ext_set = set(AppConfig.ext_list)
-        print(f"Config loaded: {config_file}")
-        print(f"Update strategy: {options.update_strategy}")
+        # print(f"Config loaded: {config_file}")
+        # print(f"Update strategy: {options.update_strategy}")
         return options

@@ -220,6 +220,7 @@ class FileInjection:
         for line in ai_answer.splitlines():
             if started:
                 if Utils.is_tag_line(line, TAG_FILE_END):
+                    started = False  # <--- TODO: this was missing. Check other similar methods for this same mistake
                     break
                 new_content.append(line)
             elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):

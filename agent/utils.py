@@ -2,6 +2,15 @@
 
 import re
 import os
+from agent.tags import (
+    TAG_INJECT_END,
+    TAG_INJECT_BEGIN,
+    TAG_FILE_BEGIN,
+    TAG_FILE_END,
+    TAG_NEW_FILE_BEGIN,
+    TAG_NEW_FILE_END,
+    DIVIDER,
+)
 
 
 class Utils:
@@ -50,3 +59,47 @@ class Utils:
         directory = os.path.dirname(file_path)
         if not os.path.exists(directory):
             os.makedirs(directory)
+
+    @staticmethod
+    def sanitize_content(content):
+        """Makes an AI input or output string presentable in on screen."""
+
+        content = content.split(DIVIDER)[0]
+
+        # Scan all the lines in content one by one and extract the new content
+        new_content = []
+        started = False
+        addendum = []
+        for line in content.splitlines():
+            if Utils.is_tag_line(line, TAG_FILE_END):
+                started = False
+                break
+            elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
+                started = False
+                break
+            elif Utils.is_tag_line(line, TAG_INJECT_END):
+                started = False
+                break
+
+            elif Utils.is_tag_line(line, TAG_FILE_BEGIN):
+                name = Utils.parse_block_name_from_line(line, TAG_FILE_BEGIN)
+                started = True
+                new_content.append("File Updated: " + name)
+
+            elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
+                name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
+                started = True
+                new_content.append("File Created: " + name)
+
+            elif Utils.is_tag_line(line, TAG_INJECT_BEGIN):
+                name = Utils.parse_block_name_from_line(line, TAG_INJECT_BEGIN)
+                started = True
+                new_content.append("Code Block Updated: " + name)
+
+            elif started is False:
+                new_content.append(line)
+
+        ret = "\n".join(new_content)
+        if addendum:
+            ret += "\n\n" + "\n".join(addendum)
+        return ret

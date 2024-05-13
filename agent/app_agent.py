@@ -15,6 +15,7 @@ from agent.tags import (
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
     TAG_NEW_FILE_END,
+    DIVIDER,
 )
 from agent.utils import Utils
 from agent.prompt_templates import PromptTemplates
@@ -36,9 +37,19 @@ class QuantaAgent:
     file_names = []
     folder_names = []
 
-    cfg = AppConfig.get_config(None)
-    source_folder_len = len(cfg.source_folder)
-    ts = str(int(time.time() * 1000))
+    def __init__(self):
+        self.cfg = AppConfig.get_config(None)
+        self.source_folder_len = len(self.cfg.source_folder)
+        self.ts = str(int(time.time() * 1000))
+        self.answer = ""
+
+    def reset(self):
+        """Resets the agent's state."""
+        self.ts = str(int(time.time() * 1000))
+        self.blocks = {}
+        # All file names encountered during the scan, relative to the source folder
+        self.file_names = []
+        self.folder_names = []
 
     def visit_file(self, path):
         """Visits a file and extracts text blocks into `blocks`. So we're just
@@ -110,14 +121,10 @@ class QuantaAgent:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(content)
 
-    def run(self):
+    def run(self, output_file_name, messages, prompt):
         """Runs the agent."""
-
-        # Ask for the output file name. They can enter any filename they want. The result will be that after the tool
-        # runs, the output will be in the data folder with the name they provided (both a question file and an answer file)
-        output_file_name = input(
-            "Enter filename for output (without extension, or path): "
-        )
+        prompt += DIVIDER
+        self.reset()
 
         # default filename to timestamp if empty
         if output_file_name == "":
@@ -125,11 +132,6 @@ class QuantaAgent:
 
         # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
-
-        with open(
-            f"{self.cfg.data_folder}/question.txt", "r", encoding="utf-8"
-        ) as file:
-            prompt = file.read()
 
         # Write template before substitutions. This is really essentially a snapshot of what the 'question.txt' file
         # contained when the tool was ran, which is important because users will edit the question.txt file
@@ -162,20 +164,23 @@ class QuantaAgent:
         if self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
             prompt += PromptTemplates.get_create_files_instructions()
 
-        answer = AppOpenAI(
+        open_ai = AppOpenAI(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.cfg.system_prompt,
             self.cfg.data_folder,
-        ).query(
+        )
+
+        self.answer = open_ai.query(
+            messages,
             prompt,
             output_file_name,
             self.ts,
         )
 
         has_new_files = (
-            f"""{TAG_NEW_FILE_BEGIN} /""" in answer
-            and f"""{TAG_NEW_FILE_END} /""" in answer
+            f"""{TAG_NEW_FILE_BEGIN} /""" in self.answer
+            and f"""{TAG_NEW_FILE_END} /""" in self.answer
         )
 
         if (
@@ -194,7 +199,7 @@ class QuantaAgent:
                     self.cfg.update_strategy,
                     self.cfg.source_folder,
                     AppConfig.ext_set,
-                    answer,
+                    self.answer,
                     self.ts,
                     None,
                 ).inject()
@@ -265,7 +270,9 @@ class QuantaAgent:
         """Builds the content of a folder. Which will contain all the filenames and their content."""
         print(f"Building content for folder: {folder_path}")
 
-        content = f"""Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
+        content = f"""{DIVIDER}
+
+Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
         """
         for dirpath, _, filenames in os.walk(folder_path):
             for filename in filenames:
