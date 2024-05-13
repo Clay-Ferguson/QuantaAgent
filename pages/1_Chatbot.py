@@ -18,9 +18,7 @@ class AppChatbotGUI:
     def clear_all(self):
         """Clear all messages."""
         st.session_state.chatbot_messages = []
-
-        # TODO: make this page have 'chat_user_input' instead of 'user_input', and other page similar rename
-        st.session_state.user_input = ""
+        st.session_state.chatbot_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
@@ -33,7 +31,7 @@ class AppChatbotGUI:
             )
 
         # handle user input
-        user_input = st.session_state.user_input
+        user_input = st.session_state.chatbot_user_input
         # handle user input
         if user_input:
             if len(user_input) > int(self.cfg.max_prompt_length):
@@ -54,7 +52,9 @@ class AppChatbotGUI:
             st.session_state.chatbot_messages.append(
                 AIMessage(content=response.content)
             )
-            st.session_state.user_input = ""  # Clear the user input after processing
+            st.session_state.chatbot_user_input = (
+                ""  # Clear the user input after processing
+            )
 
     def show_messages(self):
         """display message history"""
@@ -72,7 +72,7 @@ class AppChatbotGUI:
         with st.form("chatbot_form"):
             st.text_area(
                 "Ask the AI a Question: ",
-                key="user_input",
+                key="chatbot_user_input",
             )
             col1, col2 = st.columns(2)
             with col1:

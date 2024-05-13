@@ -18,7 +18,7 @@ class AppAgentGUI:
     def clear_all(self):
         """Clear all messages."""
         st.session_state.agent_messages = []
-        st.session_state.user_input = ""
+        st.session_state.agent_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
@@ -31,12 +31,14 @@ class AppAgentGUI:
             )
 
         # handle user input
-        user_input = st.session_state.user_input
+        user_input = st.session_state.agent_user_input
         if user_input:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
                 agent.run(st, "", st.session_state.agent_messages, user_input)
-            st.session_state.user_input = ""  # Clear the user input after processing
+            st.session_state.agent_user_input = (
+                ""  # Clear the user input after processing
+            )
 
     def show_messages(self):
         """display message history"""
@@ -57,7 +59,7 @@ class AppAgentGUI:
         with st.form("agent_form"):
             st.text_area(
                 "Ask the AI a Question (or ask for a Code Refactor to be done): ",
-                key="user_input",
+                key="agent_user_input",
             )
             col1, col2 = st.columns(2)
             with col1:
