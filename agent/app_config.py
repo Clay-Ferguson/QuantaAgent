@@ -68,11 +68,13 @@ class AppConfig:
             required=True,
             help="Update strategy for the files (whole_file or injection_points)",
         )
+        p.add_argument(
+            "--max_prompt_length", required=True, help="Max characters in prompt"
+        )
 
         options = p.parse_args()
 
         AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
         AppConfig.ext_set = set(AppConfig.ext_list)
         # print(f"Config loaded: {config_file}")
-        # print(f"Update strategy: {options.update_strategy}")
         return options

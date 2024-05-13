@@ -84,11 +84,14 @@ class Utils:
         return line[index + len(tag) :].strip()
 
     @staticmethod
-    def fail_app(msg):
+    def fail_app(msg, st=None):
         """Exits the application with a fail message"""
 
-        print(f"Error: {msg}")
-        exit(1)
+        if st is not None:
+            st.error(f"Error: {msg}")
+        else:
+            print(f"Error: {msg}")
+            exit(1)
 
     @staticmethod
     def ensure_folder_exists(file_path):

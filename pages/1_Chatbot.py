@@ -17,7 +17,10 @@ class AppChatbotGUI:
 
     def clear_all(self):
         """Clear all messages."""
-        del st.session_state.chatbot_messages
+        st.session_state.chatbot_messages = []
+
+        # TODO: make this page have 'chat_user_input' instead of 'user_input', and other page similar rename
+        st.session_state.user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
@@ -33,6 +36,12 @@ class AppChatbotGUI:
         user_input = st.session_state.user_input
         # handle user input
         if user_input:
+            if len(user_input) > int(self.cfg.max_prompt_length):
+                st.error(
+                    f"Input is too long. Max allowed is {self.cfg.max_prompt_length} characters."
+                )
+                return
+
             st.session_state.chatbot_messages.append(HumanMessage(content=user_input))
             with st.spinner("Thinking..."):
                 chat = ChatOpenAI(

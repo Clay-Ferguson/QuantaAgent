@@ -17,7 +17,8 @@ class AppAgentGUI:
 
     def clear_all(self):
         """Clear all messages."""
-        del st.session_state.agent_messages
+        st.session_state.agent_messages = []
+        st.session_state.user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
@@ -34,7 +35,7 @@ class AppAgentGUI:
         if user_input:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
-                agent.run("", st.session_state.agent_messages, user_input)
+                agent.run(st, "", st.session_state.agent_messages, user_input)
             st.session_state.user_input = ""  # Clear the user input after processing
 
     def show_messages(self):

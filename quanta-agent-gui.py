@@ -15,6 +15,7 @@ def get_config_markdown(cfg):
 * Data Folder: {cfg.data_folder}
 * Extensiont to include: {cfg.scan_extensions}
 * Update Strategy: {cfg.update_strategy}
+* Max Prompt Length: {cfg.max_prompt_length}
 """
 
 

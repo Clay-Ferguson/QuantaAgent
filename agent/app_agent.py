@@ -116,7 +116,7 @@ class QuantaAgent:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(content)
 
-    def run(self, output_file_name, messages, prompt):
+    def run(self, st, output_file_name, messages, prompt):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
@@ -164,6 +164,12 @@ class QuantaAgent:
 
         if self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
             prompt += PromptTemplates.get_create_files_instructions()
+
+        if len(prompt) > int(self.cfg.max_prompt_length):
+            Utils.fail_app(
+                f"Prompt length {len(prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
+                st,
+            )
 
         open_ai = AppOpenAI(
             self.cfg.openai_api_key,

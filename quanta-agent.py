@@ -14,4 +14,4 @@ if __name__ == "__main__":
 
     with open(f"{agent.cfg.data_folder}/question.txt", "r", encoding="utf-8") as file:
         prompt = file.read()
-        agent.run(output_file_name, None, prompt)
+        agent.run(None, output_file_name, None, prompt)

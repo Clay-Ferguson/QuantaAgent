@@ -12,8 +12,6 @@ from agent.tags import (
     DIVIDER,
 )
 
-# TODO: Lots of this verbiage says "code" when it can really be anything else (HTML, CSS) so maybe reword and use "content" instead of "code"
-
 
 class PromptTemplates:
     """Contains the prompt templates for the agent."""
