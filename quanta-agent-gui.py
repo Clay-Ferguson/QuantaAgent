@@ -18,7 +18,7 @@ The chatbot doesn't refactor code but is just a basic chatbot for general purpos
 
 ### Coding Assistant:
 
-The Coding Assistant is also a general chatbot as well however it can also refactor code. You need to provide the code you want to refactor, in the 
+The Coding Assistant is also a general chatbot as well however it can also refactor code. You need to provide name of the project folder of the code you want to refactor, in the 
 `config.yaml`
 
 **Coding Assistant Tips:**

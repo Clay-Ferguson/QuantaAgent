@@ -4,6 +4,8 @@ A tool to automate querying AIs (LLMs) about your codebase, which can also autom
 
 You have the option to use either the **Streamlit-based Web Interface/GUI, or a Command Line** version that reads the prompt from a simple text file.
 
+![Agent Conversation](docs/images/conversation.png "Agent Conversation")
+
 # Tool Features
 
 * Answers questions about software projects
