@@ -77,7 +77,7 @@ If there's no comment prefix for the language, just use `//` for the prefix.
         """Returns instructions for creating new files."""
 
         return f"""
-If you need to create any new project files to accomplish the task, please include a filename, and the content of each file in the following format, instead of your usual markdown format:
+If I asked you to create new files or projects, then you should provide the content of the new files in the following format, instead of your usual markdown format:
 
 {TAG_NEW_FILE_BEGIN} /my/folder/file.txt
 ... content of file...
