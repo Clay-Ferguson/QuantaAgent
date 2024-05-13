@@ -2,16 +2,31 @@
 
 import streamlit as st
 
+from agent.app_config import AppConfig
 from agent.utils import Utils
+
+
+def get_config_markdown(cfg):
+    """Get the config markdown."""
+    return f"""
+### Config:
+* Model: {cfg.openai_model}
+* Source Folder: {cfg.source_folder}
+* Data Folder: {cfg.data_folder}
+* Extensiont to include: {cfg.scan_extensions}
+* Update Strategy: {cfg.update_strategy}
+"""
+
 
 # to Run: `streamlit run quanta-agent-gui.py`
 
 if __name__ == "__main__":
+    cfg = AppConfig.get_config(None)
     Utils.setup_page(st, "Quanta: AI Tools")
-    st.markdown(
-        """
-Choose an AI tool to use from the sidebar.
-
+    st.markdown("Choose an AI tool to use from the sidebar.")
+    with st.expander("Expand for Helpful Tips"):
+        st.markdown(
+            """
 ### Chatbot:
 
 The chatbot doesn't refactor code but is just a basic chatbot for general purpose conversation.
@@ -33,4 +48,8 @@ must end with a slash. *Note: The folder content is omitted from the GUI display
 * To refactor a specific file, you can use `${/file_name}` to bring that file into the AI's context. *Note: The file content is omitted from the GUI display, but it will be used by the AI.*
 
 """
-    )
+        )
+
+    with st.expander("Show Configs"):
+        cm = get_config_markdown(cfg)
+        st.markdown(cm)

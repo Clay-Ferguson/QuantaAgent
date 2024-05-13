@@ -65,23 +65,24 @@ class AppAgentGUI:
                 st.form_submit_button("Clear", on_click=self.clear_all)
 
         self.show_messages()
-        st.markdown(
-            """
+
+        with st.expander("Helpful Tips. Read this first!"):
+            st.markdown(
+                """
 Remember: If you don't include one or more of the following at least in your intial prompt, the AI will not know anything about your codebase:
 | Syntax | Description |
 | --- | --- |
 | `${/}` | Include all files in the project folder |
 | `${/folder_name/}` | Include all files in the folder |
 | `${/file_name}` | Include a specific file |
-
-
+----
 **Example Refactoring Prompt:**
 ```
 In my HTML file and change the title to "Hello World" to "Hello Universe".
 ${/}
 ```
 """
-        )
+            )
 
 
 AppAgentGUI().run()
