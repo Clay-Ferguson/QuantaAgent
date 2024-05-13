@@ -47,7 +47,7 @@ class AppChatbotGUI:
             st.session_state.user_input = ""  # Clear the user input after processing
 
     def show_messages(self):
-        # display message history
+        """display message history"""
         messages = st.session_state.get("chatbot_messages", [])
         for i, msg in enumerate(messages[1:]):
             if isinstance(msg, HumanMessage):
@@ -60,7 +60,7 @@ class AppChatbotGUI:
         st.set_page_config(page_title="Quanta AI Chatbot", page_icon="🤖")
         st.header("Quanta AI Chatbot 🤖")
 
-        with st.form("my_form"):
+        with st.form("chatbot_form"):
             st.text_area(
                 "Ask the AI a Question: ",
                 key="user_input",

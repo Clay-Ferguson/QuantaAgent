@@ -1,7 +1,6 @@
 """This is the main agent module that scans the source code and generates the AI prompt."""
 
 import os
-import re
 import time
 from dataclasses import dataclass
 from agent.app_openai import AppOpenAI
@@ -11,10 +10,6 @@ from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
     TAG_BLOCK_INJECT,
-    TAG_FILE_BEGIN,
-    TAG_FILE_END,
-    TAG_NEW_FILE_BEGIN,
-    TAG_NEW_FILE_END,
     DIVIDER,
 )
 from agent.utils import Utils
@@ -122,8 +117,9 @@ class QuantaAgent:
             file.write(content)
 
     def run(self, output_file_name, messages, prompt):
-        """Runs the agent."""
-        prompt += DIVIDER
+        """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
+        represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
+        alone without any prior context."""
         self.reset()
 
         # default filename to timestamp if empty
@@ -138,22 +134,27 @@ class QuantaAgent:
         # every time they want to ask another AI question, and we want to keep a record of what the question was.
         self.write_template(self.cfg.data_folder, output_file_name, prompt)
 
+        # This divider serves only to give the GUI a way to chop off all these instructions in the display to user
+        prompt += DIVIDER
         prompt = self.insert_blocks_into_prompt(prompt)
-        prompt = self.insert_files_into_prompt(prompt)
-        prompt = self.insert_folders_into_prompt(prompt)
-        # print(f"AI Prompt: {prompt}")
+        prompt = Utils.insert_files_into_prompt(
+            prompt, self.cfg.source_folder, self.file_names
+        )
+        prompt = Utils.insert_folders_into_prompt(
+            prompt, self.cfg.source_folder, self.folder_names, AppConfig.ext_set
+        )
 
         # If the prompt has block_inject tags, add instructions for how to provide the
         # new code, in a machine parsable way.
-        has_block_inject = self.has_tag_lines(prompt, TAG_BLOCK_INJECT)
+        has_block_inject = Utils.has_tag_lines(prompt, TAG_BLOCK_INJECT)
         if (
             has_block_inject
             and self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
         ):
             prompt += PromptTemplates.get_block_insertion_instructions()
 
-        has_filename_inject = self.has_filename_injects(prompt)
-        has_folder_inject = self.has_folder_injects(prompt)
+        has_filename_inject = Utils.has_filename_injects(prompt, self.file_names)
+        has_folder_inject = Utils.has_folder_injects(prompt, self.folder_names)
         if (
             has_filename_inject
             or has_folder_inject
@@ -178,122 +179,24 @@ class QuantaAgent:
             self.ts,
         )
 
-        has_new_files = (
-            f"""{TAG_NEW_FILE_BEGIN} /""" in self.answer
-            and f"""{TAG_NEW_FILE_END} /""" in self.answer
-        )
-
+        # Only if set to one of these two strategies, do we ever alter any files
         if (
             self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
             or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
-            if (
-                has_block_inject
-                or has_filename_inject
-                or has_folder_inject
-                or has_new_files
-            ):
-                # If the prompt has block_inject tags, add instructions for how to provide the
-                # new code, in a machine parsable way.
-                FileInjection(
-                    self.cfg.update_strategy,
-                    self.cfg.source_folder,
-                    AppConfig.ext_set,
-                    self.answer,
-                    self.ts,
-                    None,
-                ).inject()
-
-    def has_filename_injects(self, prompt):
-        """Returns True if the prompt has any file content injection."""
-        for file_name in self.file_names:
-            tag_begin = f"{TAG_FILE_BEGIN} {file_name}"
-            tag_end = f"{TAG_FILE_END} {file_name}"
-            if tag_begin in prompt and tag_end in prompt:
-                return True
-        return False
-
-    def has_folder_injects(self, prompt):
-        """Returns True if the prompt has any folder content injection."""
-        for folder_name in self.folder_names:
-            tag = f"${{{folder_name}/}}"
-            if tag in prompt:
-                print(f"Found folder inject tag: {tag}")
-                return True
-        return False
+            FileInjection(
+                self.cfg.update_strategy,
+                self.cfg.source_folder,
+                self.answer,
+                self.ts,
+                None,
+            ).inject()
 
     def insert_blocks_into_prompt(self, prompt):
         """
-        Substitute blocks into the prompt. Prompts can conatin ${BlockName} tags, which will be replaced with the
+        Substitute blocks into the prompt. Prompts can contain ${BlockName} tags, which will be replaced with the
         content of the block with the name 'BlockName'
         """
         for key, value in self.blocks.items():
             prompt = prompt.replace(f"${{{key}}}", value.content)
         return prompt
-
-    def insert_files_into_prompt(self, prompt):
-        """
-        Substitute entire file contents into the prompt. Prompts can contain ${FileName} tags,
-        which will be replaced with the content of the file with the name 'FileName'
-        """
-        for file_name in self.file_names:
-            tag = f"${{{file_name}}}"
-            if tag in prompt:
-                with open(
-                    self.cfg.source_folder + file_name, "r", encoding="utf-8"
-                ) as file:
-                    content = file.read()
-                    prompt = prompt.replace(
-                        tag, PromptTemplates.get_file_content_block(file_name, content)
-                    )
-
-        return prompt
-
-    def insert_folders_into_prompt(self, prompt):
-        """
-        Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
-        which will be replaced with the content of the files inside the folder
-        """
-        for folder_name in self.folder_names:
-            tag = f"${{{folder_name}/}}"
-            # print(f"Checking for folder tag: {tag}")
-            if tag in prompt:
-                # build the content of the folder (that -1 is removing the trailing slash from the folder name)
-                content = self.build_folder_content(
-                    self.cfg.source_folder + folder_name
-                )
-                prompt = prompt.replace(tag, content)
-
-        return prompt
-
-    def build_folder_content(self, folder_path):
-        """Builds the content of a folder. Which will contain all the filenames and their content."""
-        print(f"Building content for folder: {folder_path}")
-
-        content = f"""{DIVIDER}
-
-Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
-        """
-        for dirpath, _, filenames in os.walk(folder_path):
-            for filename in filenames:
-                # Check the file extension
-                _, ext = os.path.splitext(filename)
-                if ext.lower() in AppConfig.ext_set:
-                    # build the full path
-                    path = os.path.join(dirpath, filename)
-                    # get the file name relative to the source folder
-                    file_name = path[self.source_folder_len :]
-                    with open(path, "r", encoding="utf-8") as file:
-                        file_content = file.read()
-                        content += PromptTemplates.get_file_content_block(
-                            file_name, file_content
-                        )
-
-        return content
-
-    def has_tag_lines(self, prompt, tag):
-        """Checks if the prompt has any block_inject tags."""
-
-        # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern = rf"(--|//|#) {re.escape(tag)} "
-        return re.search(pattern, prompt) is not None

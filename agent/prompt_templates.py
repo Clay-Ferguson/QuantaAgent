@@ -1,5 +1,6 @@
 """Contains the prompt templates for the agent."""
 
+import os
 from agent.tags import (
     TAG_BLOCK_INJECT,
     TAG_INJECT_BEGIN,
@@ -8,6 +9,7 @@ from agent.tags import (
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
     TAG_NEW_FILE_END,
+    DIVIDER,
 )
 
 # TODO: Lots of this verbiage says "code" when it can really be anything else (HTML, CSS) so maybe reword and use "content" instead of "code"
@@ -87,3 +89,29 @@ If you're modifying an existing project then the filenames should be relative to
 For example a file in the project root folder would be named like `/my_root_file.txt`.
 However, if you were asked to create a completely new project, you should insert a project folder name at the front all paths, but still start with a slash.
 """
+
+    @staticmethod
+    def build_folder_content(folder_path, ext_set, source_folder_len):
+        """Builds the content of a folder. Which will contain all the filenames and their content."""
+        print(f"Building content for folder: {folder_path}")
+
+        content = f"""{DIVIDER}
+
+Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
+        """
+        for dirpath, _, filenames in os.walk(folder_path):
+            for filename in filenames:
+                # Check the file extension
+                _, ext = os.path.splitext(filename)
+                if ext.lower() in ext_set:
+                    # build the full path
+                    path = os.path.join(dirpath, filename)
+                    # get the file name relative to the source folder
+                    file_name = path[source_folder_len:]
+                    with open(path, "r", encoding="utf-8") as file:
+                        file_content = file.read()
+                        content += PromptTemplates.get_file_content_block(
+                            file_name, file_content
+                        )
+
+        return content

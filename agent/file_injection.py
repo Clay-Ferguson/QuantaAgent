@@ -28,12 +28,11 @@ class FileInjection:
         name: str
         content: str
 
-    def __init__(self, update_strategy, source_folder, ext_set, ai_answer, ts, suffix):
+    def __init__(self, update_strategy, source_folder, ai_answer, ts, suffix):
         """Initializes the FileInjection object."""
         self.update_strategy = update_strategy
         self.source_folder = source_folder
         self.source_folder_len = len(source_folder)
-        self.ext_set = ext_set
         self.ai_answer = ai_answer
         self.suffix = suffix
         self.ts = ts
@@ -211,6 +210,8 @@ class FileInjection:
 
     def parse_modified_file(self, ai_answer, rel_filename):
         """Extract the new content for the given file from the AI answer."""
+
+        # print(f"parse_modified_file: {rel_filename}")
         if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
             return
 
@@ -218,12 +219,14 @@ class FileInjection:
         new_content = []
         started = False
         for line in ai_answer.splitlines():
+            # print("LINE: " + line)
             if started:
                 if Utils.is_tag_line(line, TAG_FILE_END):
                     started = False  # <--- TODO: this was missing. Check other similar methods for this same mistake
                     break
                 new_content.append(line)
             elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):
+                # print("found begin line: " + rel_filename)
                 if len(new_content) > 0:
                     Utils.fail_app(
                         f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing."
@@ -231,9 +234,11 @@ class FileInjection:
                 started = True
 
         if len(new_content) == 0:
+            # print(f"No content found for {rel_filename}")
             return None
 
         ret = "\n".join(new_content)
+        # print(f"New content for {rel_filename}: {ret}")
         return ret
 
     def process_replacements(self, content, block, name, ts):
@@ -279,13 +284,13 @@ class FileInjection:
     def scan_directory(self):
         """Scans the directory for files with the specified extensions."""
 
-        print(f"Doing Injection Scan on: {self.source_folder}")
+        # print(f"Doing Injection Scan on: {self.source_folder}")
         # Walk through all directories and files in the directory
         for dirpath, _, filenames in os.walk(self.source_folder):
             for filename in filenames:
                 # Check the file extension
                 _, ext = os.path.splitext(filename)
-                if ext.lower() in self.ext_set:
+                if ext.lower() in AppConfig.ext_set:
                     # build the full path
                     path = os.path.join(dirpath, filename)
                     # Call the visitor function for each file

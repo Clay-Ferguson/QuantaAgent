@@ -38,7 +38,7 @@ class AppAgentGUI:
             st.session_state.user_input = ""  # Clear the user input after processing
 
     def show_messages(self):
-        # display message history
+        """display message history"""
         messages = st.session_state.get("agent_messages", [])
         for i, msg in enumerate(messages[1:]):
             content = msg.content
@@ -54,9 +54,9 @@ class AppAgentGUI:
         st.set_page_config(page_title="Quanta AI Coding Agent", page_icon="🤖")
         st.header("Quanta AI Coding Agent 🤖")
 
-        with st.form("my_form"):
+        with st.form("agent_form"):
             st.text_area(
-                "Ask the AI a Question: ",
+                "Ask the AI a Question (or ask for a Code Refactor to be done): ",
                 key="user_input",
             )
             col1, col2 = st.columns(2)

@@ -17,7 +17,6 @@ def test_simple_injection():
     inst = FileInjection(
         cfg.update_strategy,
         cfg.source_folder,
-        AppConfig.ext_set,
         """
 # inject_begin InsertTarget
 # comment to be inserted
