@@ -6,6 +6,7 @@ from langchain.schema import SystemMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 
 from agent.app_config import AppConfig
+from agent.utils import Utils
 
 
 class AppChatbotGUI:
@@ -57,8 +58,7 @@ class AppChatbotGUI:
 
     def run(self):
         """Main function for the Streamlit GUI."""
-        st.set_page_config(page_title="Quanta AI Chatbot", page_icon="🤖")
-        st.header("Quanta AI Chatbot 🤖")
+        Utils.setup_page(st, "Quanta: AI Chatbot")
 
         with st.form("chatbot_form"):
             st.text_area(

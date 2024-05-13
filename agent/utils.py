@@ -178,3 +178,20 @@ class Utils:
                 prompt = prompt.replace(tag, content)
 
         return prompt
+
+    @staticmethod
+    def setup_page(st, title):
+        """Displays the app header and configures the page."""
+        st.set_page_config(page_title=title, page_icon="🤖", layout="wide")
+
+        # Create a multi-column layout
+        col1, col2 = st.columns([4, 1])
+
+        # Display the header in the first column
+        with col1:
+            st.header(title)
+
+        # Display the logo image in the second column
+        with col2:
+            logo_image = "img/logo-100px-tr.jpg"
+            st.image(logo_image, width=100)

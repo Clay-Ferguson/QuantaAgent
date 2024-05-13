@@ -2,12 +2,12 @@
 
 import streamlit as st
 
+from agent.utils import Utils
+
 # to Run: `streamlit run quanta-agent-gui.py`
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Quanta AI Tools", page_icon="🤖")
-
-    st.header("Quanta AI Tools 🤖")
+    Utils.setup_page(st, "Quanta: AI Tools")
     st.markdown(
         """
 Choose an AI tool to use from the sidebar.
