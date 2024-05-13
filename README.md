@@ -1,7 +1,8 @@
-# About Quanta Agent
+# About Quanta Agent 
 
 A tool to automate querying AIs (LLMs) about your codebase, which can also automatically refactor your actual project files, from high level human language instructions of what changes you'd like to make. You can ask the tool anything about your project, ask for any kind of refactoring you'd like to do in your project, or even ask the tool to create entirely new projects all on it's own.
 
+You have the option to use either the **Streamlit-based Web Interface/GUI, or a Command Line** version that reads the prompt from a simple text file.
 
 # Tool Features
 
@@ -12,6 +13,7 @@ A tool to automate querying AIs (LLMs) about your codebase, which can also autom
 
 # Project Summary
 
+* Has Streamlit GUI, as well as Command Line version
 * Written 100% in Python
 * Open Source Python (MIT License)
 * Uses Python Langchain giving you flexibility in which LLM you use, including either locally hosted LLMs or Cloud AI Services.
@@ -36,10 +38,10 @@ To use this tool, follow these steps:
 2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
 4) Make sure your `config.yaml` has `update_strategy: "whole_file"` if you want the tool to be free to update any of your files in their entirety, or set `update_strategy: "injection_points"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `whole_file`.
-5) Put a `question.txt` file (your AI Prompt) into your data folder. This is the file where you enter your AI prompt before you run the tool.
-6) Run `quanta-agent.py`
-7) ake up some arbitrary filename when prompted for one.
-8) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated, to accomplish whatever you asked for.
+5) If you're using the command line version, then put a `question.txt` file (your AI Prompt) into your data folder and run `python3 quanta-agent.py`. Make up any arbitrary filename when prompted for one when the tool runs.
+--or--
+5) Run the Streamlit-based Web interface with this command: `streamlit run quanta-agent-gui.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
+7) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated, to accomplish whatever you asked for.
 
 *Tip: When requesting project refactorings, it's best to be in a clean project version, so that if you don't like the changes the tool made to your code you can roll them back easily, using `git`.
 

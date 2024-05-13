@@ -8,7 +8,7 @@ openai_model: "gpt-4-turbo-2024-04-09"
 system_prompt: "You are a helpful assistant."
 
 source_folder: "test_project"
-scan_extensions: ".java, .sql, .py"
+scan_extensions: ".java, .sql, .py, .html, .htm, .js, .ts, .css"
 data_folder: "data"
 
 update_strategy: "whole_file" 
