@@ -17,7 +17,7 @@ from agent.tags import (
     DIVIDER,
 )
 from agent.utils import Utils
-from agent.prompt_templates import PromptTemplates
+from agent.prompt_utils import PromptUtils
 
 
 class QuantaAgent:
@@ -140,10 +140,10 @@ class QuantaAgent:
         # This divider serves only to give the GUI a way to chop off all these instructions in the display to user
         prompt += DIVIDER
         prompt = self.insert_blocks_into_prompt(prompt)
-        prompt = PromptTemplates.insert_files_into_prompt(
+        prompt = PromptUtils.insert_files_into_prompt(
             prompt, self.cfg.source_folder, self.file_names
         )
-        prompt = PromptTemplates.insert_folders_into_prompt(
+        prompt = PromptUtils.insert_folders_into_prompt(
             prompt, self.cfg.source_folder, self.folder_names
         )
 
@@ -154,7 +154,7 @@ class QuantaAgent:
             has_block_inject
             and self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
         ):
-            prompt += PromptTemplates.get_block_insertion_instructions()
+            prompt += PromptUtils.get_block_insertion_instructions()
 
         has_filename_inject: bool = Utils.has_filename_injects(prompt, self.file_names)
         has_folder_inject: bool = Utils.has_folder_injects(prompt, self.folder_names)
@@ -163,10 +163,10 @@ class QuantaAgent:
             or has_folder_inject
             and self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
-            prompt += PromptTemplates.get_file_insertion_instructions()
+            prompt += PromptUtils.get_file_insertion_instructions()
 
         if self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-            prompt += PromptTemplates.get_create_files_instructions()
+            prompt += PromptUtils.get_create_files_instructions()
 
         if len(prompt) > int(self.cfg.max_prompt_length):
             Utils.fail_app(

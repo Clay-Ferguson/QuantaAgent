@@ -140,8 +140,11 @@ class FileInjection:
                     full_file_name: str = self.source_folder + file_name
 
                     # fail if file already exists
-                    if os.path.exists(full_file_name):
-                        Utils.fail_app("File already exists: " + full_file_name)
+                    # Tentatively removing this check becasue the AI may be trying to update a file and accidentally
+                    # does it this way which is actually fine. TODO: Think thru whether I need a separate syntax for
+                    # new files as opposed to updated files.
+                    # if os.path.exists(full_file_name):
+                    #     Utils.fail_app("File already exists: " + full_file_name)
 
                     # Ensure folder exisits
                     Utils.ensure_folder_exists(full_file_name)

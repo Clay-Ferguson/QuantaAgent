@@ -1,0 +1,13 @@
+If I asked you to create new files or projects, then you should provide the content of the new files \
+in the following format, instead of your usual markdown format:
+
+{TAG_NEW_FILE_BEGIN} /my/folder/file.txt
+... content of file...
+{TAG_NEW_FILE_END} /my/folder/file.txt
+
+Make the content of the file the actual content, not a markdown representation of the content. You should of \
+course use that format for as many files as you need to create. If you're modifying an existing project then \
+the filenames should be relative to the root of the project, and should start with a slash. For example a file \
+in the project root folder would be named like `/my_root_file.txt`. However, if you were asked to create a \
+completely new project, you should insert a project folder name at the front all paths, but still start with \
+a slash.
