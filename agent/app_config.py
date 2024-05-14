@@ -2,20 +2,21 @@
 
 import os
 import re
+from typing import List, Set, Optional
 import configargparse
 
 
 class AppConfig:
     """Loads configuration from config.yaml and secrets.yaml files."""
 
-    ext_list = []
-    ext_set = set()
+    ext_list: List[str] = []
+    ext_set: Set[str] = set()
 
-    STRATEGY_WHOLE_FILE = "whole_file"
-    STRATEGY_INJECTION_POINTS = "injection_points"
+    STRATEGY_WHOLE_FILE: str = "whole_file"
+    STRATEGY_INJECTION_POINTS: str = "injection_points"
 
     @classmethod
-    def get_config(cls, config_file=None):
+    def get_config(cls, config_file: Optional[str] = None):
         """Loads configuration from config.yaml and secrets.yaml files."""
 
         # Both of these config files are optional, because the ArgParser can load

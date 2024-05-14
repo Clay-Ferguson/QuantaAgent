@@ -1,6 +1,7 @@
 """Contains the prompt templates for the agent."""
 
 import os
+from typing import Set
 from agent.tags import (
     TAG_BLOCK_INJECT,
     TAG_INJECT_BEGIN,
@@ -17,7 +18,7 @@ class PromptTemplates:
     """Contains the prompt templates for the agent."""
 
     @staticmethod
-    def get_file_content_block(file_name, content):
+    def get_file_content_block(file_name: str, content: str):
         """Returns a file content block for the given file name and content."""
         return f"""
 {TAG_FILE_BEGIN} {file_name}
@@ -89,7 +90,9 @@ However, if you were asked to create a completely new project, you should insert
 """
 
     @staticmethod
-    def build_folder_content(folder_path, ext_set, source_folder_len):
+    def build_folder_content(
+        folder_path: str, ext_set: Set[str], source_folder_len: int
+    ):
         """Builds the content of a folder. Which will contain all the filenames and their content."""
         print(f"Building content for folder: {folder_path}")
 

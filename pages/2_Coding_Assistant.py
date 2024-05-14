@@ -1,8 +1,9 @@
 """ Streamlit GUI for the Quanta Chatbot """
 
+from typing import List
 import streamlit as st
 from streamlit_chat import message
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
 
 from agent.app_agent import QuantaAgent
 from agent.app_config import AppConfig
@@ -17,14 +18,18 @@ class AppAgentGUI:
 
     def clear_all(self):
         """Clear all messages."""
-        st.session_state.agent_messages = []
+        messages: List[BaseMessage] = []  # using separate line for type safety syntax
+        st.session_state.agent_messages = messages
         st.session_state.agent_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
         # initialize message history
         if "agent_messages" not in st.session_state:
-            st.session_state.agent_messages = []
+            messages: List[BaseMessage] = (
+                []
+            )  # using separate line for type safety syntax
+            st.session_state.agent_messages = messages
 
             st.session_state.agent_messages.append(
                 SystemMessage(content="You are a helpful assistant.")
@@ -42,9 +47,12 @@ class AppAgentGUI:
 
     def show_messages(self):
         """display message history"""
-        messages = st.session_state.get("agent_messages", [])
+        default_messages: List[BaseMessage] = (
+            []
+        )  # using separate line for type safety syntax
+        messages = st.session_state.get("agent_messages", default_messages)
         for i, msg in enumerate(messages[1:]):
-            content = msg.content
+            content: str = msg.content  # type: ignore
             content = Utils.sanitize_content(content)
 
             if isinstance(msg, HumanMessage):

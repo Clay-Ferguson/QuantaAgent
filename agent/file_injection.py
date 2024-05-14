@@ -1,6 +1,7 @@
 """Injects data into files."""
 
 import os
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 from agent.string_utils import StringUtils
 from agent.tags import (
@@ -19,8 +20,6 @@ from agent.app_config import AppConfig
 class FileInjection:
     """Injects text blocks into files."""
 
-    blocks = {}
-
     @dataclass
     class TextBlock:
         """Represents a block of text in a file."""
@@ -28,7 +27,16 @@ class FileInjection:
         name: str
         content: str
 
-    def __init__(self, update_strategy, source_folder, ai_answer, ts, suffix):
+    blocks: Dict[str, TextBlock] = {}
+
+    def __init__(
+        self,
+        update_strategy: str,
+        source_folder: str,
+        ai_answer: str,
+        ts: str,
+        suffix: Optional[str],
+    ):
         """Initializes the FileInjection object."""
         self.update_strategy = update_strategy
         self.source_folder = source_folder
@@ -159,7 +167,7 @@ class FileInjection:
                 # Collect the content of the file
                 file_content.append(line)
 
-    def visit_file(self, filename, ts):
+    def visit_file(self, filename: str, ts: str):
         """Visit the file, to run all injections on the file"""
 
         # print("Inject Into File:", filename)
@@ -208,7 +216,7 @@ class FileInjection:
         except IOError:
             print("An error occurred while reading or writing to the file.")
 
-    def parse_modified_file(self, ai_answer, rel_filename):
+    def parse_modified_file(self, ai_answer: str, rel_filename: str):
         """Extract the new content for the given file from the AI answer."""
 
         # print(f"parse_modified_file: {rel_filename}")
@@ -241,7 +249,9 @@ class FileInjection:
         # print(f"New content for {rel_filename}: {ret}")
         return ret
 
-    def process_replacements(self, content, block, name, ts):
+    def process_replacements(
+        self, content: List[str], block: TextBlock, name: str, ts: str
+    ):
         """Process the replacements for the given block."""
 
         # print("replacing: name=" + name)
@@ -258,7 +268,14 @@ class FileInjection:
         )
         return ret
 
-    def do_replacement(self, comment_prefix, content, block, name, ts):
+    def do_replacement(
+        self,
+        comment_prefix: str,
+        content: List[str],
+        block: TextBlock,
+        name: str,
+        ts: str,
+    ):
         """Process the replacement for the given block and comment prefix.
 
         We replace the first element of the dict content with the new content, so we're treating 'content'

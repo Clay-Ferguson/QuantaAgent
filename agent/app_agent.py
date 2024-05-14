@@ -2,6 +2,7 @@
 
 import os
 import time
+from typing import List, Dict
 from dataclasses import dataclass
 from agent.app_openai import AppOpenAI
 from agent.app_config import AppConfig
@@ -14,6 +15,7 @@ from agent.tags import (
 )
 from agent.utils import Utils
 from agent.prompt_templates import PromptTemplates
+from langchain.schema import BaseMessage
 
 
 class QuantaAgent:
@@ -27,10 +29,10 @@ class QuantaAgent:
         content: str
 
     # Dictionary to store TextBlock objects keyed by 'name'
-    blocks = {}
+    blocks: Dict[str, TextBlock] = {}
     # All filen names encountered during the scan, relative to the source folder
-    file_names = []
-    folder_names = []
+    file_names: List[str] = []
+    folder_names: List[str] = []
 
     def __init__(self):
         self.cfg = AppConfig.get_config(None)
@@ -46,7 +48,7 @@ class QuantaAgent:
         self.file_names = []
         self.folder_names = []
 
-    def visit_file(self, path):
+    def visit_file(self, path: str):
         """Visits a file and extracts text blocks into `blocks`. So we're just
         scanning the file for the block_begin and block_end tags, and extracting the content between them
         and saving that text for later use
@@ -81,7 +83,7 @@ class QuantaAgent:
                     if block is not None:
                         block.content += line
 
-    def scan_directory(self, scan_dir):
+    def scan_directory(self, scan_dir: str):
         """Scans the directory for files with the specified extensions. The purpose of this scan
         is to build up the 'blocks' dictionary with the content of the blocks in the files, and also
         to collect all the filenames into `file_names`
@@ -108,7 +110,7 @@ class QuantaAgent:
                     # Call the visitor function for each file
                     self.visit_file(path)
 
-    def write_template(self, data_folder, output_file_name, content):
+    def write_template(self, data_folder: str, output_file_name: str, content: str):
         """Writes the template to a file."""
         filename = f"{data_folder}/{output_file_name}--Q.txt"
 
@@ -116,7 +118,7 @@ class QuantaAgent:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(content)
 
-    def run(self, st, output_file_name, messages, prompt):
+    def run(self, st, output_file_name: str, messages: List[BaseMessage], prompt: str):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
@@ -198,7 +200,7 @@ class QuantaAgent:
                 None,
             ).inject()
 
-    def insert_blocks_into_prompt(self, prompt):
+    def insert_blocks_into_prompt(self, prompt: str):
         """
         Substitute blocks into the prompt. Prompts can contain ${BlockName} tags, which will be replaced with the
         content of the block with the name 'BlockName'

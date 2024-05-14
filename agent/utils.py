@@ -2,6 +2,7 @@
 
 import re
 import os
+from typing import List, Set
 from agent.tags import (
     TAG_INJECT_END,
     TAG_INJECT_BEGIN,
@@ -18,7 +19,7 @@ class Utils:
     """Utilities Class"""
 
     @staticmethod
-    def has_tag_lines(prompt, tag):
+    def has_tag_lines(prompt, tag: str) -> bool:
         """Checks if the prompt has any block_inject tags."""
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
@@ -26,7 +27,7 @@ class Utils:
         return re.search(pattern, prompt) is not None
 
     @staticmethod
-    def has_filename_injects(prompt, file_names):
+    def has_filename_injects(prompt, file_names: List[str]) -> bool:
         """Returns True if the prompt has any file content injection."""
         for file_name in file_names:
             tag_begin = f"{TAG_FILE_BEGIN} {file_name}"
@@ -36,7 +37,7 @@ class Utils:
         return False
 
     @staticmethod
-    def has_folder_injects(prompt, folder_names):
+    def has_folder_injects(prompt, folder_names: List[str]) -> bool:
         """Returns True if the prompt has any folder content injection."""
         for folder_name in folder_names:
             tag = f"${{{folder_name}/}}"
@@ -46,7 +47,7 @@ class Utils:
         return False
 
     @staticmethod
-    def has_new_files(content):
+    def has_new_files(content: str) -> bool:
         """Checks if the content has new files."""
         return (
             f"""{TAG_NEW_FILE_BEGIN} /""" in content
@@ -54,7 +55,7 @@ class Utils:
         )
 
     @staticmethod
-    def is_tag_and_name_line(line, tag, name):
+    def is_tag_and_name_line(line, tag: str, name: str) -> bool:
         """Checks if the line is a line like
         `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
         or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
@@ -65,7 +66,7 @@ class Utils:
         return re.search(pattern, line) is not None
 
     @staticmethod
-    def is_tag_line(line, tag):
+    def is_tag_line(line: str, tag: str) -> bool:
         """Checks if the line is a line like
         `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
         or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
@@ -78,13 +79,13 @@ class Utils:
         return re.search(pattern, line) is not None
 
     @staticmethod
-    def parse_block_name_from_line(line, tag):
+    def parse_block_name_from_line(line: str, tag: str) -> str:
         """Parses the block name from a `... {tag} {name}` formatted line."""
         index = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
 
     @staticmethod
-    def fail_app(msg, st=None):
+    def fail_app(msg: str, st=None):
         """Exits the application with a fail message"""
 
         if st is not None:
@@ -94,14 +95,14 @@ class Utils:
             exit(1)
 
     @staticmethod
-    def ensure_folder_exists(file_path):
+    def ensure_folder_exists(file_path: str):
         """Ensures that the folder for the file exists."""
         directory = os.path.dirname(file_path)
         if not os.path.exists(directory):
             os.makedirs(directory)
 
     @staticmethod
-    def sanitize_content(content):
+    def sanitize_content(content: str) -> str:
         """Makes an AI input or output string presentable in on screen."""
 
         content = content.split(DIVIDER)[0]
@@ -145,7 +146,9 @@ class Utils:
         return ret
 
     @staticmethod
-    def insert_files_into_prompt(prompt, source_folder, file_names):
+    def insert_files_into_prompt(
+        prompt: str, source_folder: str, file_names: List[str]
+    ) -> str:
         """
         Substitute entire file contents into the prompt. Prompts can contain ${FileName} tags,
         which will be replaced with the content of the file with the name 'FileName'
@@ -162,7 +165,9 @@ class Utils:
         return prompt
 
     @staticmethod
-    def insert_folders_into_prompt(prompt, source_folder, folder_names, ext_set):
+    def insert_folders_into_prompt(
+        prompt: str, source_folder: str, folder_names: List[str], ext_set: Set[str]
+    ):
         """
         Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
         which will be replaced with the content of the files inside the folder
@@ -183,7 +188,7 @@ class Utils:
         return prompt
 
     @staticmethod
-    def setup_page(st, title):
+    def setup_page(st, title: str):
         """Displays the app header and configures the page."""
         st.set_page_config(page_title=title, page_icon="🤖", layout="wide")
 
