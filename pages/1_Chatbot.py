@@ -1,8 +1,9 @@
 """ Streamlit GUI for the Quanta Chatbot """
 
+from typing import List
 import streamlit as st
 from streamlit_chat import message
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
 from langchain_openai import ChatOpenAI
 
 from agent.app_config import AppConfig
@@ -17,21 +18,23 @@ class AppChatbotGUI:
 
     def clear_all(self):
         """Clear all messages."""
-        st.session_state.chatbot_messages = []
+        messages: List[BaseMessage] = []
+        st.session_state.chatbot_messages = messages
         st.session_state.chatbot_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
         # initialize message history
         if "chatbot_messages" not in st.session_state:
-            st.session_state.chatbot_messages = []
+            messages: List[BaseMessage] = []
+            st.session_state.chatbot_messages = messages
 
             st.session_state.chatbot_messages.append(
                 SystemMessage(content="You are a helpful assistant.")
             )
 
         # handle user input
-        user_input = st.session_state.chatbot_user_input
+        user_input: str = st.session_state.chatbot_user_input
         # handle user input
         if user_input:
             if len(user_input) > int(self.cfg.max_prompt_length):

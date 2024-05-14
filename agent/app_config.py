@@ -3,6 +3,7 @@
 import os
 import re
 from typing import List, Set, Optional
+import argparse
 import configargparse
 
 
@@ -16,14 +17,14 @@ class AppConfig:
     STRATEGY_INJECTION_POINTS: str = "injection_points"
 
     @classmethod
-    def get_config(cls, config_file: Optional[str] = None):
+    def get_config(cls, config_file: Optional[str] = None) -> argparse.Namespace:
         """Loads configuration from config.yaml and secrets.yaml files."""
 
         # Both of these config files are optional, because the ArgParser can load
         # from command line arguments or environment variables as well.
         if config_file is None:
             config_file = "config/config.yaml"
-        secrets_file = "../secrets/secrets.yaml"
+        secrets_file: str = "../secrets/secrets.yaml"
 
         if not os.path.exists(config_file):
             print(f"WARNING: File not found: {config_file}")

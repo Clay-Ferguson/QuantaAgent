@@ -2,7 +2,7 @@
 
 import os
 from typing import List, Dict, Optional
-from dataclasses import dataclass
+from agent.models import TextBlock
 from agent.string_utils import StringUtils
 from agent.tags import (
     TAG_BLOCK_INJECT,
@@ -20,13 +20,6 @@ from agent.app_config import AppConfig
 class FileInjection:
     """Injects text blocks into files."""
 
-    @dataclass
-    class TextBlock:
-        """Represents a block of text in a file."""
-
-        name: str
-        content: str
-
     blocks: Dict[str, TextBlock] = {}
 
     def __init__(
@@ -38,12 +31,12 @@ class FileInjection:
         suffix: Optional[str],
     ):
         """Initializes the FileInjection object."""
-        self.update_strategy = update_strategy
-        self.source_folder = source_folder
-        self.source_folder_len = len(source_folder)
-        self.ai_answer = ai_answer
-        self.suffix = suffix
-        self.ts = ts
+        self.update_strategy: str = update_strategy
+        self.source_folder: str = source_folder
+        self.source_folder_len: int = len(source_folder)
+        self.ai_answer: str = ai_answer
+        self.suffix: Optional[str] = suffix
+        self.ts: str = ts
 
     def inject(self):
         """Injects content into files by extracting all the named blocks on content that are structured like this:
@@ -76,9 +69,9 @@ class FileInjection:
         defined by '// inject_begin {Name}' and '// inject_end'.
         """
         self.blocks = {}
-        current_block_name = None
-        current_content = []
-        collecting = False
+        current_block_name: Optional[str] = None
+        current_content: List[str] = []
+        collecting: bool = False
 
         for line in self.ai_answer.splitlines():
             line = line.strip()
@@ -100,7 +93,7 @@ class FileInjection:
                 # print("End of Block")
                 # End of the current block
                 if current_block_name and collecting:
-                    self.blocks[current_block_name] = self.TextBlock(
+                    self.blocks[current_block_name] = TextBlock(
                         name=current_block_name, content="\n".join(current_content)
                     )
                 else:
@@ -122,9 +115,9 @@ class FileInjection:
         Args:
         text (str): The multiline string containing the file content
         """
-        file_name = None
-        file_content = []
-        collecting = False
+        file_name: Optional[str] = None
+        file_content: List[str] = []
+        collecting: bool = False
 
         for line in self.ai_answer.splitlines():
             line = line.strip()
@@ -144,7 +137,7 @@ class FileInjection:
                 # print("End of File")
                 # End of the current file
                 if file_name and collecting:
-                    full_file_name = self.source_folder + file_name
+                    full_file_name: str = self.source_folder + file_name
 
                     # fail if file already exists
                     if os.path.exists(full_file_name):
@@ -172,17 +165,17 @@ class FileInjection:
 
         # print("Inject Into File:", filename)
         # we need content to be mutable in the methods we pass it to so we hold in a dict
-        content = [""]
+        content: List[str] = [""]
         try:
             # Read the entire file content
             with open(filename, "r", encoding="utf-8") as file:
                 content[0] = file.read()
 
-            modified = False
+            modified: bool = False
 
             # Check if we have a diff for this file
-            rel_filename = filename[self.source_folder_len :]
-            new_content = None
+            rel_filename: str = filename[self.source_folder_len :]
+            new_content: Optional[str] = None
 
             if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
                 new_content = self.parse_modified_file(self.ai_answer, rel_filename)
@@ -203,7 +196,7 @@ class FileInjection:
 
             # Write the modified content back to the file
             if modified:
-                out_file = (
+                out_file: str = (
                     StringUtils.add_filename_suffix(filename, self.suffix)
                     if self.suffix
                     else filename
@@ -216,16 +209,17 @@ class FileInjection:
         except IOError:
             print("An error occurred while reading or writing to the file.")
 
-    def parse_modified_file(self, ai_answer: str, rel_filename: str):
+    def parse_modified_file(self, ai_answer: str, rel_filename: str) -> Optional[str]:
         """Extract the new content for the given file from the AI answer."""
 
         # print(f"parse_modified_file: {rel_filename}")
         if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
-            return
+            return None
 
         # Scan all the lines in content one by one and extract the new content
-        new_content = []
-        started = False
+        new_content: List[str] = []
+        started: bool = False
+
         for line in ai_answer.splitlines():
             # print("LINE: " + line)
             if started:
@@ -245,13 +239,13 @@ class FileInjection:
             # print(f"No content found for {rel_filename}")
             return None
 
-        ret = "\n".join(new_content)
+        ret: str = "\n".join(new_content)
         # print(f"New content for {rel_filename}: {ret}")
         return ret
 
     def process_replacements(
         self, content: List[str], block: TextBlock, name: str, ts: str
-    ):
+    ) -> bool:
         """Process the replacements for the given block."""
 
         # print("replacing: name=" + name)
@@ -261,7 +255,7 @@ class FileInjection:
             return False
 
         # we return true here if we did any replacements
-        ret = (
+        ret: bool = (
             self.do_replacement("//", content, block, name, ts)
             or self.do_replacement("--", content, block, name, ts)
             or self.do_replacement("#", content, block, name, ts)
@@ -275,15 +269,15 @@ class FileInjection:
         block: TextBlock,
         name: str,
         ts: str,
-    ):
+    ) -> bool:
         """Process the replacement for the given block and comment prefix.
 
         We replace the first element of the dict content with the new content, so we're treating 'content'
         as a mutable object.
         """
 
-        found = False
-        find = f"{comment_prefix} {TAG_BLOCK_INJECT} {name}"
+        found: bool = False
+        find: str = f"{comment_prefix} {TAG_BLOCK_INJECT} {name}"
 
         if find in content[0]:
             found = True
@@ -309,6 +303,6 @@ class FileInjection:
                 _, ext = os.path.splitext(filename)
                 if ext.lower() in AppConfig.ext_set:
                     # build the full path
-                    path = os.path.join(dirpath, filename)
+                    path: str = os.path.join(dirpath, filename)
                     # Call the visitor function for each file
                     self.visit_file(path, self.ts)

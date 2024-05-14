@@ -11,7 +11,7 @@ from langchain.schema import HumanMessage, AIMessage, BaseMessage
 class AppOpenAI:
     """Makes calls to OpenAI"""
 
-    dry_run = False
+    dry_run: bool = False
 
     def __init__(
         self,
@@ -34,7 +34,7 @@ class AppOpenAI:
         if self.dry_run:
             # If dry_run is True, we simulate the AI response by reading from a file
             # if we canfind that file or else we return a default response.
-            answer_file = f"{self.data_folder}/dry-run-answer.txt"
+            answer_file: str = f"{self.data_folder}/dry-run-answer.txt"
 
             if os.path.exists(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")

@@ -18,7 +18,7 @@ class PromptTemplates:
     """Contains the prompt templates for the agent."""
 
     @staticmethod
-    def get_file_content_block(file_name: str, content: str):
+    def get_file_content_block(file_name: str, content: str) -> str:
         """Returns a file content block for the given file name and content."""
         return f"""
 {TAG_FILE_BEGIN} {file_name}
@@ -27,7 +27,7 @@ class PromptTemplates:
 """
 
     @staticmethod
-    def get_file_insertion_instructions():
+    def get_file_insertion_instructions() -> str:
         """Returns instructions for providing the new code."""
 
         return f"""
@@ -47,7 +47,7 @@ If I wasn't asking you to modify any code at all don't include any {TAG_FILE_BEG
 """
 
     @staticmethod
-    def get_block_insertion_instructions():
+    def get_block_insertion_instructions() -> str:
         """Returns instructions for providing the new code."""
 
         return f"""
@@ -72,7 +72,7 @@ If there's no comment prefix for the language, just use `//` for the prefix.
 """
 
     @staticmethod
-    def get_create_files_instructions():
+    def get_create_files_instructions() -> str:
         """Returns instructions for creating new files."""
 
         return f"""
@@ -92,7 +92,7 @@ However, if you were asked to create a completely new project, you should insert
     @staticmethod
     def build_folder_content(
         folder_path: str, ext_set: Set[str], source_folder_len: int
-    ):
+    ) -> str:
         """Builds the content of a folder. Which will contain all the filenames and their content."""
         print(f"Building content for folder: {folder_path}")
 
@@ -106,9 +106,9 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
                 _, ext = os.path.splitext(filename)
                 if ext.lower() in ext_set:
                     # build the full path
-                    path = os.path.join(dirpath, filename)
+                    path: str = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
-                    file_name = path[source_folder_len:]
+                    file_name: str = path[source_folder_len:]
                     with open(path, "r", encoding="utf-8") as file:
                         file_content = file.read()
                         content += PromptTemplates.get_file_content_block(

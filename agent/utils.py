@@ -19,28 +19,28 @@ class Utils:
     """Utilities Class"""
 
     @staticmethod
-    def has_tag_lines(prompt, tag: str) -> bool:
+    def has_tag_lines(prompt: str, tag: str) -> bool:
         """Checks if the prompt has any block_inject tags."""
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern = rf"(--|//|#) {re.escape(tag)} "
+        pattern: str = rf"(--|//|#) {re.escape(tag)} "
         return re.search(pattern, prompt) is not None
 
     @staticmethod
-    def has_filename_injects(prompt, file_names: List[str]) -> bool:
+    def has_filename_injects(prompt: str, file_names: List[str]) -> bool:
         """Returns True if the prompt has any file content injection."""
         for file_name in file_names:
-            tag_begin = f"{TAG_FILE_BEGIN} {file_name}"
-            tag_end = f"{TAG_FILE_END} {file_name}"
+            tag_begin: str = f"{TAG_FILE_BEGIN} {file_name}"
+            tag_end: str = f"{TAG_FILE_END} {file_name}"
             if tag_begin in prompt and tag_end in prompt:
                 return True
         return False
 
     @staticmethod
-    def has_folder_injects(prompt, folder_names: List[str]) -> bool:
+    def has_folder_injects(prompt: str, folder_names: List[str]) -> bool:
         """Returns True if the prompt has any folder content injection."""
         for folder_name in folder_names:
-            tag = f"${{{folder_name}/}}"
+            tag: str = f"${{{folder_name}/}}"
             if tag in prompt:
                 print(f"Found folder inject tag: {tag}")
                 return True
@@ -55,14 +55,14 @@ class Utils:
         )
 
     @staticmethod
-    def is_tag_and_name_line(line, tag: str, name: str) -> bool:
+    def is_tag_and_name_line(line: str, tag: str, name: str) -> bool:
         """Checks if the line is a line like
         `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
         or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
         """
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern = rf"^(--|//|#) {re.escape(tag)} {name}"
+        pattern: str = rf"^(--|//|#) {re.escape(tag)} {name}"
         return re.search(pattern, line) is not None
 
     @staticmethod
@@ -75,15 +75,16 @@ class Utils:
         """
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern = rf"^(--|//|#) {re.escape(tag)}"
+        pattern: str = rf"^(--|//|#) {re.escape(tag)}"
         return re.search(pattern, line) is not None
 
     @staticmethod
     def parse_block_name_from_line(line: str, tag: str) -> str:
         """Parses the block name from a `... {tag} {name}` formatted line."""
-        index = line.find(f"{tag} ")
+        index: int = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
 
+    # TODO: what type is 'st' (streamlit object)?
     @staticmethod
     def fail_app(msg: str, st=None):
         """Exits the application with a fail message"""
@@ -101,6 +102,9 @@ class Utils:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+    # TODO: need to rethink this formatter, if the user is mentioning spcific blocks, folders, or files
+    # inside the prompt we need to keep the context of all that by inserting something like:
+    # "File: {file_name}..., Block: {block_name}..., Folder: {folder_name}..."
     @staticmethod
     def sanitize_content(content: str) -> str:
         """Makes an AI input or output string presentable in on screen."""
@@ -108,9 +112,10 @@ class Utils:
         content = content.split(DIVIDER)[0]
 
         # Scan all the lines in content one by one and extract the new content
-        new_content = []
-        started = False
-        addendum = []
+        new_content: List[str] = []
+        started: bool = False
+        addendum: List[str] = []
+
         for line in content.splitlines():
             if Utils.is_tag_line(line, TAG_FILE_END):
                 started = False
@@ -140,7 +145,7 @@ class Utils:
             elif started is False:
                 new_content.append(line)
 
-        ret = "\n".join(new_content)
+        ret: str = "\n".join(new_content)
         if addendum:
             ret += "\n\n" + "\n".join(addendum)
         return ret
@@ -154,10 +159,10 @@ class Utils:
         which will be replaced with the content of the file with the name 'FileName'
         """
         for file_name in file_names:
-            tag = f"${{{file_name}}}"
+            tag: str = f"${{{file_name}}}"
             if tag in prompt:
                 with open(source_folder + file_name, "r", encoding="utf-8") as file:
-                    content = file.read()
+                    content: str = file.read()
                     prompt = prompt.replace(
                         tag, PromptTemplates.get_file_content_block(file_name, content)
                     )
@@ -167,18 +172,18 @@ class Utils:
     @staticmethod
     def insert_folders_into_prompt(
         prompt: str, source_folder: str, folder_names: List[str], ext_set: Set[str]
-    ):
+    ) -> str:
         """
         Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
         which will be replaced with the content of the files inside the folder
         """
-        source_folder_len = len(source_folder)
+        source_folder_len: int = len(source_folder)
         for folder_name in folder_names:
-            tag = f"${{{folder_name}/}}"
+            tag: str = f"${{{folder_name}/}}"
             # print(f"Checking for folder tag: {tag}")
             if tag in prompt:
                 # build the content of the folder (that -1 is removing the trailing slash from the folder name)
-                content = PromptTemplates.build_folder_content(
+                content: str = PromptTemplates.build_folder_content(
                     source_folder + folder_name,
                     ext_set,
                     source_folder_len,
@@ -201,5 +206,4 @@ class Utils:
 
         # Display the logo image in the second column
         with col2:
-            logo_image = "img/logo-100px-tr.jpg"
-            st.image(logo_image, width=100)
+            st.image("img/logo-100px-tr.jpg", width=100)

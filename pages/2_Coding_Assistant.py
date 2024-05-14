@@ -18,7 +18,7 @@ class AppAgentGUI:
 
     def clear_all(self):
         """Clear all messages."""
-        messages: List[BaseMessage] = []  # using separate line for type safety syntax
+        messages: List[BaseMessage] = []
         st.session_state.agent_messages = messages
         st.session_state.agent_user_input = ""
 
@@ -26,9 +26,7 @@ class AppAgentGUI:
         """Ask the AI."""
         # initialize message history
         if "agent_messages" not in st.session_state:
-            messages: List[BaseMessage] = (
-                []
-            )  # using separate line for type safety syntax
+            messages: List[BaseMessage] = []
             st.session_state.agent_messages = messages
 
             st.session_state.agent_messages.append(
@@ -41,15 +39,11 @@ class AppAgentGUI:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
                 agent.run(st, "", st.session_state.agent_messages, user_input)
-            st.session_state.agent_user_input = (
-                ""  # Clear the user input after processing
-            )
+            st.session_state.agent_user_input = ""
 
     def show_messages(self):
         """display message history"""
-        default_messages: List[BaseMessage] = (
-            []
-        )  # using separate line for type safety syntax
+        default_messages: List[BaseMessage] = []
         messages = st.session_state.get("agent_messages", default_messages)
         for i, msg in enumerate(messages[1:]):
             content: str = msg.content  # type: ignore

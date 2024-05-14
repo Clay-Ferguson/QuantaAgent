@@ -2,11 +2,14 @@
 
 import os
 import time
-from typing import List, Dict
-from dataclasses import dataclass
+import argparse
+from typing import List, Dict, Optional
+from langchain.schema import BaseMessage
 from agent.app_openai import AppOpenAI
 from agent.app_config import AppConfig
 from agent.file_injection import FileInjection
+
+from agent.models import TextBlock
 from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
@@ -15,18 +18,10 @@ from agent.tags import (
 )
 from agent.utils import Utils
 from agent.prompt_templates import PromptTemplates
-from langchain.schema import BaseMessage
 
 
 class QuantaAgent:
     """Scans the source code and generates the AI prompt."""
-
-    @dataclass
-    class TextBlock:
-        """Represents a block of text in a file."""
-
-        name: str
-        content: str
 
     # Dictionary to store TextBlock objects keyed by 'name'
     blocks: Dict[str, TextBlock] = {}
@@ -35,10 +30,10 @@ class QuantaAgent:
     folder_names: List[str] = []
 
     def __init__(self):
-        self.cfg = AppConfig.get_config(None)
-        self.source_folder_len = len(self.cfg.source_folder)
-        self.ts = str(int(time.time() * 1000))
-        self.answer = ""
+        self.cfg: argparse.Namespace = AppConfig.get_config(None)
+        self.source_folder_len: int = len(self.cfg.source_folder)
+        self.ts: str = str(int(time.time() * 1000))
+        self.answer: str = ""
 
     def reset(self):
         """Resets the agent's state."""
@@ -57,21 +52,23 @@ class QuantaAgent:
 
         # Open the file using 'with' which ensures the file is closed after reading
         with open(path, "r", encoding="utf-8") as file:
-            block = None
+            block: Optional[TextBlock] = None
 
-            for line in file:
+            for line in file:  # NOTE: There's no way do to typesafety in loop vars
                 # Print each line; using end='' to avoid adding extra newline
                 # print(line, end='')
-                trimmed = line.strip()
+                trimmed: str = line.strip()
 
                 if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
-                    name = Utils.parse_block_name_from_line(trimmed, TAG_BLOCK_BEGIN)
+                    name: str = Utils.parse_block_name_from_line(
+                        trimmed, TAG_BLOCK_BEGIN
+                    )
                     # print(f"Block Name: {name}")
                     if name in self.blocks:
                         Utils.fail_app(f"Duplicate Block Name {name}")
                     else:
                         # print("Creating new block")
-                        block = self.TextBlock(name, "")
+                        block = TextBlock(name, "")
                         self.blocks[name] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     if block is None:
@@ -93,7 +90,7 @@ class QuantaAgent:
         for dirpath, _, filenames in os.walk(scan_dir):
             # Get the relative path of the directory, root folder is the source folder and will be "" (empty string) here
             # as the relative path of the source folder is the root folder
-            short_dir = dirpath[self.source_folder_len :]
+            short_dir: str = dirpath[self.source_folder_len :]
 
             # If not, add it to the set and list
             # print(f"Dir: {short_dir}")
@@ -104,7 +101,7 @@ class QuantaAgent:
                 _, ext = os.path.splitext(filename)
                 if ext.lower() in AppConfig.ext_set:
                     # build the full path
-                    path = os.path.join(dirpath, filename)
+                    path: str = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
                     self.file_names.append(path[self.source_folder_len :])
                     # Call the visitor function for each file
@@ -112,7 +109,7 @@ class QuantaAgent:
 
     def write_template(self, data_folder: str, output_file_name: str, content: str):
         """Writes the template to a file."""
-        filename = f"{data_folder}/{output_file_name}--Q.txt"
+        filename: str = f"{data_folder}/{output_file_name}--Q.txt"
 
         # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:
@@ -148,15 +145,15 @@ class QuantaAgent:
 
         # If the prompt has block_inject tags, add instructions for how to provide the
         # new code, in a machine parsable way.
-        has_block_inject = Utils.has_tag_lines(prompt, TAG_BLOCK_INJECT)
+        has_block_inject: bool = Utils.has_tag_lines(prompt, TAG_BLOCK_INJECT)
         if (
             has_block_inject
             and self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
         ):
             prompt += PromptTemplates.get_block_insertion_instructions()
 
-        has_filename_inject = Utils.has_filename_injects(prompt, self.file_names)
-        has_folder_inject = Utils.has_folder_injects(prompt, self.folder_names)
+        has_filename_inject: bool = Utils.has_filename_injects(prompt, self.file_names)
+        has_folder_inject: bool = Utils.has_folder_injects(prompt, self.folder_names)
         if (
             has_filename_inject
             or has_folder_inject
@@ -200,7 +197,7 @@ class QuantaAgent:
                 None,
             ).inject()
 
-    def insert_blocks_into_prompt(self, prompt: str):
+    def insert_blocks_into_prompt(self, prompt: str) -> str:
         """
         Substitute blocks into the prompt. Prompts can contain ${BlockName} tags, which will be replaced with the
         content of the block with the name 'BlockName'
