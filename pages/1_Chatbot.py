@@ -47,7 +47,7 @@ class AppChatbotGUI:
             with st.spinner("Thinking..."):
                 chat = ChatOpenAI(
                     model=self.cfg.openai_model,
-                    temperature=0,
+                    temperature=0.7,
                     api_key=self.cfg.openai_api_key,
                 )
                 response = chat(list(st.session_state.chatbot_messages))

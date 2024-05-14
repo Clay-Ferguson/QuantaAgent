@@ -1,7 +1,7 @@
 """Makes a query to OpenAI's API and writes the response to a file."""
 
 import os
-from typing import List
+from typing import List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -26,7 +26,11 @@ class AppOpenAI:
         self.data_folder: str = data_folder
 
     def query(
-        self, messages: List[BaseMessage], query: str, output_file_name: str, ts: str
+        self,
+        messages: Optional[List[BaseMessage]],
+        query: str,
+        output_file_name: str,
+        ts: str,
     ) -> str:
         """Makes a query to OpenAI's API and writes the response to a file."""
         ret: str = ""

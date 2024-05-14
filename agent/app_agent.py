@@ -115,7 +115,13 @@ class QuantaAgent:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(content)
 
-    def run(self, st, output_file_name: str, messages: List[BaseMessage], prompt: str):
+    def run(
+        self,
+        st,
+        output_file_name: str,
+        messages: Optional[List[BaseMessage]],
+        prompt: str,
+    ):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
@@ -173,7 +179,7 @@ class QuantaAgent:
         open_ai = AppOpenAI(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
-            self.cfg.system_prompt,
+            self.cfg.agent_system_prompt,
             self.cfg.data_folder,
         )
 
