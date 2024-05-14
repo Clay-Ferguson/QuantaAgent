@@ -97,9 +97,7 @@ class QuantaAgent:
             self.folder_names.append(short_dir)
 
             for filename in filenames:
-                # Check the file extension
-                _, ext = os.path.splitext(filename)
-                if ext.lower() in AppConfig.ext_set:
+                if Utils.should_include_file(AppConfig.ext_set, filename):
                     # build the full path
                     path: str = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
@@ -142,11 +140,11 @@ class QuantaAgent:
         # This divider serves only to give the GUI a way to chop off all these instructions in the display to user
         prompt += DIVIDER
         prompt = self.insert_blocks_into_prompt(prompt)
-        prompt = Utils.insert_files_into_prompt(
+        prompt = PromptTemplates.insert_files_into_prompt(
             prompt, self.cfg.source_folder, self.file_names
         )
-        prompt = Utils.insert_folders_into_prompt(
-            prompt, self.cfg.source_folder, self.folder_names, AppConfig.ext_set
+        prompt = PromptTemplates.insert_folders_into_prompt(
+            prompt, self.cfg.source_folder, self.folder_names
         )
 
         # If the prompt has block_inject tags, add instructions for how to provide the

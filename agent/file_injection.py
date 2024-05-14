@@ -300,8 +300,7 @@ class FileInjection:
         for dirpath, _, filenames in os.walk(self.source_folder):
             for filename in filenames:
                 # Check the file extension
-                _, ext = os.path.splitext(filename)
-                if ext.lower() in AppConfig.ext_set:
+                if Utils.should_include_file(AppConfig.ext_set, filename):
                     # build the full path
                     path: str = os.path.join(dirpath, filename)
                     # Call the visitor function for each file

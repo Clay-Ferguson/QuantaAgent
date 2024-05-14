@@ -8,10 +8,7 @@ openai_model: "gpt-4o"
 # NOTE: currently chat_system_prompt is not being used, we just use the langchain default, for our general non-Agent chat
 chat_system_prompt: "You are a helpful assistant."
 
-agent_system_prompt: > 
-  You are an expert Software Engineer working to assist another expert.
-  You may be asked general software questions, or you may be asked to edit, refactor, or write code.
-  Don't assume you will always be asked to write code, but be prepared to do so, and follow the instructions given.
+agent_system_prompt: "You are an expert Software Engineer working to assist another expert. You may be asked general software questions, or you may be asked to edit, refactor, or write code. Don't assume you will always be asked to write code, but be prepared to do so, and follow the instructions given."
 
 source_folder: "test_project"
 scan_extensions: ".java, .sql, .py, .html, .htm, .js, .ts, .css"

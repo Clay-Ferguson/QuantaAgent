@@ -12,11 +12,17 @@ from agent.tags import (
     TAG_NEW_FILE_END,
     DIVIDER,
 )
-from agent.prompt_templates import PromptTemplates
 
 
 class Utils:
     """Utilities Class"""
+
+    @staticmethod
+    def should_include_file(ext_set: Set[str], file_name: str) -> bool:
+        """Returns True if the file should be included in the scan."""
+        # return file_name.endswith(tuple(AppConfig.ext_set)) # <--- AI suggested this. Didn't investigate further
+        _, ext = os.path.splitext(file_name)
+        return ext.lower() in ext_set
 
     @staticmethod
     def has_tag_lines(prompt: str, tag: str) -> bool:
@@ -149,48 +155,6 @@ class Utils:
         if addendum:
             ret += "\n\n" + "\n".join(addendum)
         return ret
-
-    @staticmethod
-    def insert_files_into_prompt(
-        prompt: str, source_folder: str, file_names: List[str]
-    ) -> str:
-        """
-        Substitute entire file contents into the prompt. Prompts can contain ${FileName} tags,
-        which will be replaced with the content of the file with the name 'FileName'
-        """
-        for file_name in file_names:
-            tag: str = f"${{{file_name}}}"
-            if tag in prompt:
-                with open(source_folder + file_name, "r", encoding="utf-8") as file:
-                    content: str = file.read()
-                    prompt = prompt.replace(
-                        tag, PromptTemplates.get_file_content_block(file_name, content)
-                    )
-
-        return prompt
-
-    @staticmethod
-    def insert_folders_into_prompt(
-        prompt: str, source_folder: str, folder_names: List[str], ext_set: Set[str]
-    ) -> str:
-        """
-        Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
-        which will be replaced with the content of the files inside the folder
-        """
-        source_folder_len: int = len(source_folder)
-        for folder_name in folder_names:
-            tag: str = f"${{{folder_name}/}}"
-            # print(f"Checking for folder tag: {tag}")
-            if tag in prompt:
-                # build the content of the folder (that -1 is removing the trailing slash from the folder name)
-                content: str = PromptTemplates.build_folder_content(
-                    source_folder + folder_name,
-                    ext_set,
-                    source_folder_len,
-                )
-                prompt = prompt.replace(tag, content)
-
-        return prompt
 
     @staticmethod
     def setup_page(st, title: str):
