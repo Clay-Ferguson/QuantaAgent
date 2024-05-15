@@ -174,10 +174,12 @@ class QuantaAgent:
                 st,
             )
 
+        system_prompt = PromptUtils.get_agent_system_prompt()
+
         open_ai = AppOpenAI(
             self.cfg.openai_api_key,
             self.cfg.openai_model,
-            self.cfg.agent_system_prompt,
+            system_prompt,
             self.cfg.data_folder,
         )
 

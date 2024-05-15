@@ -4,6 +4,7 @@ import os
 from typing import List, Optional
 from langchain.prompts import PromptTemplate
 from agent.app_config import AppConfig
+from agent.string_utils import StringUtils
 from agent.tags import (
     TAG_FILE_BEGIN,
     TAG_FILE_END,
@@ -16,54 +17,67 @@ from agent.utils import Utils
 class PromptUtils:
     """Contains the prompt templates for the agent."""
 
-    # TODO: we'll be moving the two system prompts from the config yaml into this way of handling file-based prompts
     tplt_file_content_block: Optional[PromptTemplate] = None
     tplt_file_insertion_instructions: Optional[PromptTemplate] = None
     tplt_block_insertion_instructions: Optional[PromptTemplate] = None
     tplt_create_files_instructions: Optional[PromptTemplate] = None
+    tplt_agent_system_prompt: Optional[PromptTemplate] = None
+
+    @staticmethod
+    def get_agent_system_prompt() -> str:
+        """Get the agent system prompt."""
+        if PromptUtils.tplt_agent_system_prompt is None:
+            PromptUtils.tplt_agent_system_prompt = PromptTemplate.from_file(
+                "prompt_templates/agent_system_prompt.txt"
+            )
+        return "\n\n" + StringUtils.end_slash_remove(
+            PromptUtils.tplt_agent_system_prompt.format(**template_info)
+        )
 
     @staticmethod
     def get_file_content_block(file_name: str, content: str) -> str:
-        """Returns a file content block for the given file name and content."""
+        """Get the content block for a file."""
         if PromptUtils.tplt_file_content_block is None:
             PromptUtils.tplt_file_content_block = PromptTemplate.from_file(
                 "prompt_templates/file_content_block.txt"
             )
-        return "\n\n" + PromptUtils.tplt_file_content_block.format(
-            **template_info, file_name=file_name, content=content
+        return "\n\n" + StringUtils.end_slash_remove(
+            PromptUtils.tplt_file_content_block.format(
+                **template_info, file_name=file_name, content=content
+            )
         )
 
     @staticmethod
     def get_file_insertion_instructions() -> str:
-        """Returns instructions for providing the new code."""
+        """Get the file insertion instructions."""
         if PromptUtils.tplt_file_insertion_instructions is None:
             PromptUtils.tplt_file_insertion_instructions = PromptTemplate.from_file(
                 "prompt_templates/file_insertion_instructions.txt"
             )
-        return "\n\n" + PromptUtils.tplt_file_insertion_instructions.format(
-            **template_info
+        return "\n\n" + StringUtils.end_slash_remove(
+            PromptUtils.tplt_file_insertion_instructions.format(**template_info)
         )
 
     @staticmethod
     def get_create_files_instructions() -> str:
-        """Returns instructions for creating new files."""
+        """Get the create files instructions."""
         if PromptUtils.tplt_create_files_instructions is None:
             PromptUtils.tplt_create_files_instructions = PromptTemplate.from_file(
                 "prompt_templates/create_files_instructions.txt"
             )
-        return "\n\n" + PromptUtils.tplt_create_files_instructions.format(
-            **template_info
+        return "\n\n" + StringUtils.end_slash_remove(
+            PromptUtils.tplt_create_files_instructions.format(**template_info)
         )
 
     @staticmethod
     def get_block_insertion_instructions() -> str:
-        """Returns instructions for providing the new code."""
+        """Get the block insertion instructions."""
         if PromptUtils.tplt_block_insertion_instructions is None:
             PromptUtils.tplt_block_insertion_instructions = PromptTemplate.from_file(
                 "prompt_templates/block_insertion_instructions.txt"
             )
-        return "\n\n" + PromptUtils.tplt_block_insertion_instructions.format(
-            **template_info
+        return "\n\n" + StringUtils.end_slash_remove(
+            PromptUtils.tplt_block_insertion_instructions.format(**template_info)
         )
 
     @staticmethod

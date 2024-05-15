@@ -52,14 +52,6 @@ class AppConfig:
         p.add_argument("--openai_api_key", required=True, help="API key for OpenAI")
         p.add_argument("--openai_model", required=True, help="OpenAI model name")
         p.add_argument(
-            "--chat_system_prompt",
-            required=True,
-            help="Basic chat AI query system prompt",
-        )
-        p.add_argument(
-            "--agent_system_prompt", required=True, help="Agent AI query system prompt"
-        )
-        p.add_argument(
             "--scan_extensions",
             required=True,
             help="Comma separated list of file extensions to scan",

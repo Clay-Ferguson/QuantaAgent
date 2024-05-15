@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-DIVIDER = "\n----\n"
+DIVIDER = "\n----\nAdditional Instructions:\n"
 
 TAG_BLOCK_BEGIN = "block_begin"
 TAG_BLOCK_END = "block_end"
@@ -30,5 +30,4 @@ template_info: Dict[str, str] = {
     "TAG_NEW_FILE_BEGIN": f"""{TAG_NEW_FILE_BEGIN}""",
     "TAG_NEW_FILE_END": f"""{TAG_NEW_FILE_END}""",
     "DIVIDER": f"""{DIVIDER}""",
-    "\\n": "",  # allows a slash to be used in the prompt file to break up long lines
 }
