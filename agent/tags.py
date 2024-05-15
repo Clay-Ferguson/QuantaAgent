@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-DIVIDER = "\n----\nAdditional Instructions:\n"
+MORE_INSTRUCTIONS = "\n----\nAdditional Instructions:\n"
 
 TAG_BLOCK_BEGIN = "block_begin"
 TAG_BLOCK_END = "block_end"
@@ -29,5 +29,4 @@ template_info: Dict[str, str] = {
     "TAG_FILE_END": f"""{TAG_FILE_END}""",
     "TAG_NEW_FILE_BEGIN": f"""{TAG_NEW_FILE_BEGIN}""",
     "TAG_NEW_FILE_END": f"""{TAG_NEW_FILE_END}""",
-    "DIVIDER": f"""{DIVIDER}""",
 }

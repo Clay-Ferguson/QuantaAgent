@@ -14,7 +14,7 @@ from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
     TAG_BLOCK_INJECT,
-    DIVIDER,
+    MORE_INSTRUCTIONS,
 )
 from agent.utils import Utils
 from agent.prompt_utils import PromptUtils
@@ -137,8 +137,10 @@ class QuantaAgent:
         # every time they want to ask another AI question, and we want to keep a record of what the question was.
         self.write_template(self.cfg.data_folder, output_file_name, prompt)
 
-        # This divider serves only to give the GUI a way to chop off all these instructions in the display to user
-        prompt += DIVIDER
+        # we save the original input because it will be needed later for rendering the chat history
+        user_input = prompt
+
+        prompt += MORE_INSTRUCTIONS
         prompt = self.insert_blocks_into_prompt(prompt)
         prompt = PromptUtils.insert_files_into_prompt(
             prompt, self.cfg.source_folder, self.file_names
@@ -186,6 +188,7 @@ class QuantaAgent:
         self.answer = open_ai.query(
             messages,
             prompt,
+            user_input,
             output_file_name,
             self.ts,
         )

@@ -1,14 +1,13 @@
 """Contains the prompt templates for the agent."""
 
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict
 from langchain.prompts import PromptTemplate
 from agent.app_config import AppConfig
 from agent.string_utils import StringUtils
 from agent.tags import (
     TAG_FILE_BEGIN,
     TAG_FILE_END,
-    DIVIDER,
     template_info,
 )
 from agent.utils import Utils
@@ -16,6 +15,9 @@ from agent.utils import Utils
 
 class PromptUtils:
     """Contains the prompt templates for the agent."""
+
+    # Dictionary to store user inputs keyed by id(HumanMessage)
+    user_inputs: Dict[int, str] = {}
 
     tplt_file_content_block: Optional[PromptTemplate] = None
     tplt_file_insertion_instructions: Optional[PromptTemplate] = None
@@ -85,7 +87,7 @@ class PromptUtils:
         """Builds the content of a folder. Which will contain all the filenames and their content."""
         print(f"Building content for folder: {folder_path}")
 
-        content = f"""{DIVIDER}
+        content = f"""
 
 Below is the content of the files in the folder named {folder_path} (using {TAG_FILE_BEGIN} and {TAG_FILE_END} tags to delimit the files):
         """
@@ -137,7 +139,7 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
             tag: str = f"${{{folder_name}/}}"
             # print(f"Checking for folder tag: {tag}")
             if tag in prompt:
-                # build the content of the folder (that -1 is removing the trailing slash from the folder name)
+                # build the content of the folder
                 content: str = PromptUtils.build_folder_content(
                     source_folder + folder_name,
                     source_folder_len,

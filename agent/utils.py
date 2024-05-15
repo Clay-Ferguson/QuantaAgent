@@ -10,7 +10,6 @@ from agent.tags import (
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
     TAG_NEW_FILE_END,
-    DIVIDER,
 )
 
 
@@ -90,7 +89,6 @@ class Utils:
         index: int = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
 
-    # TODO: what type is 'st' (streamlit object)?
     @staticmethod
     def fail_app(msg: str, st=None):
         """Exits the application with a fail message"""
@@ -108,19 +106,13 @@ class Utils:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-    # TODO: need to rethink this formatter, if the user is mentioning spcific blocks, folders, or files
-    # inside the prompt we need to keep the context of all that by inserting something like:
-    # "File: {file_name}..., Block: {block_name}..., Folder: {folder_name}..."
     @staticmethod
     def sanitize_content(content: str) -> str:
         """Makes an AI input or output string presentable in on screen."""
 
-        content = content.split(DIVIDER)[0]
-
         # Scan all the lines in content one by one and extract the new content
         new_content: List[str] = []
         started: bool = False
-        addendum: List[str] = []
 
         for line in content.splitlines():
             if Utils.is_tag_line(line, TAG_FILE_END):
@@ -152,8 +144,6 @@ class Utils:
                 new_content.append(line)
 
         ret: str = "\n".join(new_content)
-        if addendum:
-            ret += "\n\n" + "\n".join(addendum)
         return ret
 
     @staticmethod

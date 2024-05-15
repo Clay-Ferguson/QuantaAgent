@@ -7,6 +7,7 @@ from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
 
 from agent.app_agent import QuantaAgent
 from agent.app_config import AppConfig
+from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
 
 
@@ -21,6 +22,7 @@ class AppAgentGUI:
         messages: List[BaseMessage] = []
         st.session_state.agent_messages = messages
         st.session_state.agent_user_input = ""
+        PromptUtils.user_inputs = {}
 
     def ask_ai(self):
         """Ask the AI."""
@@ -46,12 +48,12 @@ class AppAgentGUI:
         default_messages: List[BaseMessage] = []
         messages = st.session_state.get("agent_messages", default_messages)
         for i, msg in enumerate(messages[1:]):
-            content: str = msg.content  # type: ignore
-            content = Utils.sanitize_content(content)
-
             if isinstance(msg, HumanMessage):
-                message(str(content), is_user=True, key=str(i) + "_user")
+                user_input = PromptUtils.user_inputs[id(msg)]
+                message(user_input, is_user=True, key=str(i) + "_user")
             elif isinstance(msg, AIMessage):
+                content: str = msg.content  # type: ignore
+                content = Utils.sanitize_content(content)
                 message(str(content), is_user=False, key=str(i) + "_ai")
 
     def run(self):

@@ -7,6 +7,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain.schema import HumanMessage, AIMessage, BaseMessage
 
+from agent.prompt_utils import PromptUtils
+
 
 class AppOpenAI:
     """Makes calls to OpenAI"""
@@ -29,6 +31,7 @@ class AppOpenAI:
         self,
         messages: Optional[List[BaseMessage]],
         query: str,
+        user_input: str,
         output_file_name: str,
         ts: str,
     ) -> str:
@@ -62,7 +65,9 @@ class AppOpenAI:
             else:
                 # Else we're doing a chat with context, so we append the question and also the answer, and leave
                 # the self.chat_response as the last response.
-                messages.append(HumanMessage(content=query))
+                human_message = HumanMessage(content=query)
+                PromptUtils.user_inputs[id(human_message)] = user_input
+                messages.append(human_message)
                 response = llm(list(messages))
                 ret = response.content  # type: ignore
                 messages.append(AIMessage(content=response.content))

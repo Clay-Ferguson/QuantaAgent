@@ -141,8 +141,7 @@ class FileInjection:
 
                     # fail if file already exists
                     # Tentatively removing this check becasue the AI may be trying to update a file and accidentally
-                    # does it this way which is actually fine. TODO: Think thru whether I need a separate syntax for
-                    # new files as opposed to updated files.
+                    # does it this way which is actually fine.
                     # if os.path.exists(full_file_name):
                     #     Utils.fail_app("File already exists: " + full_file_name)
 
