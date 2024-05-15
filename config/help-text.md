@@ -1,10 +1,6 @@
-### Chatbot:
+# Coding Assistant
 
-The chatbot doesn't refactor code but is just a basic chatbot for general purpose conversation.
-
-### Coding Assistant:
-
-The Coding Assistant is also a general chatbot as well however it can also refactor code. You need to provide name of the project folder of the code you want to refactor, in the `config.yaml`, and then you can reference files, folders, or specific code blocks in your prompt as explained below:
+The Coding Assistant is a chatbot which will help you write or refactor code. You simply provide the root level folder in the `config.yaml`, and then you can reference specific files, folders, or code blocks in your prompt as explained below:
 
 **Referencing Code in your Prompt**
 

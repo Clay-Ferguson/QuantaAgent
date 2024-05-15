@@ -3,6 +3,7 @@
 import re
 import os
 from typing import List, Set
+import streamlit as st
 from agent.tags import (
     TAG_INJECT_END,
     TAG_INJECT_BEGIN,
@@ -161,3 +162,17 @@ class Utils:
         # Display the logo image in the second column
         with col2:
             st.image("img/logo-100px-tr.jpg", width=100)
+
+    @staticmethod
+    def st_markdown(markdown_string):
+        """Renders markdown with images in Streamlit.
+        We need this method only because Streamlit's markdown does not support localhost images.
+        """
+        parts = re.split(r"!\[(.*?)\]\((.*?)\)", markdown_string)
+        for i, part in enumerate(parts):
+            if i % 3 == 0:
+                st.markdown(part)
+            elif i % 3 == 1:
+                title = part
+            else:
+                st.image(part)  # Add caption if you want -> , caption=title)

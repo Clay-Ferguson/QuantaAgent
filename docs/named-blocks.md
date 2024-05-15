@@ -1,4 +1,4 @@
-## Named Blocks
+# Named Blocks
 
 You can define `Named Blocks` in your code to identify specific areas which you'd like to ask questions about by name (name of a block), to save you from having to continually paste those sections of code into AI prompts.
 
