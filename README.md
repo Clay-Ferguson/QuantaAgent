@@ -42,7 +42,7 @@ To use this tool, follow these steps:
 4) Make sure your `config.yaml` has `update_strategy: "whole_file"` if you want the tool to be free to update any of your files in their entirety, or set `update_strategy: "injection_points"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `whole_file`.
 5) If you're using the command line version, then put a `question.txt` file (your AI Prompt) into your data folder and run `python3 quanta-agent.py`. Make up any arbitrary filename when prompted for one when the tool runs.
 --or--
-5) Run the Streamlit-based Web interface with this command: `streamlit run quanta-agent-gui.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
+5) Run the Streamlit-based Web interface with this command: `streamlit run Quanta_Agent.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
 7) That's it. After running the tool you will have the Question and Answer files saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated, to accomplish whatever you asked for.
 
 *Tip: When requesting project refactorings, it's best to be in a clean project version, so that if you don't like the changes the tool made to your code you can roll them back easily, using `git`.

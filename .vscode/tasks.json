@@ -2,11 +2,11 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Quanta Agent - CMD", 
+            "label": "Run Quanta Agent - CMD",
             "type": "shell",
-            "command": "python3",            
+            "command": "python3",
             "args": [
-                "${workspaceFolder}/quanta-agent.py"  
+                "${workspaceFolder}/quanta-agent.py"
             ],
             "group": {
                 "kind": "build",
@@ -19,12 +19,12 @@
             "problemMatcher": []
         },
         {
-            "label": "Run Quanta Agent - GUI", 
+            "label": "Run Quanta Agent - GUI",
             "type": "shell",
-            "command": "streamlit",            
+            "command": "streamlit",
             "args": [
                 "run",
-                "${workspaceFolder}/quanta-agent-gui.py"  
+                "${workspaceFolder}/Quanta_Agent.py"
             ],
             "group": {
                 "kind": "build",
@@ -35,6 +35,17 @@
                 "panel": "shared"
             },
             "problemMatcher": []
+        },
+        {
+            "type": "java (build)",
+            "paths": [
+                "${workspace}"
+            ],
+            "isFullBuild": true,
+            "group": "build",
+            "problemMatcher": [],
+            "label": "java (build): Build Workspace",
+            "detail": "$(tools) Build all the Java projects in workspace."
         }
     ]
 }

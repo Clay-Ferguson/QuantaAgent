@@ -34,6 +34,7 @@ class QuantaAgent:
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
+        self.update_strategy = "whole_file"
 
     def reset(self):
         """Resets the agent's state."""
@@ -116,6 +117,7 @@ class QuantaAgent:
     def run(
         self,
         st,
+        update_strategy: str,
         output_file_name: str,
         messages: Optional[List[BaseMessage]],
         prompt: str,
@@ -124,6 +126,7 @@ class QuantaAgent:
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
         self.reset()
+        self.update_strategy = update_strategy
 
         # default filename to timestamp if empty
         if output_file_name == "":
@@ -154,7 +157,7 @@ class QuantaAgent:
         has_block_inject: bool = Utils.has_tag_lines(prompt, TAG_BLOCK_INJECT)
         if (
             has_block_inject
-            and self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
+            and self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
         ):
             prompt += PromptUtils.get_block_insertion_instructions()
 
@@ -163,11 +166,11 @@ class QuantaAgent:
         if (
             has_filename_inject
             or has_folder_inject
-            and self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+            and self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
             prompt += PromptUtils.get_file_insertion_instructions()
 
-        if self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+        if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
             prompt += PromptUtils.get_create_files_instructions()
 
         if len(prompt) > int(self.cfg.max_prompt_length):
@@ -195,11 +198,11 @@ class QuantaAgent:
 
         # Only if set to one of these two strategies, do we ever alter any files
         if (
-            self.cfg.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
-            or self.cfg.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+            self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
+            or self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
             FileInjection(
-                self.cfg.update_strategy,
+                self.update_strategy,
                 self.cfg.source_folder,
                 self.answer,
                 self.ts,

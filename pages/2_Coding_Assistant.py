@@ -40,7 +40,13 @@ class AppAgentGUI:
         if user_input:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
-                agent.run(st, "", st.session_state.agent_messages, user_input)
+                agent.run(
+                    st,
+                    "",
+                    st.session_state.update_strategy,
+                    st.session_state.agent_messages,
+                    user_input,
+                )
             st.session_state.agent_user_input = ""
 
     def show_messages(self):
