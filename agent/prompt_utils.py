@@ -137,7 +137,6 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
         source_folder_len: int = len(source_folder)
         for folder_name in folder_names:
             tag: str = f"${{{folder_name}/}}"
-            # print(f"Checking for folder tag: {tag}")
             if tag in prompt:
                 # build the content of the folder
                 content: str = PromptUtils.build_folder_content(

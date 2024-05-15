@@ -60,7 +60,6 @@ class FileInjection:
         elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
             self.parse_new_files()
 
-        # print("Injection Blocks: " + str(self.blocks))
         self.scan_directory()
 
     def parse_injections(self):
@@ -75,7 +74,6 @@ class FileInjection:
 
         for line in self.ai_answer.splitlines():
             line = line.strip()
-            # print(f"Line: [{line}]")
 
             if Utils.is_tag_line(line, TAG_INJECT_BEGIN):
                 if collecting:
@@ -85,12 +83,10 @@ class FileInjection:
                 current_block_name = Utils.parse_block_name_from_line(
                     line, TAG_INJECT_BEGIN
                 )
-                # print(f"Found Block: {current_block_name}")
                 collecting = True
                 current_content = []
 
             elif Utils.is_tag_line(line, TAG_INJECT_END):
-                # print("End of Block")
                 # End of the current block
                 if current_block_name and collecting:
                     self.blocks[current_block_name] = TextBlock(
@@ -104,8 +100,6 @@ class FileInjection:
             elif collecting:
                 # Collect the content of the block
                 current_content.append(line)
-
-        # print("blocks created: " + str(self.blocks))
 
     def parse_new_files(self):
         """
@@ -121,7 +115,6 @@ class FileInjection:
 
         for line in self.ai_answer.splitlines():
             line = line.strip()
-            # print(f"Line: [{line}]")
 
             if line.startswith(f"""{TAG_NEW_FILE_BEGIN} /"""):
                 if collecting:
@@ -129,12 +122,10 @@ class FileInjection:
 
                 # Start of a new file
                 file_name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
-                # print(f"Found New File: {file_name}")
                 collecting = True
                 file_content = []
 
             elif line.startswith(f"""{TAG_NEW_FILE_END} /"""):
-                # print("End of File")
                 # End of the current file
                 if file_name and collecting:
                     full_file_name: str = self.source_folder + file_name
@@ -165,7 +156,6 @@ class FileInjection:
     def visit_file(self, filename: str, ts: str):
         """Visit the file, to run all injections on the file"""
 
-        # print("Inject Into File:", filename)
         # we need content to be mutable in the methods we pass it to so we hold in a dict
         content: List[str] = [""]
         try:
@@ -214,7 +204,6 @@ class FileInjection:
     def parse_modified_file(self, ai_answer: str, rel_filename: str) -> Optional[str]:
         """Extract the new content for the given file from the AI answer."""
 
-        # print(f"parse_modified_file: {rel_filename}")
         if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
             return None
 
@@ -223,14 +212,12 @@ class FileInjection:
         started: bool = False
 
         for line in ai_answer.splitlines():
-            # print("LINE: " + line)
             if started:
                 if Utils.is_tag_line(line, TAG_FILE_END):
                     started = False
                     break
                 new_content.append(line)
             elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):
-                # print("found begin line: " + rel_filename)
                 if len(new_content) > 0:
                     Utils.fail_app(
                         f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing."
@@ -238,11 +225,9 @@ class FileInjection:
                 started = True
 
         if len(new_content) == 0:
-            # print(f"No content found for {rel_filename}")
             return None
 
         ret: str = "\n".join(new_content)
-        # print(f"New content for {rel_filename}: {ret}")
         return ret
 
     def process_replacements(
@@ -250,10 +235,8 @@ class FileInjection:
     ) -> bool:
         """Process the replacements for the given block."""
 
-        # print("replacing: name=" + name)
         # Optimization to avoid unnessary cycles
         if f" {TAG_BLOCK_INJECT} {name}" not in content[0]:
-            # print("Skipping: " + name)
             return False
 
         # we return true here if we did any replacements
@@ -297,7 +280,6 @@ class FileInjection:
     def scan_directory(self):
         """Scans the directory for files with the specified extensions."""
 
-        # print(f"Doing Injection Scan on: {self.source_folder}")
         # Walk through all directories and files in the directory
         for dirpath, _, filenames in os.walk(self.source_folder):
             for filename in filenames:

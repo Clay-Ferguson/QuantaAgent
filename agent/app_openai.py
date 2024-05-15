@@ -86,7 +86,6 @@ Timestamp: {ts}
 User Prompt: {query}
 """
 
-        # print("Answer: "+output)
         self.write_to_file(output_file_name, output)
         return ret
 

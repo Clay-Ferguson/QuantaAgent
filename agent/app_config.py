@@ -77,5 +77,4 @@ class AppConfig:
 
         AppConfig.ext_list = re.split(r"\s*,\s*", options.scan_extensions)
         AppConfig.ext_set = set(AppConfig.ext_list)
-        # print(f"Config loaded: {config_file}")
         return options

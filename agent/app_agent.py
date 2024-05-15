@@ -49,7 +49,6 @@ class QuantaAgent:
         scanning the file for the block_begin and block_end tags, and extracting the content between them
         and saving that text for later use
         """
-        # print("File:", file_path)
 
         # Open the file using 'with' which ensures the file is closed after reading
         with open(path, "r", encoding="utf-8") as file:
@@ -57,18 +56,15 @@ class QuantaAgent:
 
             for line in file:  # NOTE: There's no way do to typesafety in loop vars
                 # Print each line; using end='' to avoid adding extra newline
-                # print(line, end='')
                 trimmed: str = line.strip()
 
                 if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
                     name: str = Utils.parse_block_name_from_line(
                         trimmed, TAG_BLOCK_BEGIN
                     )
-                    # print(f"Block Name: {name}")
                     if name in self.blocks:
                         Utils.fail_app(f"Duplicate Block Name {name}")
                     else:
-                        # print("Creating new block")
                         block = TextBlock(name, "")
                         self.blocks[name] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
@@ -94,7 +90,6 @@ class QuantaAgent:
             short_dir: str = dirpath[self.source_folder_len :]
 
             # If not, add it to the set and list
-            # print(f"Dir: {short_dir}")
             self.folder_names.append(short_dir)
 
             for filename in filenames:
