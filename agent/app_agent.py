@@ -51,7 +51,7 @@ class QuantaAgent:
         """
 
         # Open the file using 'with' which ensures the file is closed after reading
-        with open(path, "r", encoding="utf-8") as file:
+        with Utils.open_file(path) as file:
             block: Optional[TextBlock] = None
 
             for line in file:  # NOTE: There's no way do to typesafety in loop vars

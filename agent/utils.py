@@ -1,5 +1,6 @@
 """Utilities Module"""
 
+from io import TextIOWrapper
 import re
 import os
 import argparse
@@ -19,11 +20,22 @@ class Utils:
     """Utilities Class"""
 
     @staticmethod
+    def open_file(filename: str) -> TextIOWrapper:
+        """Reads a file and returns the content."""
+        return open(filename, "r", encoding="utf-8")
+
+    @staticmethod
     def write_file(filename: str, content: str):
         """Writes content to a file."""
 
         with open(filename, "w", encoding="utf-8") as file:
             file.write(content)
+
+    @staticmethod
+    def read_file(filename: str) -> str:
+        """Reads a file and returns the content."""
+        with Utils.open_file(filename) as file:
+            return file.read()
 
     @staticmethod
     def should_include_file(ext_set: Set[str], file_name: str) -> bool:

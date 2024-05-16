@@ -46,8 +46,7 @@ class AppOpenAI:
 
             if os.path.exists(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")
-                with open(answer_file, "r", encoding="utf-8") as file:
-                    ret = file.read()
+                ret = Utils.read_file(answer_file)
             else:
                 ret = "Dry Run: No API call made."
         else:

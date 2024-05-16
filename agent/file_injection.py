@@ -159,9 +159,7 @@ class FileInjection:
         content: List[str] = [""]
         try:
             # Read the entire file content
-            with open(filename, "r", encoding="utf-8") as file:
-                content[0] = file.read()
-
+            content[0] = Utils.read_file(filename)
             modified: bool = False
 
             # Check if we have a diff for this file

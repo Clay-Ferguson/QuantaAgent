@@ -65,11 +65,10 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
                     path: str = os.path.join(dirpath, filename)
                     # get the file name relative to the source folder
                     file_name: str = path[source_folder_len:]
-                    with open(path, "r", encoding="utf-8") as file:
-                        file_content = file.read()
-                        content += PromptUtils.get_file_content_block(
-                            file_name, file_content
-                        )
+                    file_content = Utils.read_file(path)
+                    content += PromptUtils.get_file_content_block(
+                        file_name, file_content
+                    )
 
         return content
 
@@ -84,11 +83,10 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
         for file_name in file_names:
             tag: str = f"${{{file_name}}}"
             if tag in prompt:
-                with open(source_folder + file_name, "r", encoding="utf-8") as file:
-                    content: str = file.read()
-                    prompt = prompt.replace(
-                        tag, PromptUtils.get_file_content_block(file_name, content)
-                    )
+                content: str = Utils.read_file(source_folder + file_name)
+                prompt = prompt.replace(
+                    tag, PromptUtils.get_file_content_block(file_name, content)
+                )
 
         return prompt
 

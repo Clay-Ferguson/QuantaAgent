@@ -18,12 +18,6 @@ class Documentation:
     def __init__(self):
         self.cfg = AppConfig.get_config(None)
 
-    def read_file(self, file_path: str):
-        """Read the content of a file."""
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-        return content
-
     def run(self):
         ### Main Documentation Page ###
         Utils.setup_page(st, self.cfg, "Quanta: Documentation")
@@ -40,7 +34,7 @@ class Documentation:
 
         # Display the content of the selected file in the right column
         with col2:
-            content = self.read_file(selected_file)
+            content = Utils.read_file(selected_file)
             Utils.st_markdown(content)
 
         # Sanity check
