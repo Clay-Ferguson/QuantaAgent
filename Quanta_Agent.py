@@ -10,8 +10,8 @@ def show_strategy_picker(default_strategy: str):
     """Show the strategy picker."""
 
     # Initialize the session state variable if it doesn't exist
-    if "update_strategy" not in st.session_state:
-        st.session_state.update_strategy = default_strategy
+    if "p_update_strategy" not in st.session_state:
+        st.session_state.p_update_strategy = default_strategy
 
     # Define the mapping between keys and display values
     strategy_mapping = {
@@ -23,7 +23,7 @@ def show_strategy_picker(default_strategy: str):
     st.radio(
         "File Modification Strategy:",
         list(strategy_mapping.keys()),
-        key="update_strategy",
+        key="p_update_strategy",
         format_func=lambda x: {
             "whole_file": "Whole File: AI is allowed to update entire files.",
             "injection_points": "Injection Points: AI is only allowed to update specific points in the code.",

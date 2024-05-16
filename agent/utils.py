@@ -163,25 +163,19 @@ class Utils:
         with col2:
             st.image("img/logo-100px-tr.jpg", width=100)
 
-        # All Session Vars that are shared acorss pages should be include here or else they
-        # will be lost when the user navigates to another page.
-        # This is a rediculous fix to stop the Streamlit API from blowing away this varible.
-        # Some moron at Streamlit decided that if a variable is not used in the current scope, it should be deleted
-        # from the session state, but it's completely stupid to randomly delete variables like that. Lucikly one of their
-        # developers provided this hack of a workaround:
-        # https://discuss.streamlit.io/t/mutipages-and-st-session-state-has-no-key-username/45237
-        Utils.keep_session_vars(
-            "update_strategy",
-            "chatbot_messages",
-            "agent_messages",
-        )
+        Utils.keep_session_vars()
 
     @staticmethod
-    def keep_session_vars(*property_names: str):
-        """Keeps the session state variables from being deleted by Streamlit."""
-        for property_name in property_names:
-            if property_name in st.session_state:
-                st.session_state[property_name] = st.session_state[property_name]
+    def keep_session_vars():
+        """
+        Keeps the session state variables from being deleted by Streamlit.
+
+        This is a workaround for the issue where Streamlit deletes session state variables when the page is refreshed.
+        https://discuss.streamlit.io/t/mutipages-and-st-session-state-has-no-key-username/45237
+        """
+        for prop in st.session_state:
+            if prop.startswith("p_"):
+                st.session_state[prop] = st.session_state[prop]
 
     @staticmethod
     def st_markdown(markdown_string):

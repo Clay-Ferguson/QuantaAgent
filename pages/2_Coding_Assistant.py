@@ -9,6 +9,10 @@ from agent.app_agent import QuantaAgent
 from agent.app_config import AppConfig
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
+from agent.tags import (
+    TAG_BLOCK_BEGIN,
+    TAG_BLOCK_END,
+)
 
 
 class AppAgentGUI:
@@ -20,18 +24,18 @@ class AppAgentGUI:
     def clear_all(self):
         """Clear all messages."""
         messages: List[BaseMessage] = []
-        st.session_state.agent_messages = messages
+        st.session_state.p_agent_messages = messages
         st.session_state.agent_user_input = ""
         PromptUtils.user_inputs = {}
 
     def ask_ai(self):
         """Ask the AI."""
         # initialize message history
-        if "agent_messages" not in st.session_state:
+        if "p_agent_messages" not in st.session_state:
             messages: List[BaseMessage] = []
-            st.session_state.agent_messages = messages
+            st.session_state.p_agent_messages = messages
 
-            st.session_state.agent_messages.append(
+            st.session_state.p_agent_messages.append(
                 SystemMessage(content="You are a helpful assistant.")
             )
 
@@ -43,8 +47,8 @@ class AppAgentGUI:
                 agent.run(
                     st,
                     "",
-                    st.session_state.update_strategy,
-                    st.session_state.agent_messages,
+                    st.session_state.p_update_strategy,
+                    st.session_state.p_agent_messages,
                     user_input,
                 )
             st.session_state.agent_user_input = ""
@@ -52,7 +56,7 @@ class AppAgentGUI:
     def show_messages(self):
         """display message history"""
         default_messages: List[BaseMessage] = []
-        messages = st.session_state.get("agent_messages", default_messages)
+        messages = st.session_state.get("p_agent_messages", default_messages)
         for i, msg in enumerate(messages[1:]):
             if isinstance(msg, HumanMessage):
                 user_input = PromptUtils.user_inputs[id(msg)]
@@ -80,19 +84,22 @@ class AppAgentGUI:
         self.show_messages()
 
         with st.expander("Helpful Tips. Read this first!"):
+            # TODO: Get this template the normal way other tempaltes are gotten. From text file. Be sure to remove {{ and }}
+            # when you put in a text file.
             st.markdown(
-                """
+                f"""
 Remember: If you don't include one or more of the following at least in your intial prompt, the AI will not know anything about your codebase:
 | Syntax | Description |
 | --- | --- |
-| `${/}` | Include all files in the project folder |
-| `${/folder_name/}` | Include all files in the folder |
-| `${/file_name}` | Include a specific file |
+| `${{/}}` | Include all files in the project folder |
+| `${{/folder_name/}}` | Include all files in the folder |
+| `${{/file_name}}` | Include a specific file |
+| `#{{BlockName}}` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
 ----
 **Example Refactoring Prompt:**
 ```
 In my HTML file and change the title to "Hello World" to "Hello Universe".
-${/}
+${{/}}
 ```
 """
             )

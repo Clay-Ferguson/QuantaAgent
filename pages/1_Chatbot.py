@@ -19,17 +19,17 @@ class AppChatbotGUI:
     def clear_all(self):
         """Clear all messages."""
         messages: List[BaseMessage] = []
-        st.session_state.chatbot_messages = messages
+        st.session_state.p_chatbot_messages = messages
         st.session_state.chatbot_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
         # initialize message history
-        if "chatbot_messages" not in st.session_state:
+        if "p_chatbot_messages" not in st.session_state:
             messages: List[BaseMessage] = []
-            st.session_state.chatbot_messages = messages
+            st.session_state.p_chatbot_messages = messages
 
-            st.session_state.chatbot_messages.append(
+            st.session_state.p_chatbot_messages.append(
                 SystemMessage(content="You are a helpful assistant.")
             )
 
@@ -43,16 +43,16 @@ class AppChatbotGUI:
                 )
                 return
 
-            st.session_state.chatbot_messages.append(HumanMessage(content=user_input))
+            st.session_state.p_chatbot_messages.append(HumanMessage(content=user_input))
             with st.spinner("Thinking..."):
                 chat = ChatOpenAI(
                     model=self.cfg.openai_model,
                     temperature=0.7,
                     api_key=self.cfg.openai_api_key,
                 )
-                response = chat(list(st.session_state.chatbot_messages))
+                response = chat(list(st.session_state.p_chatbot_messages))
 
-            st.session_state.chatbot_messages.append(
+            st.session_state.p_chatbot_messages.append(
                 AIMessage(content=response.content)
             )
             st.session_state.chatbot_user_input = (
@@ -61,7 +61,7 @@ class AppChatbotGUI:
 
     def show_messages(self):
         """display message history"""
-        messages = st.session_state.get("chatbot_messages", [])
+        messages = st.session_state.get("p_chatbot_messages", [])
         for i, msg in enumerate(messages[1:]):
             if isinstance(msg, HumanMessage):
                 message(str(msg.content), is_user=True, key=str(i) + "_user")
