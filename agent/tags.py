@@ -23,6 +23,8 @@ TAG_BLOCK_BEGIN_LEN = len(TAG_BLOCK_BEGIN)
 
 template_info: Dict[str, str] = {
     "TAG_BLOCK_INJECT": f"""{TAG_BLOCK_INJECT}""",
+    "TAG_BLOCK_BEGIN": f"""{TAG_BLOCK_BEGIN}""",
+    "TAG_BLOCK_END": f"""{TAG_BLOCK_END}""",
     "TAG_INJECT_BEGIN": f"""{TAG_INJECT_BEGIN}""",
     "TAG_INJECT_END": f"""{TAG_INJECT_END}""",
     "TAG_FILE_BEGIN": f"""{TAG_FILE_BEGIN}""",

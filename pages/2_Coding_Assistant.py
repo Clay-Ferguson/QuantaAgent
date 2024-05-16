@@ -87,25 +87,7 @@ class AppAgentGUI:
         self.show_form()
 
         with st.expander("Helpful Tips. Read this first!"):
-            # TODO: Get this template the normal way other tempaltes are gotten. From text file. Be sure to remove {{ and }}
-            # when you put in a text file.
-            st.markdown(
-                f"""
-Remember: If you don't include one or more of the following at least in your intial prompt, the AI will not know anything about your codebase:
-| Syntax | Description |
-| --- | --- |
-| `${{/}}` | Include all files in the project folder |
-| `${{/folder_name/}}` | Include all files in the folder |
-| `${{/file_name}}` | Include a specific file |
-| `#{{BlockName}}` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
-----
-**Example Refactoring Prompt:**
-```
-In my HTML file and change the title to "Hello World" to "Hello Universe".
-${{/}}
-```
-"""
-            )
+            st.markdown(PromptUtils.get_template("agent_chat_tips"))
 
         # Sanity check
         # st.write(st.session_state)
