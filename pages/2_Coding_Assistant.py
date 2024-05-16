@@ -66,10 +66,8 @@ class AppAgentGUI:
                 content = Utils.sanitize_content(content)
                 message(str(content), is_user=False, key=str(i) + "_ai")
 
-    def run(self):
-        """Main function for the Streamlit GUI."""
-        Utils.setup_page(st, self.cfg, "Quanta: AI Coding Agent")
-
+    def show_form(self):
+        """Show the form for user input."""
         with st.form("agent_form"):
             st.text_area(
                 "Ask the AI a Question (or ask for a Code Refactor to be done): ",
@@ -81,7 +79,12 @@ class AppAgentGUI:
             with col2:
                 st.form_submit_button("Clear", on_click=self.clear_all)
 
+    def run(self):
+        """Main function for the Streamlit GUI."""
+        Utils.setup_page(st, self.cfg, "Quanta: AI Coding Agent")
+
         self.show_messages()
+        self.show_form()
 
         with st.expander("Helpful Tips. Read this first!"):
             # TODO: Get this template the normal way other tempaltes are gotten. From text file. Be sure to remove {{ and }}

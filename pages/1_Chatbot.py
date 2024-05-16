@@ -68,10 +68,8 @@ class AppChatbotGUI:
             elif isinstance(msg, AIMessage):
                 message(str(msg.content), is_user=False, key=str(i) + "_ai")
 
-    def run(self):
-        """Main function for the Streamlit GUI."""
-        Utils.setup_page(st, self.cfg, "Quanta: AI Chatbot")
-
+    def show_form(self):
+        """Show the form to ask the AI a question."""
         with st.form("chatbot_form"):
             st.text_area(
                 "Ask the AI a Question: ",
@@ -83,7 +81,12 @@ class AppChatbotGUI:
             with col2:
                 st.form_submit_button("Clear", on_click=self.clear_all)
 
+    def run(self):
+        """Main function for the Streamlit GUI."""
+        Utils.setup_page(st, self.cfg, "Quanta: AI Chatbot")
+
         self.show_messages()
+        self.show_form()
 
         # Sanity check
         # st.write(st.session_state)
