@@ -97,5 +97,8 @@ ${/}
 """
             )
 
+        # Sanity check
+        # st.write(st.session_state)
+
 
 AppAgentGUI().run()

@@ -19,27 +19,26 @@ def show_strategy_picker(default_strategy: str):
         "injection_points": "Injection Points",
     }
 
-    idx = list(strategy_mapping.keys()).index(st.session_state.update_strategy)
-
     # Create the radio button
-    choice = st.radio(
+    st.radio(
         "File Modification Strategy:",
         list(strategy_mapping.keys()),
-        index=idx,
+        key="update_strategy",
         format_func=lambda x: {
             "whole_file": "Whole File: AI is allowed to update entire files.",
             "injection_points": "Injection Points: AI is only allowed to update specific points in the code.",
         }[x],
     )
 
-    # Update the session state variable when the radio button value changes
-    st.session_state.update_strategy = choice
-
 
 # to Run: `streamlit run Quanta_Agent.py`
 
 if __name__ == "__main__":
     cfg = AppConfig.get_config(None)
+
     Utils.setup_page(st, "Quanta: AI Tools")
 
     show_strategy_picker(cfg.update_strategy)
+
+    # Sanity check
+    # st.write(st.session_state)

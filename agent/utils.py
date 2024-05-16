@@ -163,6 +163,16 @@ class Utils:
         with col2:
             st.image("img/logo-100px-tr.jpg", width=100)
 
+        # All Session Vars that are shared acorss pages should be include here or else they
+        # will be lost when the user navigates to another page.
+        # This is a rediculous fix to stop the Streamlit API from blowing away this varible.
+        # Some moron at Streamlit decided that if a variable is not used in the current scope, it should be deleted
+        # from the session state, but it's completely stupid to randomly delete variables like that. Lucikly one of their
+        # developers provided this hack of a workaround:
+        # https://discuss.streamlit.io/t/mutipages-and-st-session-state-has-no-key-username/45237
+        if "update_strategy" in st.session_state:
+            st.session_state.update_strategy = st.session_state.update_strategy
+
     @staticmethod
     def st_markdown(markdown_string):
         """Renders markdown with images in Streamlit.

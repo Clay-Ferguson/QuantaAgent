@@ -3,6 +3,8 @@ import streamlit as st
 from agent.app_config import AppConfig
 from agent.utils import Utils
 
+# TODO: Just for consistency make this a class like other pages
+
 
 def get_config_markdown(cfg):
     """Get the config markdown."""
@@ -23,3 +25,6 @@ Utils.setup_page(st, "Quanta: Agent Settings")
 # ith st.expander("Show Configs"):
 cm = get_config_markdown(cfg)
 st.markdown(cm)
+
+# Sanity check
+# st.write(st.session_state)

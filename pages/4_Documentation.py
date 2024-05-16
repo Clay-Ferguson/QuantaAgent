@@ -39,5 +39,8 @@ class Documentation:
             content = self.read_file(selected_file)
             Utils.st_markdown(content)
 
+        # Sanity check
+        # st.write(st.session_state)
+
 
 Documentation().run()

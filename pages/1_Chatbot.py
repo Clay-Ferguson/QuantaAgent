@@ -85,5 +85,8 @@ class AppChatbotGUI:
 
         self.show_messages()
 
+        # Sanity check
+        # st.write(st.session_state)
+
 
 AppChatbotGUI().run()
