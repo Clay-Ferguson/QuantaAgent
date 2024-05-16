@@ -170,8 +170,18 @@ class Utils:
         # from the session state, but it's completely stupid to randomly delete variables like that. Lucikly one of their
         # developers provided this hack of a workaround:
         # https://discuss.streamlit.io/t/mutipages-and-st-session-state-has-no-key-username/45237
-        if "update_strategy" in st.session_state:
-            st.session_state.update_strategy = st.session_state.update_strategy
+        Utils.keep_session_vars(
+            "update_strategy",
+            "chatbot_messages",
+            "agent_messages",
+        )
+
+    @staticmethod
+    def keep_session_vars(*property_names: str):
+        """Keeps the session state variables from being deleted by Streamlit."""
+        for property_name in property_names:
+            if property_name in st.session_state:
+                st.session_state[property_name] = st.session_state[property_name]
 
     @staticmethod
     def st_markdown(markdown_string):
