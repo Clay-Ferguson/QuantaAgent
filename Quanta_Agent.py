@@ -6,12 +6,8 @@ from agent.app_config import AppConfig
 from agent.utils import Utils
 
 
-def show_strategy_picker(default_strategy: str):
+def show_strategy_picker():
     """Show the strategy picker."""
-
-    # Initialize the session state variable if it doesn't exist
-    if "p_update_strategy" not in st.session_state:
-        st.session_state.p_update_strategy = default_strategy
 
     # Define the mapping between keys and display values
     strategy_mapping = {
@@ -36,9 +32,8 @@ def show_strategy_picker(default_strategy: str):
 if __name__ == "__main__":
     cfg = AppConfig.get_config(None)
 
-    Utils.setup_page(st, "Quanta: AI Tools")
-
-    show_strategy_picker(cfg.update_strategy)
+    Utils.setup_page(st, cfg, "Quanta: AI Tools")
+    show_strategy_picker()
 
     # Sanity check
     # st.write(st.session_state)

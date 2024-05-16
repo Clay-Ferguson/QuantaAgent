@@ -154,7 +154,7 @@ class QuantaAgent:
             has_block_inject
             and self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
         ):
-            prompt += PromptUtils.get_block_insertion_instructions()
+            prompt += PromptUtils.get_template("block_insertion_instructions")
 
         has_filename_inject: bool = Utils.has_filename_injects(prompt, self.file_names)
         has_folder_inject: bool = Utils.has_folder_injects(prompt, self.folder_names)
@@ -163,10 +163,10 @@ class QuantaAgent:
             or has_folder_inject
             and self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
-            prompt += PromptUtils.get_file_insertion_instructions()
+            prompt += PromptUtils.get_template("file_insertion_instructions")
 
         if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-            prompt += PromptUtils.get_create_files_instructions()
+            prompt += PromptUtils.get_template("create_files_instructions")
 
         if len(prompt) > int(self.cfg.max_prompt_length):
             Utils.fail_app(
@@ -174,7 +174,7 @@ class QuantaAgent:
                 st,
             )
 
-        system_prompt = PromptUtils.get_agent_system_prompt()
+        system_prompt = PromptUtils.get_template("agent_system_prompt")
 
         open_ai = AppOpenAI(
             self.cfg.openai_api_key,

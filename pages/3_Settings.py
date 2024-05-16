@@ -10,7 +10,7 @@ class Settings:
     """Settings page."""
 
     def __init__(self):
-        self.cfg = None
+        self.cfg = AppConfig.get_config(None)
 
     def get_config_markdown(self, cfg: argparse.Namespace):
         """Get the config markdown."""
@@ -26,8 +26,7 @@ class Settings:
 
     def run(self):
         """Run the settings page."""
-        self.cfg = AppConfig.get_config(None)
-        Utils.setup_page(st, "Quanta: Agent Settings")
+        Utils.setup_page(st, self.cfg, "Quanta: Agent Settings")
 
         # ith st.expander("Show Configs"):
         cm = self.get_config_markdown(self.cfg)

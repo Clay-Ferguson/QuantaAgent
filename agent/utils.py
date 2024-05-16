@@ -2,6 +2,7 @@
 
 import re
 import os
+import argparse
 from typing import List, Set
 import streamlit as st
 from agent.tags import (
@@ -148,7 +149,7 @@ class Utils:
         return ret
 
     @staticmethod
-    def setup_page(st, title: str):
+    def setup_page(st, cfg: argparse.Namespace, title: str):
         """Displays the app header and configures the page."""
         st.set_page_config(page_title=title, page_icon="🤖", layout="wide")
 
@@ -163,7 +164,14 @@ class Utils:
         with col2:
             st.image("img/logo-100px-tr.jpg", width=100)
 
+        Utils.set_default_session_vars(cfg)
         Utils.keep_session_vars()
+
+    @staticmethod
+    def set_default_session_vars(cfg: argparse.Namespace):
+        """Sets the default session variables."""
+        if "p_update_strategy" not in st.session_state:
+            st.session_state.p_update_strategy = cfg.update_strategy
 
     @staticmethod
     def keep_session_vars():

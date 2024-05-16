@@ -46,8 +46,8 @@ class AppAgentGUI:
                 agent = QuantaAgent()
                 agent.run(
                     st,
-                    "",
                     st.session_state.p_update_strategy,
+                    "",
                     st.session_state.p_agent_messages,
                     user_input,
                 )
@@ -68,7 +68,7 @@ class AppAgentGUI:
 
     def run(self):
         """Main function for the Streamlit GUI."""
-        Utils.setup_page(st, "Quanta: AI Coding Agent")
+        Utils.setup_page(st, self.cfg, "Quanta: AI Coding Agent")
 
         with st.form("agent_form"):
             st.text_area(

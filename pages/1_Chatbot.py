@@ -70,7 +70,7 @@ class AppChatbotGUI:
 
     def run(self):
         """Main function for the Streamlit GUI."""
-        Utils.setup_page(st, "Quanta: AI Chatbot")
+        Utils.setup_page(st, self.cfg, "Quanta: AI Chatbot")
 
         with st.form("chatbot_form"):
             st.text_area(

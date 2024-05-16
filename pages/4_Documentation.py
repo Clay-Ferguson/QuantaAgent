@@ -1,5 +1,6 @@
 import streamlit as st
 
+from agent.app_config import AppConfig
 from agent.utils import Utils
 
 # Define the files lookup map
@@ -14,6 +15,9 @@ files = {
 class Documentation:
     """Streamlit GUI for the Quanta Chatbot."""
 
+    def __init__(self):
+        self.cfg = AppConfig.get_config(None)
+
     def read_file(self, file_path: str):
         """Read the content of a file."""
         with open(file_path, "r", encoding="utf-8") as file:
@@ -22,7 +26,7 @@ class Documentation:
 
     def run(self):
         ### Main Documentation Page ###
-        Utils.setup_page(st, "Quanta: Documentation")
+        Utils.setup_page(st, self.cfg, "Quanta: Documentation")
 
         # Create a two-column layout
         col1, col2 = st.columns([1, 3])

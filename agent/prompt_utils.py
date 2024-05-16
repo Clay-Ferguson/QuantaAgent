@@ -20,21 +20,20 @@ class PromptUtils:
     user_inputs: Dict[int, str] = {}
 
     tplt_file_content_block: Optional[PromptTemplate] = None
-    tplt_file_insertion_instructions: Optional[PromptTemplate] = None
-    tplt_block_insertion_instructions: Optional[PromptTemplate] = None
-    tplt_create_files_instructions: Optional[PromptTemplate] = None
-    tplt_agent_system_prompt: Optional[PromptTemplate] = None
+
+    # caches the version of a template file, after core substitutions have been made from template_info
+    template_cache: Dict[str, str] = {}
 
     @staticmethod
-    def get_agent_system_prompt() -> str:
-        """Get the agent system prompt."""
-        if PromptUtils.tplt_agent_system_prompt is None:
-            PromptUtils.tplt_agent_system_prompt = PromptTemplate.from_file(
-                "prompt_templates/agent_system_prompt.txt"
+    def get_template(file_name: str) -> str:
+        """Get the template for the given file name."""
+        if file_name not in PromptUtils.template_cache:
+            pt = PromptTemplate.from_file(f"prompt_templates/{file_name}.txt")
+            PromptUtils.template_cache[file_name] = (
+                "\n\n" + StringUtils.end_slash_remove(pt.format(**template_info))
             )
-        return "\n\n" + StringUtils.end_slash_remove(
-            PromptUtils.tplt_agent_system_prompt.format(**template_info)
-        )
+
+        return PromptUtils.template_cache[file_name]
 
     @staticmethod
     def get_file_content_block(file_name: str, content: str) -> str:
@@ -47,39 +46,6 @@ class PromptUtils:
             PromptUtils.tplt_file_content_block.format(
                 **template_info, file_name=file_name, content=content
             )
-        )
-
-    @staticmethod
-    def get_file_insertion_instructions() -> str:
-        """Get the file insertion instructions."""
-        if PromptUtils.tplt_file_insertion_instructions is None:
-            PromptUtils.tplt_file_insertion_instructions = PromptTemplate.from_file(
-                "prompt_templates/file_insertion_instructions.txt"
-            )
-        return "\n\n" + StringUtils.end_slash_remove(
-            PromptUtils.tplt_file_insertion_instructions.format(**template_info)
-        )
-
-    @staticmethod
-    def get_create_files_instructions() -> str:
-        """Get the create files instructions."""
-        if PromptUtils.tplt_create_files_instructions is None:
-            PromptUtils.tplt_create_files_instructions = PromptTemplate.from_file(
-                "prompt_templates/create_files_instructions.txt"
-            )
-        return "\n\n" + StringUtils.end_slash_remove(
-            PromptUtils.tplt_create_files_instructions.format(**template_info)
-        )
-
-    @staticmethod
-    def get_block_insertion_instructions() -> str:
-        """Get the block insertion instructions."""
-        if PromptUtils.tplt_block_insertion_instructions is None:
-            PromptUtils.tplt_block_insertion_instructions = PromptTemplate.from_file(
-                "prompt_templates/block_insertion_instructions.txt"
-            )
-        return "\n\n" + StringUtils.end_slash_remove(
-            PromptUtils.tplt_block_insertion_instructions.format(**template_info)
         )
 
     @staticmethod
