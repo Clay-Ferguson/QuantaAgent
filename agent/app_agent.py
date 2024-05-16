@@ -7,7 +7,7 @@ from typing import List, Dict, Optional
 from langchain.schema import BaseMessage
 from agent.app_openai import AppOpenAI
 from agent.app_config import AppConfig
-from agent.file_injection import FileInjection
+from agent.project_mutator import ProjectMutator
 
 from agent.models import TextBlock
 from agent.tags import (
@@ -188,13 +188,13 @@ class QuantaAgent:
             self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
             or self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
         ):
-            FileInjection(
+            ProjectMutator(
                 self.update_strategy,
                 self.cfg.source_folder,
                 self.answer,
                 self.ts,
                 None,
-            ).inject()
+            ).run()
 
     def insert_blocks_into_prompt(self, prompt: str) -> str:
         """

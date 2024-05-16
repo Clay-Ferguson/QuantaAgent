@@ -17,8 +17,8 @@ from agent.utils import Utils
 from agent.app_config import AppConfig
 
 
-class FileInjection:
-    """Injects text blocks into files."""
+class ProjectMutator:
+    """Performs all project mutations that the AI has requested."""
 
     blocks: Dict[str, TextBlock] = {}
 
@@ -30,7 +30,7 @@ class FileInjection:
         ts: str,
         suffix: Optional[str],
     ):
-        """Initializes the FileInjection object."""
+        """Initializes the ProjectMutator object."""
         self.update_strategy: str = update_strategy
         self.source_folder: str = source_folder
         self.source_folder_len: int = len(source_folder)
@@ -38,23 +38,10 @@ class FileInjection:
         self.suffix: Optional[str] = suffix
         self.ts: str = ts
 
-    def inject(self):
-        """Injects content into files by extracting all the named blocks on content that are structured like this:
-
-        // inject_begin <Name>
-        ...content to be injected...
-        // inject_end
-
-        And inserting into the proper source file injection site identifieid in the code by:
-        // block_inject <Name>
-        or
-        -- block_inject <Name>
-        or
-        # block_inject <Name>
-        """
+    def run(self):
+        """Performs all the project mutations which may be new files, updated files, or updated blocks in files."""
 
         self.blocks = {}
-        # Put this string in a constants file
         if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
             self.parse_injections()
         elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:

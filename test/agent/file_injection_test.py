@@ -1,7 +1,7 @@
 """Test the file injection module."""
 
 import time
-from agent.file_injection import FileInjection
+from agent.project_mutator import ProjectMutator
 from agent.app_config import AppConfig
 
 
@@ -14,7 +14,7 @@ def test_simple_injection():
 
     ts = str(int(time.time() * 1000))
     cfg = AppConfig.get_config("config/config_test.yaml")
-    inst = FileInjection(
+    inst = ProjectMutator(
         cfg.update_strategy,
         cfg.source_folder,
         """
@@ -25,5 +25,5 @@ def test_simple_injection():
         ts,
         f"-{ts}",
     )
-    inst.inject()
+    inst.run()
     assert True
