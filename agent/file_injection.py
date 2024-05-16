@@ -141,8 +141,7 @@ class FileInjection:
 
                     # write the new file
                     print("Writing new file: " + full_file_name)
-                    with open(full_file_name, "w", encoding="utf-8") as file:
-                        file.write("\n".join(file_content))
+                    Utils.write_file(full_file_name, "\n".join(file_content))
                 else:
                     print("No file_name or not collecting")
 
@@ -193,8 +192,7 @@ class FileInjection:
                     if self.suffix
                     else filename
                 )
-                with open(out_file, "w", encoding="utf-8") as file:
-                    file.write(content[0])
+                Utils.write_file(out_file, content[0])
 
         except FileNotFoundError:
             print(f"The file {filename} does not exist.")

@@ -35,7 +35,6 @@ class AppChatbotGUI:
 
         # handle user input
         user_input: str = st.session_state.chatbot_user_input
-        # handle user input
         if user_input:
             if len(user_input) > int(self.cfg.max_prompt_length):
                 st.error(

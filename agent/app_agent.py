@@ -101,14 +101,6 @@ class QuantaAgent:
                     # Call the visitor function for each file
                     self.visit_file(path)
 
-    def write_template(self, data_folder: str, output_file_name: str, content: str):
-        """Writes the template to a file."""
-        filename: str = f"{data_folder}/{output_file_name}--Q.txt"
-
-        # Write content to the file
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(content)
-
     def run(
         self,
         st,
@@ -133,7 +125,7 @@ class QuantaAgent:
         # Write template before substitutions. This is really essentially a snapshot of what the 'question.txt' file
         # contained when the tool was ran, which is important because users will edit the question.txt file
         # every time they want to ask another AI question, and we want to keep a record of what the question was.
-        self.write_template(self.cfg.data_folder, output_file_name, prompt)
+        Utils.write_file(f"{self.cfg.data_folder}/{output_file_name}--Q.txt", prompt)
 
         # we save the original input because it will be needed later for rendering the chat history
         user_input = prompt

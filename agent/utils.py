@@ -19,6 +19,13 @@ class Utils:
     """Utilities Class"""
 
     @staticmethod
+    def write_file(filename: str, content: str):
+        """Writes content to a file."""
+
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(content)
+
+    @staticmethod
     def should_include_file(ext_set: Set[str], file_name: str) -> bool:
         """Returns True if the file should be included in the scan."""
         # return file_name.endswith(tuple(AppConfig.ext_set)) # <--- AI suggested this. Didn't investigate further

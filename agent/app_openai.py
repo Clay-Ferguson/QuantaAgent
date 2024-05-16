@@ -8,6 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain.schema import HumanMessage, AIMessage, BaseMessage
 
 from agent.prompt_utils import PromptUtils
+from agent.utils import Utils
 
 
 class AppOpenAI:
@@ -93,9 +94,5 @@ User Prompt: {query}
         """Writes the content to a file."""
 
         filename = f"{self.data_folder}/{output_file_name}--A.txt"
-
-        # Write content to the file
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(content)
-
+        Utils.write_file(filename, content)
         print(f"Wrote File: {filename}")

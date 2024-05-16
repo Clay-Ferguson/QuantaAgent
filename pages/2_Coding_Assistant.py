@@ -9,10 +9,6 @@ from agent.app_agent import QuantaAgent
 from agent.app_config import AppConfig
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
-from agent.tags import (
-    TAG_BLOCK_BEGIN,
-    TAG_BLOCK_END,
-)
 
 
 class AppAgentGUI:
