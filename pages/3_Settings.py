@@ -1,14 +1,20 @@
-import streamlit as st
+"""Settings page."""
 
+import streamlit as st
+import argparse
 from agent.app_config import AppConfig
 from agent.utils import Utils
 
-# TODO: Just for consistency make this a class like other pages
 
+class Settings:
+    """Settings page."""
 
-def get_config_markdown(cfg):
-    """Get the config markdown."""
-    return f"""
+    def __init__(self):
+        self.cfg = None
+
+    def get_config_markdown(self, cfg: argparse.Namespace):
+        """Get the config markdown."""
+        return f"""
 ### Configuration
 * Model: {cfg.openai_model}
 * Source Folder: {cfg.source_folder}
@@ -18,13 +24,17 @@ def get_config_markdown(cfg):
 * Max Prompt Length: {cfg.max_prompt_length}
 """
 
+    def run(self):
+        """Run the settings page."""
+        self.cfg = AppConfig.get_config(None)
+        Utils.setup_page(st, "Quanta: Agent Settings")
 
-cfg = AppConfig.get_config(None)
-Utils.setup_page(st, "Quanta: Agent Settings")
+        # ith st.expander("Show Configs"):
+        cm = self.get_config_markdown(self.cfg)
+        st.markdown(cm)
 
-# ith st.expander("Show Configs"):
-cm = get_config_markdown(cfg)
-st.markdown(cm)
+    # Sanity check
+    # st.write(st.session_state)
 
-# Sanity check
-# st.write(st.session_state)
+
+Settings().run()
