@@ -53,26 +53,6 @@ class Utils:
         return re.search(pattern, prompt) is not None
 
     @staticmethod
-    def has_filename_injects(prompt: str, file_names: List[str]) -> bool:
-        """Returns True if the prompt has any file content injection."""
-        for file_name in file_names:
-            tag_begin: str = f"{TAG_FILE_BEGIN} {file_name}"
-            tag_end: str = f"{TAG_FILE_END} {file_name}"
-            if tag_begin in prompt and tag_end in prompt:
-                return True
-        return False
-
-    @staticmethod
-    def has_folder_injects(prompt: str, folder_names: List[str]) -> bool:
-        """Returns True if the prompt has any folder content injection."""
-        for folder_name in folder_names:
-            tag: str = f"${{{folder_name}/}}"
-            if tag in prompt:
-                print(f"Found folder inject tag: {tag}")
-                return True
-        return False
-
-    @staticmethod
     def has_new_files(content: str) -> bool:
         """Checks if the content has new files."""
         return (

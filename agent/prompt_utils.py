@@ -1,7 +1,7 @@
 """Contains the prompt templates for the agent."""
 
 import os
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from langchain.prompts import PromptTemplate
 from agent.app_config import AppConfig
 from agent.string_utils import StringUtils
@@ -75,38 +75,40 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
     @staticmethod
     def insert_files_into_prompt(
         prompt: str, source_folder: str, file_names: List[str]
-    ) -> str:
+    ) -> Tuple[str, bool]:
         """
         Substitute entire file contents into the prompt. Prompts can contain ${FileName} tags,
         which will be replaced with the content of the file with the name 'FileName'
         """
+        inserted: bool = False
         for file_name in file_names:
             tag: str = f"${{{file_name}}}"
             if tag in prompt:
+                inserted = True
                 content: str = Utils.read_file(source_folder + file_name)
                 prompt = prompt.replace(
                     tag, PromptUtils.get_file_content_block(file_name, content)
                 )
-
-        return prompt
+        return prompt, inserted
 
     @staticmethod
     def insert_folders_into_prompt(
         prompt: str, source_folder: str, folder_names: List[str]
-    ) -> str:
+    ) -> Tuple[str, bool]:
         """
         Substitute entire folder contents into the prompt. Prompts can contain ${FolderName} tags,
         which will be replaced with the content of the files inside the folder
         """
         source_folder_len: int = len(source_folder)
+        inserted: bool = False
         for folder_name in folder_names:
             tag: str = f"${{{folder_name}/}}"
             if tag in prompt:
+                inserted = True
                 # build the content of the folder
                 content: str = PromptUtils.build_folder_content(
                     source_folder + folder_name,
                     source_folder_len,
                 )
                 prompt = prompt.replace(tag, content)
-
-        return prompt
+        return prompt, inserted

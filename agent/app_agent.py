@@ -35,6 +35,14 @@ class QuantaAgent:
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
         self.update_strategy = "whole_file"
+        self.ran: bool = False
+        self.prompt: str = ""
+        self.has_filename_inject = False
+        self.has_folder_inject = False
+        self.blocks = {}
+        # All file names encountered during the scan, relative to the source folder
+        self.file_names = []
+        self.folder_names = []
 
     def run(
         self,
@@ -42,12 +50,18 @@ class QuantaAgent:
         update_strategy: str,
         output_file_name: str,
         messages: Optional[List[BaseMessage]],
-        prompt: str,
+        input_prompt: str,
     ):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
-        self.reset()
+        if self.ran:
+            Utils.fail_app(
+                "Agent has already run. Instantiate a new agent instance to run again.",
+                st,
+            )
+        self.ran = True
+        self.prompt = input_prompt
         self.update_strategy = update_strategy
 
         # default filename to timestamp if empty
@@ -60,47 +74,11 @@ class QuantaAgent:
         # Write template before substitutions. This is really essentially a snapshot of what the 'question.txt' file
         # contained when the tool was ran, which is important because users will edit the question.txt file
         # every time they want to ask another AI question, and we want to keep a record of what the question was.
-        Utils.write_file(f"{self.cfg.data_folder}/{output_file_name}--Q.txt", prompt)
-
-        # we save the original input because it will be needed later for rendering the chat history
-        user_input = prompt
-
-        prompt += MORE_INSTRUCTIONS
-        prompt = self.insert_blocks_into_prompt(prompt)
-        prompt = PromptUtils.insert_files_into_prompt(
-            prompt, self.cfg.source_folder, self.file_names
-        )
-        prompt = PromptUtils.insert_folders_into_prompt(
-            prompt, self.cfg.source_folder, self.folder_names
+        Utils.write_file(
+            f"{self.cfg.data_folder}/{output_file_name}--Q.txt", self.prompt
         )
 
-        # If the prompt has block_inject tags, add instructions for how to provide the
-        # new code, in a machine parsable way.
-        has_block_inject: bool = Utils.has_tag_lines(prompt, TAG_BLOCK_INJECT)
-        if (
-            has_block_inject
-            and self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
-        ):
-            prompt += PromptUtils.get_template("block_insertion_instructions")
-
-        has_filename_inject: bool = Utils.has_filename_injects(prompt, self.file_names)
-        has_folder_inject: bool = Utils.has_folder_injects(prompt, self.folder_names)
-        if (
-            has_filename_inject
-            or has_folder_inject
-            and self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
-        ):
-            prompt += PromptUtils.get_template("file_insertion_instructions")
-
-        if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-            prompt += PromptUtils.get_template("create_files_instructions")
-
-        if len(prompt) > int(self.cfg.max_prompt_length):
-            Utils.fail_app(
-                f"Prompt length {len(prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
-                st,
-            )
-
+        self.add_all_prompt_instructions(st)
         system_prompt = PromptUtils.get_template("agent_system_prompt")
 
         open_ai = AppOpenAI(
@@ -112,8 +90,8 @@ class QuantaAgent:
 
         self.answer = open_ai.query(
             messages,
-            prompt,
-            user_input,
+            self.prompt,
+            input_prompt,
             output_file_name,
             self.ts,
         )
@@ -131,13 +109,62 @@ class QuantaAgent:
                 None,
             ).run()
 
-    def reset(self):
-        """Resets the agent's state."""
-        self.ts = str(int(time.time() * 1000))
-        self.blocks = {}
-        # All file names encountered during the scan, relative to the source folder
-        self.file_names = []
-        self.folder_names = []
+    def add_all_prompt_instructions(self, st):
+        """Adds all the instructions to the prompt. This includes instructions for inserting blocks, files,
+        folders, and creating files."""
+        self.prompt += MORE_INSTRUCTIONS
+        self.insert_blocks_into_prompt()
+        self.insert_files_and_folders_into_prompt()
+
+        # Technically these insertion instructions could be moved to the SystemPrompt, and it might be
+        # a good idea to do that, but for now we're keeping them here.
+        self.add_block_insertion_instructions()
+        self.add_file_insertion_instructions()
+        self.add_create_file_instructions()
+
+        if len(self.prompt) > int(self.cfg.max_prompt_length):
+            Utils.fail_app(
+                f"Prompt length {len(self.prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
+                st,
+            )
+
+    def add_create_file_instructions(self):
+        """Adds instructions for creating files. If the update strategy is 'whole_file', then we need to
+        provide instructions for how to create files."""
+        if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+            self.prompt += PromptUtils.get_template("create_files_instructions")
+
+    def add_file_insertion_instructions(self):
+        """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
+        we need to provide instructions for how to provide the new file or folder names.
+        """
+        if (
+            self.has_filename_inject
+            or self.has_folder_inject
+            and self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+        ):
+            self.prompt += PromptUtils.get_template("file_insertion_instructions")
+
+    def add_block_insertion_instructions(self):
+        """Adds instructions for inserting blocks. If the prompt contains ${BlockName} tags, then we need to provide
+        instructions for how to provide the new block content."""
+        # If the prompt has block_inject tags, add instructions for how to provide the
+        # new code, in a machine parsable way.
+        has_block_inject: bool = Utils.has_tag_lines(self.prompt, TAG_BLOCK_INJECT)
+        if (
+            has_block_inject
+            and self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
+        ):
+            self.prompt += PromptUtils.get_template("block_insertion_instructions")
+
+    def insert_files_and_folders_into_prompt(self):
+        """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags"""
+        self.prompt, self.has_filename_inject = PromptUtils.insert_files_into_prompt(
+            self.prompt, self.cfg.source_folder, self.file_names
+        )
+        self.prompt, self.has_folder_inject = PromptUtils.insert_folders_into_prompt(
+            self.prompt, self.cfg.source_folder, self.folder_names
+        )
 
     def visit_file(self, path: str):
         """Visits a file and extracts text blocks into `blocks`. So we're just
@@ -196,11 +223,10 @@ class QuantaAgent:
                     # Call the visitor function for each file
                     self.visit_file(path)
 
-    def insert_blocks_into_prompt(self, prompt: str) -> str:
+    def insert_blocks_into_prompt(self):
         """
         Substitute blocks into the prompt. Prompts can contain ${BlockName} tags, which will be replaced with the
         content of the block with the name 'BlockName'
         """
         for key, value in self.blocks.items():
-            prompt = prompt.replace(f"${{{key}}}", value.content)
-        return prompt
+            self.prompt = self.prompt.replace(f"${{{key}}}", value.content)
