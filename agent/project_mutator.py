@@ -37,11 +37,16 @@ class ProjectMutator:
         self.ai_answer: str = ai_answer
         self.suffix: Optional[str] = suffix
         self.ts: str = ts
+        self.ran = False
+        self.blocks = {}
 
     def run(self):
         """Performs all the project mutations which may be new files, updated files, or updated blocks in files."""
 
-        self.blocks = {}
+        if self.ran:
+            Utils.fail_app("ProjectMutator has already run.")
+        self.ran = True
+
         if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
             self.parse_injections()
         elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
@@ -50,11 +55,9 @@ class ProjectMutator:
         self.scan_directory()
 
     def parse_injections(self):
-        """
-        Parses the ai prompt to find and extract blocks of text
+        """Parses the ai prompt to find and extract blocks of text
         defined by '// inject_begin {Name}' and '// inject_end'.
         """
-        self.blocks = {}
         current_block_name: Optional[str] = None
         current_content: List[str] = []
         collecting: bool = False
@@ -116,12 +119,6 @@ class ProjectMutator:
                 # End of the current file
                 if file_name and collecting:
                     full_file_name: str = self.source_folder + file_name
-
-                    # fail if file already exists
-                    # Tentatively removing this check becasue the AI may be trying to update a file and accidentally
-                    # does it this way which is actually fine.
-                    # if os.path.exists(full_file_name):
-                    #     Utils.fail_app("File already exists: " + full_file_name)
 
                     # Ensure folder exisits
                     Utils.ensure_folder_exists(full_file_name)

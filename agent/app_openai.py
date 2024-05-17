@@ -86,12 +86,7 @@ Timestamp: {ts}
 User Prompt: {query}
 """
 
-        self.write_to_file(output_file_name, output)
-        return ret
-
-    def write_to_file(self, output_file_name: str, content: str):
-        """Writes the content to a file."""
-
         filename = f"{self.data_folder}/{output_file_name}--A.txt"
-        Utils.write_file(filename, content)
+        Utils.write_file(filename, output)
         print(f"Wrote File: {filename}")
+        return ret

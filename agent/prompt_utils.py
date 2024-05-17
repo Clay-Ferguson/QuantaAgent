@@ -26,9 +26,16 @@ class PromptUtils:
 
     @staticmethod
     def get_template(file_name: str) -> str:
-        """Get the template for the given file name."""
+        """
+        Get the template for the given file name.
+        NOTE: Of the file_name contains a slash we use it as is (minus the .txt extension),
+        else we assume it's in prompt_templates folder
+        """
         if file_name not in PromptUtils.template_cache:
-            pt = PromptTemplate.from_file(f"prompt_templates/{file_name}.txt")
+            if "/" in file_name:
+                pt = PromptTemplate.from_file(f"{file_name}.txt")
+            else:
+                pt = PromptTemplate.from_file(f"prompt_templates/{file_name}.txt")
             PromptUtils.template_cache[file_name] = (
                 "\n\n" + StringUtils.end_slash_remove(pt.format(**template_info))
             )

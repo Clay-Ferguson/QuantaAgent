@@ -9,8 +9,11 @@ source_folder: "test_project"
 scan_extensions: ".java, .sql, .py, .html, .htm, .js, .ts, .css"
 data_folder: "data"
 
-update_strategy: "whole_file" 
+# TODO: better naming for these would be just 'files, points, blocks, none'
+#       'none' would mean you can ask about files and it will never change them
+# update_strategy: "whole_file" 
 # update_strategy: "injection_points"
+update_strategy: "blocks"
 
 # Units are in characters (bytes). This is just a safegard mainly to keep from accidentally spending too much money
 max_prompt_length: 100000

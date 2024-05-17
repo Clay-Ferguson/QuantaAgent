@@ -83,7 +83,7 @@ class AppAgentGUI:
         self.show_form()
 
         with st.expander("Helpful Tips. Read this first!"):
-            st.markdown(PromptUtils.get_template("agent_chat_tips"))
+            st.markdown(PromptUtils.get_template("config/agent_chat_tips"))
 
         # Sanity check
         # st.write(st.session_state)
