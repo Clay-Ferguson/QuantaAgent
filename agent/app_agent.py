@@ -36,71 +36,6 @@ class QuantaAgent:
         self.answer: str = ""
         self.update_strategy = "whole_file"
 
-    def reset(self):
-        """Resets the agent's state."""
-        self.ts = str(int(time.time() * 1000))
-        self.blocks = {}
-        # All file names encountered during the scan, relative to the source folder
-        self.file_names = []
-        self.folder_names = []
-
-    def visit_file(self, path: str):
-        """Visits a file and extracts text blocks into `blocks`. So we're just
-        scanning the file for the block_begin and block_end tags, and extracting the content between them
-        and saving that text for later use
-        """
-
-        # Open the file using 'with' which ensures the file is closed after reading
-        with Utils.open_file(path) as file:
-            block: Optional[TextBlock] = None
-
-            for line in file:  # NOTE: There's no way do to typesafety in loop vars
-                # Print each line; using end='' to avoid adding extra newline
-                trimmed: str = line.strip()
-
-                if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
-                    name: str = Utils.parse_block_name_from_line(
-                        trimmed, TAG_BLOCK_BEGIN
-                    )
-                    if name in self.blocks:
-                        Utils.fail_app(f"Duplicate Block Name {name}")
-                    else:
-                        block = TextBlock(name, "")
-                        self.blocks[name] = block
-                elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
-                    if block is None:
-                        Utils.fail_app(
-                            f"""Encountered {TAG_BLOCK_END} without a corresponding {TAG_BLOCK_BEGIN}"""
-                        )
-                    block = None
-                else:
-                    if block is not None:
-                        block.content += line
-
-    def scan_directory(self, scan_dir: str):
-        """Scans the directory for files with the specified extensions. The purpose of this scan
-        is to build up the 'blocks' dictionary with the content of the blocks in the files, and also
-        to collect all the filenames into `file_names`
-        """
-
-        # Walk through all directories and files in the directory
-        for dirpath, _, filenames in os.walk(scan_dir):
-            # Get the relative path of the directory, root folder is the source folder and will be "" (empty string) here
-            # as the relative path of the source folder is the root folder
-            short_dir: str = dirpath[self.source_folder_len :]
-
-            # If not, add it to the set and list
-            self.folder_names.append(short_dir)
-
-            for filename in filenames:
-                if Utils.should_include_file(AppConfig.ext_set, filename):
-                    # build the full path
-                    path: str = os.path.join(dirpath, filename)
-                    # get the file name relative to the source folder
-                    self.file_names.append(path[self.source_folder_len :])
-                    # Call the visitor function for each file
-                    self.visit_file(path)
-
     def run(
         self,
         st,
@@ -195,6 +130,71 @@ class QuantaAgent:
                 self.ts,
                 None,
             ).run()
+
+    def reset(self):
+        """Resets the agent's state."""
+        self.ts = str(int(time.time() * 1000))
+        self.blocks = {}
+        # All file names encountered during the scan, relative to the source folder
+        self.file_names = []
+        self.folder_names = []
+
+    def visit_file(self, path: str):
+        """Visits a file and extracts text blocks into `blocks`. So we're just
+        scanning the file for the block_begin and block_end tags, and extracting the content between them
+        and saving that text for later use
+        """
+
+        # Open the file using 'with' which ensures the file is closed after reading
+        with Utils.open_file(path) as file:
+            block: Optional[TextBlock] = None
+
+            for line in file:  # NOTE: There's no way do to typesafety in loop vars
+                # Print each line; using end='' to avoid adding extra newline
+                trimmed: str = line.strip()
+
+                if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
+                    name: str = Utils.parse_block_name_from_line(
+                        trimmed, TAG_BLOCK_BEGIN
+                    )
+                    if name in self.blocks:
+                        Utils.fail_app(f"Duplicate Block Name {name}")
+                    else:
+                        block = TextBlock(name, "")
+                        self.blocks[name] = block
+                elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
+                    if block is None:
+                        Utils.fail_app(
+                            f"""Encountered {TAG_BLOCK_END} without a corresponding {TAG_BLOCK_BEGIN}"""
+                        )
+                    block = None
+                else:
+                    if block is not None:
+                        block.content += line
+
+    def scan_directory(self, scan_dir: str):
+        """Scans the directory for files with the specified extensions. The purpose of this scan
+        is to build up the 'blocks' dictionary with the content of the blocks in the files, and also
+        to collect all the filenames into `file_names`
+        """
+
+        # Walk through all directories and files in the directory
+        for dirpath, _, filenames in os.walk(scan_dir):
+            # Get the relative path of the directory, root folder is the source folder and will be "" (empty string) here
+            # as the relative path of the source folder is the root folder
+            short_dir: str = dirpath[self.source_folder_len :]
+
+            # If not, add it to the set and list
+            self.folder_names.append(short_dir)
+
+            for filename in filenames:
+                if Utils.should_include_file(AppConfig.ext_set, filename):
+                    # build the full path
+                    path: str = os.path.join(dirpath, filename)
+                    # get the file name relative to the source folder
+                    self.file_names.append(path[self.source_folder_len :])
+                    # Call the visitor function for each file
+                    self.visit_file(path)
 
     def insert_blocks_into_prompt(self, prompt: str) -> str:
         """
