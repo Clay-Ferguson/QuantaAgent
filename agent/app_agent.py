@@ -34,7 +34,7 @@ class QuantaAgent:
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
-        self.update_strategy = "whole_file"
+        self.update_strategy = AppConfig.STRATEGY_WHOLE_FILE
         self.ran: bool = False
         self.prompt: str = ""
         self.has_filename_inject = False
@@ -100,6 +100,7 @@ class QuantaAgent:
         if (
             self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
             or self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
+            or self.update_strategy == AppConfig.STRATEGY_BLOCKS
         ):
             ProjectMutator(
                 self.update_strategy,
@@ -116,17 +117,23 @@ class QuantaAgent:
         self.insert_blocks_into_prompt()
         self.insert_files_and_folders_into_prompt()
 
-        # Technically these insertion instructions could be moved to the SystemPrompt, and it might be
-        # a good idea to do that, but for now we're keeping them here.
+        # TODO: These insertion instructions should be moved to the SystemPrompt,so they're not repeated in every prompt
         self.add_block_insertion_instructions()
         self.add_file_insertion_instructions()
         self.add_create_file_instructions()
+        self.add_block_update_instructions()
 
         if len(self.prompt) > int(self.cfg.max_prompt_length):
             Utils.fail_app(
                 f"Prompt length {len(self.prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
                 st,
             )
+
+    def add_block_update_instructions(self):
+        """Adds instructions for updating blocks. If the prompt contains ${BlockName} tags, then we need to provide
+        instructions for how to provide the new block content."""
+        if self.update_strategy == AppConfig.STRATEGY_BLOCKS and len(self.blocks) > 0:
+            self.prompt += PromptUtils.get_template("block_update_instructions")
 
     def add_create_file_instructions(self):
         """Adds instructions for creating files. If the update strategy is 'whole_file', then we need to
@@ -168,7 +175,7 @@ class QuantaAgent:
 
     def visit_file(self, path: str):
         """Visits a file and extracts text blocks into `blocks`. So we're just
-        scanning the file for the block_begin and block_end tags, and extracting the content between them
+        scanning the files for the block_begin and block_end tags, and extracting the content between them
         and saving that text for later use
         """
 

@@ -13,6 +13,8 @@ from agent.tags import (
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
     TAG_NEW_FILE_END,
+    TAG_BLOCK_BEGIN,
+    TAG_BLOCK_END,
 )
 
 
@@ -86,7 +88,10 @@ class Utils:
 
     @staticmethod
     def parse_block_name_from_line(line: str, tag: str) -> str:
-        """Parses the block name from a `... {tag} {name}` formatted line."""
+        """Parses the block name from a `... {tag} {name}` formatted line.
+
+        Note: this keys off the 'tag' in the string and is works with or without any comment characters at the beginning of the line.
+        """
         index: int = line.find(f"{tag} ")
         return line[index + len(tag) :].strip()
 
@@ -109,12 +114,14 @@ class Utils:
 
     @staticmethod
     def sanitize_content(content: str) -> str:
-        """Makes an AI input or output string presentable in on screen."""
+        """Makes an AI response string presentable in on screen."""
 
         # Scan all the lines in content one by one and extract the new content
         new_content: List[str] = []
         started: bool = False
 
+        # TODO: the TAG_FILE_* and TAG_NEW_FILE_* tags should be converted over to never use the '//' or '--' comment characters, right?
+        #       Specifically meaning in the prompt outout from the LLM
         for line in content.splitlines():
             if Utils.is_tag_line(line, TAG_FILE_END):
                 started = False
@@ -122,7 +129,12 @@ class Utils:
             elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
                 started = False
                 break
-            elif Utils.is_tag_line(line, TAG_INJECT_END):
+            # we use 'startswith' because this is never in code
+            elif line.startswith(TAG_INJECT_END):
+                started = False
+                break
+            # we use 'startswith' because this is never in code
+            elif line.startswith(TAG_BLOCK_END):
                 started = False
                 break
 
@@ -136,8 +148,13 @@ class Utils:
                 started = True
                 new_content.append("File Created: " + name)
 
-            elif Utils.is_tag_line(line, TAG_INJECT_BEGIN):
+            elif line.startswith(TAG_INJECT_BEGIN):
                 name = Utils.parse_block_name_from_line(line, TAG_INJECT_BEGIN)
+                started = True
+                new_content.append("Code Block Injected: " + name)
+
+            elif line.startswith(TAG_BLOCK_BEGIN):
+                name = Utils.parse_block_name_from_line(line, TAG_BLOCK_BEGIN)
                 started = True
                 new_content.append("Code Block Updated: " + name)
 

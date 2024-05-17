@@ -5,10 +5,17 @@ class StringUtils:
     """String Utilities Class"""
 
     @staticmethod
-    def end_slash_remove(line: str) -> str:
-        """Remove the ending slash from a line."""
+    def post_process_template(prompt: str) -> str:
+        """Remove the ending slash from lines.
+        And remove all lines in the prompt that start with `-- ` because they are comments.
+        """
 
-        return line.replace("\\\n", "")
+        # Removes the commented lines from the prompt (lines that start with '-- ')
+        prompt = "\n".join(
+            [line.rstrip() for line in prompt.split("\n") if not line.startswith("-- ")]
+        )
+
+        return prompt.replace("\\\n", "")
 
     @staticmethod
     def add_filename_suffix(filename: str, suffix: str) -> str:

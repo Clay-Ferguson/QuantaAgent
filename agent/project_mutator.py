@@ -6,6 +6,8 @@ from agent.models import TextBlock
 from agent.string_utils import StringUtils
 from agent.tags import (
     TAG_BLOCK_INJECT,
+    TAG_BLOCK_BEGIN,
+    TAG_BLOCK_END,
     TAG_INJECT_END,
     TAG_INJECT_BEGIN,
     TAG_FILE_BEGIN,
@@ -48,15 +50,17 @@ class ProjectMutator:
         self.ran = True
 
         if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
-            self.parse_injections()
+            self.parse_blocks(TAG_INJECT_BEGIN, TAG_INJECT_END)
+        if self.update_strategy == AppConfig.STRATEGY_BLOCKS:
+            self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
         elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-            self.parse_new_files()
+            self.process_new_files()
 
-        self.scan_directory()
+        self.process_project()
 
-    def parse_injections(self):
-        """Parses the ai prompt to find and extract blocks of text
-        defined by '// inject_begin {Name}' and '// inject_end'.
+    def parse_blocks(self, begin_tag: str, end_tag: str):
+        """Parses the ai answer to find and extract blocks of text defined by '{begin_tag} {Name}'
+        and {end_tag}. The output of this method is stored in the 'blocks' dictionary.
         """
         current_block_name: Optional[str] = None
         current_content: List[str] = []
@@ -65,18 +69,16 @@ class ProjectMutator:
         for line in self.ai_answer.splitlines():
             line = line.strip()
 
-            if Utils.is_tag_line(line, TAG_INJECT_BEGIN):
+            if line.startswith(begin_tag):
                 if collecting:
-                    Utils.fail_app("Found Inject Begin tag while still collecting")
+                    Utils.fail_app("Found Begin tag while still collecting")
 
                 # Start of a new block
-                current_block_name = Utils.parse_block_name_from_line(
-                    line, TAG_INJECT_BEGIN
-                )
+                current_block_name = Utils.parse_block_name_from_line(line, begin_tag)
                 collecting = True
                 current_content = []
 
-            elif Utils.is_tag_line(line, TAG_INJECT_END):
+            elif line.startswith(end_tag):
                 # End of the current block
                 if current_block_name and collecting:
                     self.blocks[current_block_name] = TextBlock(
@@ -91,10 +93,10 @@ class ProjectMutator:
                 # Collect the content of the block
                 current_content.append(line)
 
-    def parse_new_files(self):
+    def process_new_files(self):
         """
         Parses the ai prompt to find and extract new files content
-        defined by '// new_file_begin {Name}' and '// new_file_end'.
+        defined by '// new_file_begin {Name}' and '// new_file_end' and write those files
 
         Args:
         text (str): The multiline string containing the file content
@@ -161,6 +163,11 @@ class ProjectMutator:
                 if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
                     # Perform all injections but keep the 'block_inject' lines
                     for name, block in self.blocks.items():
+                        if self.process_injections(content, block, name, ts):
+                            modified = True
+                if self.update_strategy == AppConfig.STRATEGY_BLOCKS:
+                    # Perform all injections but keep the 'block_inject' lines
+                    for name, block in self.blocks.items():
                         if self.process_replacements(content, block, name, ts):
                             modified = True
 
@@ -210,10 +217,32 @@ class ProjectMutator:
         ret: str = "\n".join(new_content)
         return ret
 
+    # TODO: For methods like this currently using the [0] list element for simulating pass-by-reference we
+    # can make them return a tuple of (bool, str) instead
     def process_replacements(
         self, content: List[str], block: TextBlock, name: str, ts: str
     ) -> bool:
         """Process the replacements for the given block."""
+
+        # Optimization to avoid unnessary cycles
+        # TODO: We can optimize this even better by checking each of the types of comments
+        #       here precisely and then just calling that one, rather than doing the big "or" below.
+        #       There are at least two places in the code that can be optimized in this way.
+        if f" {TAG_BLOCK_BEGIN} {name}" not in content[0]:
+            return False
+
+        # we return true here if we did any replacements
+        ret: bool = (
+            self.do_replacement("//", content, block, name)
+            or self.do_replacement("--", content, block, name)
+            or self.do_replacement("#", content, block, name)
+        )
+        return ret
+
+    def process_injections(
+        self, content: List[str], block: TextBlock, name: str, ts: str
+    ) -> bool:
+        """Process the injections for the given block."""
 
         # Optimization to avoid unnessary cycles
         if f" {TAG_BLOCK_INJECT} {name}" not in content[0]:
@@ -221,13 +250,13 @@ class ProjectMutator:
 
         # we return true here if we did any replacements
         ret: bool = (
-            self.do_replacement("//", content, block, name, ts)
-            or self.do_replacement("--", content, block, name, ts)
-            or self.do_replacement("#", content, block, name, ts)
+            self.do_injection("//", content, block, name, ts)
+            or self.do_injection("--", content, block, name, ts)
+            or self.do_injection("#", content, block, name, ts)
         )
         return ret
 
-    def do_replacement(
+    def do_injection(
         self,
         comment_prefix: str,
         content: List[str],
@@ -235,7 +264,8 @@ class ProjectMutator:
         name: str,
         ts: str,
     ) -> bool:
-        """Process the replacement for the given block and comment prefix.
+        """Process the injections for the given block and comment prefix. This is what does the actual
+        injection of new code into an injection point in a file.
 
         We replace the first element of the dict content with the new content, so we're treating 'content'
         as a mutable object.
@@ -257,7 +287,41 @@ class ProjectMutator:
             print("Replaced: " + find)
         return found
 
-    def scan_directory(self):
+    def do_replacement(
+        self, comment_prefix: str, content: List[str], block: TextBlock, name: str
+    ) -> bool:
+        """Process the replacement for the given block and comment prefix. This is what does the actual
+        replacement of a named block of code.
+
+        We replace the first element of the dict content with the new content, so we're treating 'content'
+        as a mutable object.
+        """
+
+        found: bool = False
+        lines = content[0].splitlines()
+        new_lines = []
+        in_block = False
+        # We will break up content into lines and then iterate over them to find the block we want to replace
+        # We will then replace the block with the new block content
+        for line in lines:
+            if in_block:
+                if f"{comment_prefix} {TAG_BLOCK_END}" in line:
+                    in_block = False
+                    new_lines.append(block.content)
+                    new_lines.append(line)
+                    found = True
+            elif f"{comment_prefix} {TAG_BLOCK_BEGIN} {name}" in line:
+                in_block = True
+                new_lines.append(line)
+            else:
+                new_lines.append(line)
+
+        if found:
+            content[0] = "\n".join(new_lines)
+
+        return found
+
+    def process_project(self):
         """Scans the directory for files with the specified extensions."""
 
         # Walk through all directories and files in the directory

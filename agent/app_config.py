@@ -15,6 +15,7 @@ class AppConfig:
 
     STRATEGY_WHOLE_FILE: str = "whole_file"
     STRATEGY_INJECTION_POINTS: str = "injection_points"
+    STRATEGY_BLOCKS: str = "blocks"
 
     @classmethod
     def get_config(cls, config_file: Optional[str] = None) -> argparse.Namespace:
@@ -67,7 +68,7 @@ class AppConfig:
         p.add_argument(
             "--update_strategy",
             required=True,
-            help="Update strategy for the files (whole_file or injection_points)",
+            help="Update strategy for the files (whole_file or injection_points, or blocks)",
         )
         p.add_argument(
             "--max_prompt_length", required=True, help="Max characters in prompt"

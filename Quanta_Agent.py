@@ -11,8 +11,9 @@ def show_strategy_picker():
 
     # Define the mapping between keys and display values
     strategy_mapping = {
-        "whole_file": "Whole File",
-        "injection_points": "Injection Points",
+        AppConfig.STRATEGY_WHOLE_FILE: "Whole File",
+        AppConfig.STRATEGY_INJECTION_POINTS: "Injection Points",
+        AppConfig.STRATEGY_BLOCKS: "Update Blocks",
     }
 
     # Create the radio button
@@ -21,8 +22,9 @@ def show_strategy_picker():
         list(strategy_mapping.keys()),
         key="p_update_strategy",
         format_func=lambda x: {
-            "whole_file": "Whole File: AI is allowed to update entire files.",
-            "injection_points": "Injection Points: AI is only allowed to update specific points in the code.",
+            AppConfig.STRATEGY_WHOLE_FILE: "Whole File: AI is allowed to update entire files.",
+            AppConfig.STRATEGY_INJECTION_POINTS: "Injection Points: AI is only allowed to update specific points in the code.",
+            AppConfig.STRATEGY_BLOCKS: "Update Blocks: AI is only allowed to update specific blocks in the code.",
         }[x],
     )
 

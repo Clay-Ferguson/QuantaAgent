@@ -37,7 +37,7 @@ class PromptUtils:
             else:
                 pt = PromptTemplate.from_file(f"prompt_templates/{file_name}.txt")
             PromptUtils.template_cache[file_name] = (
-                "\n\n" + StringUtils.end_slash_remove(pt.format(**template_info))
+                "\n\n" + StringUtils.post_process_template(pt.format(**template_info))
             )
 
         return PromptUtils.template_cache[file_name]
@@ -49,7 +49,7 @@ class PromptUtils:
             PromptUtils.tplt_file_content_block = PromptTemplate.from_file(
                 "prompt_templates/file_content_block.txt"
             )
-        return "\n\n" + StringUtils.end_slash_remove(
+        return "\n\n" + StringUtils.post_process_template(
             PromptUtils.tplt_file_content_block.format(
                 **template_info, file_name=file_name, content=content
             )
