@@ -1,5 +1,7 @@
+# block_begin MyCodeBlock
 # Prompt the user to input a temperature in the format (e.g., 45F, 102C, etc.)
 temp = input("Input the temperature you like to convert? (e.g., 45F, 102C etc.) : ")
+# block_end
 
 # Extract the numerical part of the temperature and convert it to an integer
 degree = int(temp[:-1])
