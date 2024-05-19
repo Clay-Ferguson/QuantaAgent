@@ -104,16 +104,6 @@ class Utils:
         #     pattern += "$"
         return re.search(pattern, line) is not None
 
-    # TODO: this can probably be replaced by the parse_name_from_tag_line method
-    @staticmethod
-    def parse_block_name_from_line(line: str, tag: str) -> str:
-        """Parses the block name from a `... {tag} {name}` formatted line.
-
-        Note: this keys off the 'tag' in the string and is works with or without any comment characters at the beginning of the line.
-        """
-        index: int = line.find(f"{tag} ")
-        return line[index + len(tag) :].strip()
-
     @staticmethod
     def fail_app(msg: str, st=None):
         """Exits the application with a fail message"""
@@ -153,22 +143,28 @@ class Utils:
 
             # BEGINS
             elif Utils.is_tag_line(line, TAG_FILE_BEGIN):
-                name = Utils.parse_block_name_from_line(line, TAG_FILE_BEGIN)
+                name: Optional[str] = Utils.parse_name_from_tag_line(
+                    line, TAG_FILE_BEGIN
+                )
                 started_counter += 1
                 if started_counter == 1:
-                    new_content.append("File Updated: " + name)
+                    new_content.append(f"File Updated: {name}")
 
             elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
-                name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
+                name: Optional[str] = Utils.parse_name_from_tag_line(
+                    line, TAG_NEW_FILE_BEGIN
+                )
                 started_counter += 1
                 if started_counter == 1:
-                    new_content.append("File Created: " + name)
+                    new_content.append(f"File Created: {name}")
 
             elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
-                name = Utils.parse_block_name_from_line(line, TAG_BLOCK_BEGIN)
+                name: Optional[str] = Utils.parse_name_from_tag_line(
+                    line, TAG_BLOCK_BEGIN
+                )
                 started_counter += 1
                 if started_counter == 1:
-                    new_content.append("Code Block Updated: " + name)
+                    new_content.append(f"Code Block Updated: {name}")
 
             elif started_counter == 0:
                 new_content.append(line)

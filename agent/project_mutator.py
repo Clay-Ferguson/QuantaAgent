@@ -73,7 +73,7 @@ class ProjectMutator:
                     Utils.fail_app("Found Begin tag while still collecting", self.st)
 
                 # Start of a new block
-                current_block_name = Utils.parse_block_name_from_line(line, begin_tag)
+                current_block_name = Utils.parse_name_from_tag_line(line, begin_tag)
                 collecting = True
                 current_content = []
 
@@ -122,7 +122,7 @@ class ProjectMutator:
                     )
 
                 # Start of a new file
-                file_name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
+                file_name = Utils.parse_name_from_tag_line(line, TAG_NEW_FILE_BEGIN)
                 collecting = True
                 file_content = []
 
@@ -154,7 +154,7 @@ class ProjectMutator:
                 # Collect the content of the file
                 file_content.append(line)
 
-    def visit_file(self, filename: str, ts: str):
+    def visit_file(self, filename: str):
         """Visit the file, to run all code modifications on the file"""
 
         # we need content to be mutable in the methods we pass it to so we hold in a dict
@@ -178,7 +178,7 @@ class ProjectMutator:
             else:
                 if self.mode == AppConfig.MODE_BLOCKS:
                     for name, block in self.blocks.items():
-                        if self.process_replacements(content, block, name, ts):
+                        if self.replace_blocks(content, block, name):
                             modified = True
 
             if modified:
@@ -201,9 +201,6 @@ class ProjectMutator:
     def parse_modified_file(self, ai_answer: str, rel_filename: str) -> Optional[str]:
         """Extract the new content for the given file from the AI answer."""
 
-        # TODO: I had an oversight here where FILE_BEGIN is a substring of NEW_FILE_BEGIN, so this kind
-        #        of check was sloppy, but I got lucky and this is not a bug here, but need to look for similar
-        #        mistakes elsewhere in the code.
         if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
             return None
 
@@ -231,29 +228,21 @@ class ProjectMutator:
         ret: str = "\n".join(new_content)
         return ret
 
-    # TODO: For methods like this currently using the [0] list element for doing pass-by-reference we
-    # can make them return a tuple of (bool, str) instead, and return the content and a bool
-    def process_replacements(
-        self, content: List[str], block: TextBlock, name: str, ts: str
-    ) -> bool:
+    def replace_blocks(self, content: List[str], block: TextBlock, name: str) -> bool:
         """Process the replacements for the given block."""
 
-        # Optimization to avoid unnessary cycles
-        # TODO: We can optimize this even better by checking each of the types of comments
-        #       here precisely and then just calling that one, rather than doing the big "or" below.
-        #       There are at least two places in the code that can be optimized in this way.
-        if f" {TAG_BLOCK_BEGIN} {name}" not in content[0]:
+        if f"{TAG_BLOCK_BEGIN} {name}" not in content[0]:
             return False
 
         # we return true here if we did any replacements
         ret: bool = (
-            self.do_replacement("//", content, block, name)
-            or self.do_replacement("--", content, block, name)
-            or self.do_replacement("#", content, block, name)
+            self.replace_block("//", content, block, name)
+            or self.replace_block("--", content, block, name)
+            or self.replace_block("#", content, block, name)
         )
         return ret
 
-    def do_replacement(
+    def replace_block(
         self, comment_prefix: str, content: List[str], block: TextBlock, name: str
     ) -> bool:
         """Process the replacement for the given block and comment prefix. This is what does the actual
@@ -298,4 +287,4 @@ class ProjectMutator:
                     # build the full path
                     path: str = os.path.join(dirpath, filename)
                     # Call the visitor function for each file
-                    self.visit_file(path, self.ts)
+                    self.visit_file(path)
