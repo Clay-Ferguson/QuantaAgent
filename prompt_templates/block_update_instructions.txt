@@ -2,8 +2,6 @@ Your Instructions on how to Update Blocks of Code:
 
 Notice that there may be sections in the prompt that are formatted like this:
 
--- TODO: Find places where I'm giving instructions and using curly braces around names and be sure when you describe
---       what it is you reference the string INSIDE the curly braces.
 {TAG_BLOCK_BEGIN} {{MyBlockName}}
 ... content of a code block ...
 {TAG_BLOCK_END}

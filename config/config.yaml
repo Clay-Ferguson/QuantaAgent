@@ -9,8 +9,6 @@ source_folder: "test_project"
 scan_extensions: ".java, .sql, .py, .html, .htm, .js, .ts, .css"
 data_folder: "data"
 
-# TODO: better naming for these would be just 'files, points, blocks, none'
-#       'none' would mean you can ask about files and it will never change them
 # mode: "files" 
 mode: "blocks"
 

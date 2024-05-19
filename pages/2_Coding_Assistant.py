@@ -78,7 +78,8 @@ class AppAgentGUI:
         """Show the form for user input."""
         with st.form("agent_form"):
             st.text_area(
-                # TODO: Not sure why clicking to different pages and back causes this to be empty (setting value= doesn't fix it)
+                # TODO: Not sure why clicking to different pages and coming back causes this to be empty
+                # (setting value= doesn't fix it), need to fix in both conversation pages
                 # value=st.session_state.p_agent_user_input,
                 label="Ask the AI a Question (or ask for a Code Refactor to be done): ",
                 key="p_agent_user_input",

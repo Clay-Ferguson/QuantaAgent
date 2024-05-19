@@ -104,8 +104,6 @@ So you're basically labeling (or naming) specific sections of your code (or othe
 
 Every time you run an LLM query the full prompt, system prompt, and answer will be automatically saved into a new log file in the `data` folder.
 
-TODO: add these (the previous ones were outdated to they're removed)
-
 Example log files can be found in this project's [Data Folder](/data)
 
 
