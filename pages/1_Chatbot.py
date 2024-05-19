@@ -20,7 +20,7 @@ class AppChatbotGUI:
         """Clear all messages."""
         messages: List[BaseMessage] = []
         st.session_state.p_chatbot_messages = messages
-        st.session_state.chatbot_user_input = ""
+        st.session_state.p_chatbot_user_input = ""
 
     def ask_ai(self):
         """Ask the AI."""
@@ -34,7 +34,7 @@ class AppChatbotGUI:
             )
 
         # handle user input
-        user_input: str = st.session_state.chatbot_user_input
+        user_input: str = st.session_state.p_chatbot_user_input
         if user_input:
             if len(user_input) > int(self.cfg.max_prompt_length):
                 st.error(
@@ -54,7 +54,7 @@ class AppChatbotGUI:
             st.session_state.p_chatbot_messages.append(
                 AIMessage(content=response.content)
             )
-            st.session_state.chatbot_user_input = (
+            st.session_state.p_chatbot_user_input = (
                 ""  # Clear the user input after processing
             )
 
@@ -69,16 +69,16 @@ class AppChatbotGUI:
 
     def show_form(self):
         """Show the form to ask the AI a question."""
-        with st.form("chatbot_form"):
-            st.text_area(
-                "Ask the AI a Question: ",
-                key="chatbot_user_input",
-            )
-            col1, col2 = st.columns(2)
-            with col1:
-                st.form_submit_button("Ask AI", on_click=self.ask_ai)
-            with col2:
-                st.form_submit_button("Clear", on_click=self.clear_all)
+
+        st.text_area(
+            "Ask the AI a Question: ",
+            key="p_chatbot_user_input",
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            st.button("Ask AI", on_click=self.ask_ai)
+        with col2:
+            st.button("Clear", on_click=self.clear_all)
 
     def run(self):
         """Main function for the Streamlit GUI."""
