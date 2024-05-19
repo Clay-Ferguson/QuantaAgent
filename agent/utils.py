@@ -196,7 +196,7 @@ class Utils:
         """Sets the default session variables."""
         if "p_mode" not in st.session_state:
             st.session_state.p_mode = cfg.mode
-        if "p_source_profided" not in st.session_state:
+        if "p_source_provided" not in st.session_state:
             st.session_state.p_source_provided = False
         if "p_agent_user_input" not in st.session_state:
             st.session_state.p_agent_user_input = ""

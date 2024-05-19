@@ -247,11 +247,13 @@ class ProjectMutator:
         )
         return ret
 
+    # TODO: Can we refactor this method to have regex that accepts ANY comment prefix, so we only have
+    #       to call it once rather than for each comment prefix?
     def replace_block(
         self, comment_prefix: str, content: List[str], block: TextBlock, name: str
     ) -> bool:
         """Process the replacement for the given block and comment prefix. This is what does the actual
-        replacement of a named block of code.
+        replacement of a named block of code in the file
 
         We replace the first element of the dict content with the new content, so we're treating 'content'
         as a mutable object.
@@ -264,13 +266,14 @@ class ProjectMutator:
         # We will break up content into lines and then iterate over them to find the block we want to replace
         # We will then replace the block with the new block content
         for line in lines:
+            trimmed = line.strip()
             if in_block:
-                if f"{comment_prefix} {TAG_BLOCK_END}" in line:
+                if trimmed == f"{comment_prefix} {TAG_BLOCK_END}":
                     in_block = False
                     new_lines.append(block.content)
                     new_lines.append(line)
                     found = True
-            elif f"{comment_prefix} {TAG_BLOCK_BEGIN} {name}" in line:
+            elif trimmed == f"{comment_prefix} {TAG_BLOCK_BEGIN} {name}":
                 in_block = True
                 new_lines.append(line)
             else:

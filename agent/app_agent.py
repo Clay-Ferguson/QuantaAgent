@@ -230,7 +230,7 @@ class QuantaAgent:
         """
         ret = False
         for key, value in self.blocks.items():
-            k = f"block: {key}\n"
+            k = f"block({key})"
             if k in self.prompt:
                 ret = True
 
