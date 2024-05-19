@@ -1,7 +1,7 @@
 OpenAI Model Used: gpt-4o, Mode: blocks, Timestamp: 1716079560234
 ____________________________________________________________________________________
 Input Prompt: 
-In ${MyTestBlock} add a print statement that says "Hello Universe."
+In block(MyTestBlock) add a print statement that says "Hello Universe."
 ____________________________________________________________________________________
 LLM Output: 
 Sure, here is the updated block with the additional print statement:

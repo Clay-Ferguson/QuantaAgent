@@ -1,16 +1,34 @@
-Remember: If you don't include one or more of the following at least in your intial prompt, the AI will not know anything about your codebase:
+If you don't include one or more of the following at least in your intial prompt, \
+the AI will not know anything about your codebase:
 
 | Syntax | Description |
 | --- | --- |
-| `${{/}}` | Include all files in the project folder |
-| `${{/my/folder/name/}}` | Include all files in the folder |
-| `${{/my/file/name.py}}` | Include a specific file |
-| `${{BlockName}}` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
+| `folder(/)` | Include all files in the project folder |
+| `folder(/my/folder/name/)` | Include all files in the folder |
+| `file(/my/file/name.py)` | Include a specific file |
+| `block(BlockName)` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
 
-----
+Once you've mentioned a file(), folder(), or block() in your current conversation thread, \
+you don't need to mention it again because it will remain in the conversation context. Mentioning a file, folder, or \
+block will insert the entire content of that code into the context for the LLM, so you can ask questions abou it. 
 
-**Example Refactoring Prompt:**
+#### Example Prompts
+
 ```
-In my HTML file and change the title to "Hello World" to "Hello Universe".
-${{/}}
+In my HTML file in the project below, change the title "Hello World" to "Hello Universe".
+
+folder(/)
 ```
+
+```
+What does this code do? And do you see any bugs in it?
+
+file(/my/file/name.py)
+```
+
+```
+Do you see any ways to optimized the following code?
+
+block(MyNamedBlock)
+```
+

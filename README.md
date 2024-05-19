@@ -26,8 +26,8 @@ If you're a software developer and you want to be able to ask AI (like OpenAI's 
 
 To ask questions about or request refactorings inside specific files or folders, you simply refer to them by name in your prompt using the following syntax (*folders must end with a slash*):
 
-For Files: `${/my/file.py}`
-For Foders: `${/my/project/folder/}`
+For Files: `file(/my/file.py)`
+For Foders: `folder(/my/project/folder/)`
 
 The location in your prompt where you mention files, or folders, or Block Names (explained later), will be automatically replaced with the actual full content fo those files when the prompt is submitted.
 
@@ -67,10 +67,10 @@ The simplest possible refactoring prompt would be something like this:
 ```txt
 Modify the following Python file, so that it's using a class that has a public static `run` method to do what it does.
 
-${/temperature_convert.py}
+file(/temperature_convert.py)
 ```
 
-In the above prompt we're using the `${}` syntax to inject the entire `temperature_convert.py` file into the prompt, and the tool will actually *do* what you're asking for to the actual file when you run the tool! In other words this tool will modify your source files if you ask for a refactor. The default `config.yaml` already points to the `test_project` folder, which contains a `temperature_convert.py` which is not implemented as a class. So running the prompt example above will update the actual python file and make it into a class as the prompt requested.
+In the above prompt we're using the `file()` syntax to inject the entire `temperature_convert.py` file into the prompt, and the tool will actually *do* what you're asking for to the actual file when you run the tool! In other words this tool will modify your source files if you ask for a refactor. The default `config.yaml` already points to the `test_project` folder, which contains a `temperature_convert.py` which is not implemented as a class. So running the prompt example above will update the actual python file and make it into a class as the prompt requested.
 
 
 # Comparison to other AI Coding Assistants
@@ -95,7 +95,7 @@ You can run LLM Prompts/Queries like this:
 
     What is happening in the following code:
 
-    ${Adding_Numbers}
+    block(Adding_Numbers)
 
 So you're basically labeling (or naming) specific sections of your code (or other text files) in such a way that this tool can find them, answer questions about them, and/or modify them directly. You can go anywhere in your codebase and wrap sections of code with this `block_begin` and `block_end` syntax, to create named blocks which are then template substituded automatically into your prompt. Also once the AI has seen any code with the named block in it, it can also automatically refactor any of that code for you, and in any number of named blocks, simultaneously.
 

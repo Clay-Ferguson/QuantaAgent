@@ -73,8 +73,13 @@ class QuantaAgent:
         # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
 
-        self.insert_blocks_into_prompt()
-        self.insert_files_and_folders_into_prompt()
+        prompt_injects: bool = (
+            self.insert_blocks_into_prompt()
+            or self.insert_files_and_folders_into_prompt()
+        )
+
+        if self.st is not None and prompt_injects:
+            self.st.session_state.p_source_provided = True
 
         if len(self.prompt) > int(self.cfg.max_prompt_length):
             Utils.fail_app(
@@ -139,14 +144,18 @@ class QuantaAgent:
         if self.mode == AppConfig.MODE_FILES:
             self.system_prompt += PromptUtils.get_template("file_edit_instructions")
 
-    def insert_files_and_folders_into_prompt(self):
-        """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags"""
+    def insert_files_and_folders_into_prompt(self) -> bool:
+        """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags
+
+        Returns true only if some files or folders were inserted.
+        """
         self.prompt, self.has_filename_inject = PromptUtils.insert_files_into_prompt(
             self.prompt, self.cfg.source_folder, self.file_names
         )
         self.prompt, self.has_folder_inject = PromptUtils.insert_folders_into_prompt(
             self.prompt, self.cfg.source_folder, self.folder_names
         )
+        return self.has_filename_inject or self.has_folder_inject
 
     def visit_file(self, path: str):
         """Visits a file and extracts text blocks into `blocks`. So we're just
@@ -163,7 +172,7 @@ class QuantaAgent:
                 trimmed: str = line.strip()
 
                 if Utils.is_tag_line(trimmed, TAG_BLOCK_BEGIN):
-                    name: str = Utils.parse_block_name_from_line(
+                    name: Optional[str] = Utils.parse_name_from_tag_line(
                         trimmed, TAG_BLOCK_BEGIN
                     )
 
@@ -173,8 +182,10 @@ class QuantaAgent:
                             self.st,
                         )
                     else:
-                        block = TextBlock(name, "")
-                        self.blocks[name] = block
+                        # n is a non-optional string
+                        n = name if name is not None else ""
+                        block = TextBlock(n, "")
+                        self.blocks[n] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     if block is None:
                         Utils.fail_app(
@@ -210,17 +221,25 @@ class QuantaAgent:
                     # Call the visitor function for each file
                     self.visit_file(path)
 
-    def insert_blocks_into_prompt(self):
+    def insert_blocks_into_prompt(self) -> bool:
         """
         Substitute blocks into the prompt. Prompts can contain ${BlockName} tags, which will be replaced with the
         content of the block with the name 'BlockName'
+
+        Returns true only if someblocks were inserted.
         """
+        ret = False
         for key, value in self.blocks.items():
+            k = f"block: {key}\n"
+            if k in self.prompt:
+                ret = True
+
             self.prompt = self.prompt.replace(
-                f"${{{key}}}",
+                k,
                 f"""
 {TAG_BLOCK_BEGIN} {key}
 {value.content}
 {TAG_BLOCK_END}
 """,
             )
+        return ret

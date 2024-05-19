@@ -111,6 +111,7 @@ class ProjectMutator:
         file_name: Optional[str] = None
         file_content: List[str] = []
         collecting: bool = False
+        wrote_files: bool = False
 
         for line in self.ai_answer.splitlines():
             line = line.strip()
@@ -143,6 +144,7 @@ class ProjectMutator:
 
                     # write the new file
                     print("Writing new file: " + full_file_name)
+                    wrote_files = True
                     Utils.write_file(full_file_name, "\n".join(file_content))
                 else:
                     print("No file_name or not collecting")
@@ -153,6 +155,9 @@ class ProjectMutator:
             elif collecting:
                 # Collect the content of the file
                 file_content.append(line)
+
+        if wrote_files and self.st is not None:
+            self.st.session_state.p_source_provided = True
 
     def visit_file(self, filename: str):
         """Visit the file, to run all code modifications on the file"""

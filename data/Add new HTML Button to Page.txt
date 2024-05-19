@@ -3,7 +3,7 @@ ________________________________________________________________________________
 Input Prompt: 
 in my "sample_web_project" add another button that says "Don't Click Me", and when the user clicks it make it do an alert that says "Don't click me bro".
 
-${/sample_web_project/}
+folder(/sample_web_project/)
 ____________________________________________________________________________________
 LLM Output: 
 Here are the updated files with the new button and its corresponding functionality:

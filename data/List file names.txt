@@ -1,7 +1,7 @@
 OpenAI Model Used: gpt-4o, Mode: files, Timestamp: 1716078749621
 ____________________________________________________________________________________
 Input Prompt: 
-what are the filenames in this folder: ${/}
+what are the filenames in this folder: folder(/)
 ____________________________________________________________________________________
 LLM Output: 
 The filenames in the folder named `test_project` are:

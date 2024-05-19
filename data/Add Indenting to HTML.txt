@@ -1,7 +1,7 @@
 OpenAI Model Used: gpt-4o, Mode: files, Timestamp: 1716079248571
 ____________________________________________________________________________________
 Input Prompt: 
-Add indenting to my html in this folder: ${/}
+Add indenting to my html in this folder: folder(/)
 ____________________________________________________________________________________
 LLM Output: 
 Here is the updated content of the HTML file with proper indentation:

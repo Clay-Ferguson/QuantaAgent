@@ -3,7 +3,7 @@
 from typing import List
 import streamlit as st
 from streamlit_chat import message
-from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
+from langchain.schema import HumanMessage, AIMessage, BaseMessage
 
 from agent.app_agent import QuantaAgent
 from agent.app_config import AppConfig
@@ -21,7 +21,8 @@ class AppAgentGUI:
         """Clear all messages."""
         messages: List[BaseMessage] = []
         st.session_state.p_agent_messages = messages
-        st.session_state.agent_user_input = ""
+        st.session_state.p_source_provided = False
+        st.session_state.p_agent_user_input = ""
         PromptUtils.user_inputs = {}
 
     def ask_ai(self):
@@ -30,13 +31,10 @@ class AppAgentGUI:
         if "p_agent_messages" not in st.session_state:
             messages: List[BaseMessage] = []
             st.session_state.p_agent_messages = messages
-
-            st.session_state.p_agent_messages.append(
-                SystemMessage(content="You are a helpful assistant.")
-            )
+            st.session_state.p_source_provided = False
 
         # handle user input
-        user_input = st.session_state.agent_user_input
+        user_input = st.session_state.p_agent_user_input
         if user_input:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
@@ -47,7 +45,14 @@ class AppAgentGUI:
                     st.session_state.p_agent_messages,
                     user_input,
                 )
-            st.session_state.agent_user_input = ""
+
+                if not st.session_state.p_source_provided:
+                    st.error(
+                        "Warning: No files, folders, or blocks were provided to the AI. "
+                        + "See `Helpful Tips` section below to learn how to provide code context."
+                    )
+                else:
+                    st.session_state.p_agent_user_input = ""
 
     def show_messages(self):
         """display message history"""
@@ -73,8 +78,10 @@ class AppAgentGUI:
         """Show the form for user input."""
         with st.form("agent_form"):
             st.text_area(
-                "Ask the AI a Question (or ask for a Code Refactor to be done): ",
-                key="agent_user_input",
+                # TODO: Not sure why clicking to different pages and back causes this to be empty (setting value= doesn't fix it)
+                # value=st.session_state.p_agent_user_input,
+                label="Ask the AI a Question (or ask for a Code Refactor to be done): ",
+                key="p_agent_user_input",
             )
             col1, col2 = st.columns(2)
             with col1:

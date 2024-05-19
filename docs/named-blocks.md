@@ -24,5 +24,5 @@ Named blocks are defined using this kind syntax to wrap part of your files:
 // block_end 
 ```
 
-In the example above, the text that comes after the `block_begin` is considered the `Block Name` and, so that those blocks anywhere in your code, you can now refer to `${SQL_Scripts}` and/or `${My_Java}` in the text of any prompt, and it will be replaced with the block content (actual source). You can also request for those blocks to be refactored and updates by the AI as well.
+In the example above, the text that comes after the `block_begin` is considered the `Block Name` and, so that those blocks anywhere in your code, you can now refer to `block(SQL_Scripts)` and/or `block(My_Java)` in the text of any prompt, and it will be replaced with the block content (actual source). You can also request for those blocks to be refactored and updates by the AI as well.
 

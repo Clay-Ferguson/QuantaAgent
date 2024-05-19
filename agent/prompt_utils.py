@@ -85,7 +85,7 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
         """
         inserted: bool = False
         for file_name in file_names:
-            tag: str = f"${{{file_name}}}"
+            tag: str = f"file({file_name})"
             if tag in prompt:
                 inserted = True
                 content: str = Utils.read_file(source_folder + file_name)
@@ -105,7 +105,7 @@ Below is the content of the files in the folder named {folder_path} (using {TAG_
         source_folder_len: int = len(source_folder)
         inserted: bool = False
         for folder_name in folder_names:
-            tag: str = f"${{{folder_name}/}}"
+            tag: str = f"folder({folder_name}/)"
             if tag in prompt:
                 inserted = True
                 # build the content of the folder

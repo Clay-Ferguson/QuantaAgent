@@ -4,21 +4,22 @@ The Coding Assistant is a chatbot which will help you write or refactor code. Yo
 
 **Referencing Code in your Prompt**
 
-* To reference your project files you need to mention `${/}`, which will bring all your project files into the AI's context, and allow any arbitrary changes, but beware this uses up more of your AI credits. *Note: Your content after the ${/} will get omitted from the GUI,
-but it will be used by the AI.*
+To bring your code into the context of a given chat thread, you need to mention it using `file(), folder(), or block()` as follows:
 
-* To reference a folder, you can mention `${/folder_name/}` to bring all the files in that folder into the AI's context. Note that this must end with a slash. *Note: The folder content is omitted from the GUI display, but it will be used by the AI.*
+* To reference your *entire* project's code you can mention `folder(/)` in your prompt to refer to it which will bring all your project files into the AI's context, and allow any arbitrary changes, but beware this uses up more of your AI credits that only referencing the specific files or folders you need to.
 
-* To reference a specific file, you can use `${/file_name}` to bring that file into the AI's context. *Note: The file content is omitted from the GUI display, but it will be used by the AI.*
+* To reference a folder, you can mention `folder(/folder_name/)` to bring all the files in that folder into the AI's context. Note that this must end with a slash. 
 
-* To reference a specific `Named Block` you can use `${MyBlock}` to bring that block of code into the AI's context. *Note: The block content is omitted from the GUI display, but it will be used by the AI.* 
+* To reference a specific file, you can use `file(/file_name)` to bring that file into the AI's context.
 
-To define `MyBlock` from your code you can just wrap some of your code with something like the following, using Python comment syntax for example:
+* To reference a specific `Named Block` you can use `block(MyBlockName)` to bring that block of code into the AI's context. 
+
+To define `MyBlockName` in your code, in order to refer to it in prompts, you simply wrap some of your code with something like the following, using Python comment syntax for example:
 
 ```py
-block_begin MyBlock
-...
+# block_begin MyBlock
 ...some python code...
-...
-block_end
+# block_end
 ```
+
+Note that the block_begin/block_end lines are comments. The comments characters currently supported are `//`, `--`, and `#`
