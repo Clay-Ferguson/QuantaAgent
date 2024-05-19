@@ -20,7 +20,7 @@ class Settings:
 * Source Folder: {cfg.source_folder}
 * Data Folder: {cfg.data_folder}
 * Extensiont to include: {cfg.scan_extensions}
-* Update Strategy: {cfg.update_strategy}
+* Update Mode: {cfg.mode}
 * Max Prompt Length: {cfg.max_prompt_length}
 """
 

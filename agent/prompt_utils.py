@@ -45,15 +45,11 @@ class PromptUtils:
     @staticmethod
     def get_file_content_block(file_name: str, content: str) -> str:
         """Get the content block for a file."""
-        if PromptUtils.tplt_file_content_block is None:
-            PromptUtils.tplt_file_content_block = PromptTemplate.from_file(
-                "prompt_templates/file_content_block.txt"
-            )
-        return "\n\n" + StringUtils.post_process_template(
-            PromptUtils.tplt_file_content_block.format(
-                **template_info, file_name=file_name, content=content
-            )
-        )
+        return f"""
+{TAG_FILE_BEGIN} {file_name}
+{content}
+{TAG_FILE_END} {file_name}
+"""
 
     @staticmethod
     def build_folder_content(folder_path: str, source_folder_len: int) -> str:

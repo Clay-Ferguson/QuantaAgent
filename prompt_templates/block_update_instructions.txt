@@ -1,24 +1,21 @@
 Your Instructions on how to Update Blocks of Code:
 
-If I was asking you to edit some blocks of code, in the prompt above, then to provide me with the \
-new code blocks, use the following strategy: 
-Notice that there are sections of my prompt that look like this:
+Notice that there may be sections in the prompt that are formatted like this:
 
--- Note there's no // (or other comment characters) in front of these tags because this is only an output
--- that goes into the reply, and never is directly used in code.
--- TODO: Find places where I'm giving innstructions and using curly braces around names and be sure when you describe
+-- TODO: Find places where I'm giving instructions and using curly braces around names and be sure when you describe
 --       what it is you reference the string INSIDE the curly braces.
 {TAG_BLOCK_BEGIN} {{MyBlockName}}
 ... content of a code block ...
 {TAG_BLOCK_END}
 
-In these prompt sections the {{MyBlockName}} slot holds the name of the code block (just for you to uniquely identify \
-the code block), and the content is below it, in between the {TAG_BLOCK_BEGIN} and {TAG_BLOCK_END} lines. Note that \
-the block name itself doesn't contain any curly braces.
+In these prompt sections the {{MyBlockName}} slot holds the name of the code block (so you can uniquely identify \
+the code block), and the content lines are below it, in between the {TAG_BLOCK_BEGIN} line and {TAG_BLOCK_END} line. \
+Note: The block name itself doesn't contain any curly braces. 
 
-When you reply back to me with updates to those blocks of code, use this same format as shown above, \
-that has the {TAG_BLOCK_BEGIN} and {TAG_BLOCK_END} lines around the code, and put the raw code in the block content, \
-rather than your usual markdown format. If you didn't need to edit some of the code blocks, that is fine, \
-and in that case, you should of course omit those unmodified blocks from your response.
+When you reply back to the developer with any of your updates to those blocks of code, use this same format as \
+shown above and put the raw code in your new content for the block, rather than your usual markdown format. 
+
+If you didn't need to edit some of the code blocks, that is fine, \
+and in that case, you should of course omit any unmodified blocks from your response.
 
 *** end of: Your Instructions on how to Update Blocks of Code ***

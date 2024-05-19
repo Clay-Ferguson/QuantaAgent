@@ -4,11 +4,10 @@ from io import TextIOWrapper
 import re
 import os
 import argparse
-from typing import List, Set
+from typing import List, Set, Optional
 import streamlit as st
+from agent.app_config import AppConfig
 from agent.tags import (
-    TAG_INJECT_END,
-    TAG_INJECT_BEGIN,
     TAG_FILE_BEGIN,
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
@@ -48,10 +47,10 @@ class Utils:
 
     @staticmethod
     def has_tag_lines(prompt: str, tag: str) -> bool:
-        """Checks if the prompt has any block_inject tags."""
+        """Checks if the prompt has this tag line."""
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern: str = rf"(--|//|#) {re.escape(tag)} "
+        pattern: str = rf"^(-- |// |# |) {re.escape(tag)} "
         return re.search(pattern, prompt) is not None
 
     @staticmethod
@@ -64,28 +63,48 @@ class Utils:
 
     @staticmethod
     def is_tag_and_name_line(line: str, tag: str, name: str) -> bool:
-        """Checks if the line is a line like
+        """Checks if the line is a pattern like
         `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
         or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
+        or any of those without the comment characters at the beginning of the line as well
         """
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern: str = rf"^(--|//|#) {re.escape(tag)} {name}"
+        pattern: str = rf"^(-- |// |# |){re.escape(tag)} {name}$"
         return re.search(pattern, line) is not None
 
+    # If the line is something like "// block_begin name" we return name, else return None
+    @staticmethod
+    def parse_name_from_tag_line(line: str, tag: str) -> Optional[str]:
+        """Parses the name from a `... {tag} {name}` formatted line."""
+        pattern: str = rf"^(-- |// |# |){re.escape(tag)}(.+)$"
+        match = re.search(pattern, line)
+        if match:
+            return match.group(2).strip()
+        else:
+            return None
+
+    # NOTE: if exact=True it does an exact match on this line, else functions more like a "startswith"
+    #       Note: This means is exact=true we're checking the nothing is to the right of the tag.
     @staticmethod
     def is_tag_line(line: str, tag: str) -> bool:
         """Checks if the line is a line like
-        `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
-        or `-- block_end {Name}` or `// block_end {Name}` or `# block_end {Name}`
+        `-- block_begin` or `// block_begin` or `# block_begin`
+        or `-- block_end` or `// block_end` or `# block_end`
+        or any of those without the comment characters at the beginning of the line as well
 
         Notice that we only check for the tag, not the block name.
         """
 
         # Note: the 're' module caches compiled regexes, so there's no need to store the compiled regex for reuse.
-        pattern: str = rf"^(--|//|#) {re.escape(tag)}"
+        pattern: str = rf"^(-- |// |# |){re.escape(tag)}"
+
+        # Forces our pattren to apply out to the end of the string (making it an exact match)
+        # if exact:
+        #     pattern += "$"
         return re.search(pattern, line) is not None
 
+    # TODO: this can probably be replaced by the parse_name_from_tag_line method
     @staticmethod
     def parse_block_name_from_line(line: str, tag: str) -> str:
         """Parses the block name from a `... {tag} {name}` formatted line.
@@ -113,52 +132,45 @@ class Utils:
             os.makedirs(directory)
 
     @staticmethod
-    def sanitize_content(content: str) -> str:
+    def sanitize_content(cfg: argparse.Namespace, content: str) -> str:
         """Makes an AI response string presentable in on screen."""
 
         # Scan all the lines in content one by one and extract the new content
         new_content: List[str] = []
-        started: bool = False
 
-        # TODO: the TAG_FILE_* and TAG_NEW_FILE_* tags should be converted over to never use the '//' or '--' comment characters, right?
-        #       Specifically meaning in the prompt outout from the LLM
+        # to support blocks in blocks we use a counter to keep track of how many blocks we're in
+        started_counter: int = 0
+        block_mode = cfg.mode == AppConfig.MODE_BLOCKS
+
         for line in content.splitlines():
+            # ENDS
             if Utils.is_tag_line(line, TAG_FILE_END):
-                started = False
-                break
+                started_counter -= 1
             elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
-                started = False
-                break
-            # we use 'startswith' because this is never in code
-            elif line.startswith(TAG_INJECT_END):
-                started = False
-                break
-            # we use 'startswith' because this is never in code
-            elif line.startswith(TAG_BLOCK_END):
-                started = False
-                break
+                started_counter -= 1
+            elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_END):
+                started_counter -= 1
 
+            # BEGINS
             elif Utils.is_tag_line(line, TAG_FILE_BEGIN):
                 name = Utils.parse_block_name_from_line(line, TAG_FILE_BEGIN)
-                started = True
-                new_content.append("File Updated: " + name)
+                started_counter += 1
+                if started_counter == 1:
+                    new_content.append("File Updated: " + name)
 
             elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
                 name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
-                started = True
-                new_content.append("File Created: " + name)
+                started_counter += 1
+                if started_counter == 1:
+                    new_content.append("File Created: " + name)
 
-            elif line.startswith(TAG_INJECT_BEGIN):
-                name = Utils.parse_block_name_from_line(line, TAG_INJECT_BEGIN)
-                started = True
-                new_content.append("Code Block Injected: " + name)
-
-            elif line.startswith(TAG_BLOCK_BEGIN):
+            elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
                 name = Utils.parse_block_name_from_line(line, TAG_BLOCK_BEGIN)
-                started = True
-                new_content.append("Code Block Updated: " + name)
+                started_counter += 1
+                if started_counter == 1:
+                    new_content.append("Code Block Updated: " + name)
 
-            elif started is False:
+            elif started_counter == 0:
                 new_content.append(line)
 
         ret: str = "\n".join(new_content)
@@ -186,8 +198,8 @@ class Utils:
     @staticmethod
     def set_default_session_vars(cfg: argparse.Namespace):
         """Sets the default session variables."""
-        if "p_update_strategy" not in st.session_state:
-            st.session_state.p_update_strategy = cfg.update_strategy
+        if "p_mode" not in st.session_state:
+            st.session_state.p_mode = cfg.mode
 
     @staticmethod
     def keep_session_vars():

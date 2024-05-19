@@ -13,7 +13,6 @@ from agent.models import TextBlock
 from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
-    TAG_BLOCK_INJECT,
     MORE_INSTRUCTIONS,
 )
 from agent.utils import Utils
@@ -34,9 +33,10 @@ class QuantaAgent:
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
-        self.update_strategy = AppConfig.STRATEGY_WHOLE_FILE
+        self.mode = AppConfig.MODE_FILES
         self.ran: bool = False
         self.prompt: str = ""
+        self.system_prompt: str = ""
         self.has_filename_inject = False
         self.has_folder_inject = False
         self.blocks = {}
@@ -47,7 +47,7 @@ class QuantaAgent:
     def run(
         self,
         st,
-        update_strategy: str,
+        mode: str,
         output_file_name: str,
         messages: Optional[List[BaseMessage]],
         input_prompt: str,
@@ -55,6 +55,7 @@ class QuantaAgent:
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
         alone without any prior context."""
+        self.st = st
         if self.ran:
             Utils.fail_app(
                 "Agent has already run. Instantiate a new agent instance to run again.",
@@ -62,7 +63,7 @@ class QuantaAgent:
             )
         self.ran = True
         self.prompt = input_prompt
-        self.update_strategy = update_strategy
+        self.mode = mode
 
         # default filename to timestamp if empty
         if output_file_name == "":
@@ -71,23 +72,26 @@ class QuantaAgent:
         # Scan the source folder for files with the specified extensions, to build up the 'blocks' dictionary
         self.scan_directory(self.cfg.source_folder)
 
-        # Write template before substitutions. This is really essentially a snapshot of what the 'question.txt' file
-        # contained when the tool was ran, which is important because users will edit the question.txt file
-        # every time they want to ask another AI question, and we want to keep a record of what the question was.
-        Utils.write_file(
-            f"{self.cfg.data_folder}/{output_file_name}--Q.txt", self.prompt
-        )
+        self.insert_blocks_into_prompt()
+        self.insert_files_and_folders_into_prompt()
 
-        self.add_all_prompt_instructions(st)
-        system_prompt = PromptUtils.get_template("agent_system_prompt")
+        if len(self.prompt) > int(self.cfg.max_prompt_length):
+            Utils.fail_app(
+                f"Prompt length {len(self.prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
+                st,
+            )
+
+        self.build_system_prompt()
 
         open_ai = AppOpenAI(
+            self.mode,
             self.cfg.openai_api_key,
             self.cfg.openai_model,
-            system_prompt,
+            self.system_prompt,
             self.cfg.data_folder,
         )
 
+        # Need to be sure the current `self.system_prompt`` is in these messages every time we send
         self.answer = open_ai.query(
             messages,
             self.prompt,
@@ -97,72 +101,42 @@ class QuantaAgent:
         )
 
         # Only if set to one of these two strategies, do we ever alter any files
-        if (
-            self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
-            or self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
-            or self.update_strategy == AppConfig.STRATEGY_BLOCKS
-        ):
+        if self.mode == AppConfig.MODE_FILES or self.mode == AppConfig.MODE_BLOCKS:
             ProjectMutator(
-                self.update_strategy,
+                self.st,
+                self.mode,
                 self.cfg.source_folder,
                 self.answer,
                 self.ts,
                 None,
             ).run()
 
-    def add_all_prompt_instructions(self, st):
+    def build_system_prompt(self):
         """Adds all the instructions to the prompt. This includes instructions for inserting blocks, files,
-        folders, and creating files."""
-        self.prompt += MORE_INSTRUCTIONS
-        self.insert_blocks_into_prompt()
-        self.insert_files_and_folders_into_prompt()
+        folders, and creating files.
 
-        # TODO: These insertion instructions should be moved to the SystemPrompt,so they're not repeated in every prompt
-        self.add_block_insertion_instructions()
-        self.add_file_insertion_instructions()
-        self.add_create_file_instructions()
+        WARNING: This method modifies the `prompt` attribute of the class to have already been configured, and
+        also really everything else that this class sets up, so this method should be called last, just before
+        the AI query is made.
+        """
+
+        self.system_prompt = PromptUtils.get_template("agent_system_prompt")
+        self.system_prompt += MORE_INSTRUCTIONS
+        self.add_file_edit_instructions()
         self.add_block_update_instructions()
-
-        if len(self.prompt) > int(self.cfg.max_prompt_length):
-            Utils.fail_app(
-                f"Prompt length {len(self.prompt)} exceeds the maximum allowed length of {self.cfg.max_prompt_length} characters.",
-                st,
-            )
 
     def add_block_update_instructions(self):
         """Adds instructions for updating blocks. If the prompt contains ${BlockName} tags, then we need to provide
         instructions for how to provide the new block content."""
-        if self.update_strategy == AppConfig.STRATEGY_BLOCKS and len(self.blocks) > 0:
-            self.prompt += PromptUtils.get_template("block_update_instructions")
+        if self.mode == AppConfig.MODE_BLOCKS and len(self.blocks) > 0:
+            self.system_prompt += PromptUtils.get_template("block_update_instructions")
 
-    def add_create_file_instructions(self):
-        """Adds instructions for creating files. If the update strategy is 'whole_file', then we need to
-        provide instructions for how to create files."""
-        if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
-            self.prompt += PromptUtils.get_template("create_files_instructions")
-
-    def add_file_insertion_instructions(self):
+    def add_file_edit_instructions(self):
         """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
         we need to provide instructions for how to provide the new file or folder names.
         """
-        if (
-            self.has_filename_inject
-            or self.has_folder_inject
-            and self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE
-        ):
-            self.prompt += PromptUtils.get_template("file_insertion_instructions")
-
-    def add_block_insertion_instructions(self):
-        """Adds instructions for inserting blocks. If the prompt contains ${BlockName} tags, then we need to provide
-        instructions for how to provide the new block content."""
-        # If the prompt has block_inject tags, add instructions for how to provide the
-        # new code, in a machine parsable way.
-        has_block_inject: bool = Utils.has_tag_lines(self.prompt, TAG_BLOCK_INJECT)
-        if (
-            has_block_inject
-            and self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS
-        ):
-            self.prompt += PromptUtils.get_template("block_insertion_instructions")
+        if self.mode == AppConfig.MODE_FILES:
+            self.system_prompt += PromptUtils.get_template("file_edit_instructions")
 
     def insert_files_and_folders_into_prompt(self):
         """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags"""
@@ -191,8 +165,13 @@ class QuantaAgent:
                     name: str = Utils.parse_block_name_from_line(
                         trimmed, TAG_BLOCK_BEGIN
                     )
+
+                    # TODO: Verify all calls to fail_app have 'st' if they need to.
                     if name in self.blocks:
-                        Utils.fail_app(f"Duplicate Block Name {name}")
+                        Utils.fail_app(
+                            f"Duplicate Block Name {name}. Block Names must be unique across all files.",
+                            self.st,
+                        )
                     else:
                         block = TextBlock(name, "")
                         self.blocks[name] = block
@@ -236,4 +215,11 @@ class QuantaAgent:
         content of the block with the name 'BlockName'
         """
         for key, value in self.blocks.items():
-            self.prompt = self.prompt.replace(f"${{{key}}}", value.content)
+            self.prompt = self.prompt.replace(
+                f"${{{key}}}",
+                f"""
+{TAG_BLOCK_BEGIN} {key}
+{value.content}
+{TAG_BLOCK_END}
+""",
+            )

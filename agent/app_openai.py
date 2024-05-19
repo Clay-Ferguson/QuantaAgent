@@ -5,7 +5,7 @@ from typing import List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain.schema import HumanMessage, AIMessage, BaseMessage
+from langchain.schema import HumanMessage, AIMessage, BaseMessage, SystemMessage
 
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
@@ -18,11 +18,13 @@ class AppOpenAI:
 
     def __init__(
         self,
+        mode: str,
         api_key: str,
         model: str,
         system_prompt: str,
         data_folder: str,
     ):
+        self.mode = mode
         self.api_key: str = api_key
         self.model: str = model
         self.system_prompt: str = system_prompt
@@ -32,7 +34,7 @@ class AppOpenAI:
         self,
         messages: Optional[List[BaseMessage]],
         query: str,
-        user_input: str,
+        input_prompt: str,
         output_file_name: str,
         ts: str,
     ) -> str:
@@ -55,6 +57,8 @@ class AppOpenAI:
 
             # messages is none this is a one-shot query with no prior context
             if messages is None:
+                # TODO: this is an ugly way to crate system and user message, use the way below instead, with
+                # HumanMessage etc
                 prompt = ChatPromptTemplate.from_messages(
                     [("system", self.system_prompt), ("user", "{input}")]
                 )
@@ -65,28 +69,37 @@ class AppOpenAI:
             else:
                 # Else we're doing a chat with context, so we append the question and also the answer, and leave
                 # the self.chat_response as the last response.
+
+                # Check the first 'message' to see if it's a SystemMessage and if not then insert one
+                if len(messages) == 0 or not isinstance(messages[0], SystemMessage):
+                    messages.insert(0, SystemMessage(content=self.system_prompt))
+                # else we set the first message to the system prompt
+                else:
+                    messages[0] = SystemMessage(content=self.system_prompt)
+
                 human_message = HumanMessage(content=query)
-                PromptUtils.user_inputs[id(human_message)] = user_input
+                PromptUtils.user_inputs[id(human_message)] = input_prompt
                 messages.append(human_message)
                 response = llm(list(messages))
                 ret = response.content  # type: ignore
                 messages.append(AIMessage(content=response.content))
 
-        output = f"""
+        output = f"""OpenAI Model Used: {self.model}, Mode: {self.mode}, Timestamp: {ts}
+____________________________________________________________________________________
+Input Prompt: 
+{input_prompt}
+____________________________________________________________________________________
+LLM Output: 
 {ret}
 ____________________________________________________________________________________
-Note: The above content is the response from OpenAI's API using the following prompt:
-
-OpenAI Model Used: {self.model}
-
-System Prompt: {self.system_prompt}
-
-Timestamp: {ts}
-
-User Prompt: {query}
+System Prompt: 
+{self.system_prompt}
+____________________________________________________________________________________
+Final Prompt: 
+{query}
 """
 
-        filename = f"{self.data_folder}/{output_file_name}--A.txt"
+        filename = f"{self.data_folder}/{output_file_name}.txt"
         Utils.write_file(filename, output)
-        print(f"Wrote File: {filename}")
+        print(f"Wrote Log File: {filename}")
         return ret

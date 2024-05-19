@@ -8,7 +8,6 @@ files = {
     "README.md": "Readme Text / Introduction",
     "config/help-text.md": "Coding Assistant Tips",
     "docs/named-blocks.md": "Named Blocks",
-    "docs/injection-points.md": "Injection Points",
 }
 
 

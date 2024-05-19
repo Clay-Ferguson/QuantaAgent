@@ -6,25 +6,23 @@ from agent.app_config import AppConfig
 from agent.utils import Utils
 
 
-def show_strategy_picker():
-    """Show the strategy picker."""
+def show_mode_picker():
+    """Show the mode picker."""
 
     # Define the mapping between keys and display values
-    strategy_mapping = {
-        AppConfig.STRATEGY_WHOLE_FILE: "Whole File",
-        AppConfig.STRATEGY_INJECTION_POINTS: "Injection Points",
-        AppConfig.STRATEGY_BLOCKS: "Update Blocks",
+    mode_mapping = {
+        AppConfig.MODE_FILES: "Whole File",
+        AppConfig.MODE_BLOCKS: "Update Blocks",
     }
 
     # Create the radio button
     st.radio(
-        "File Modification Strategy:",
-        list(strategy_mapping.keys()),
-        key="p_update_strategy",
+        "Coding Assistant Mode:",
+        list(mode_mapping.keys()),
+        key="p_mode",
         format_func=lambda x: {
-            AppConfig.STRATEGY_WHOLE_FILE: "Whole File: AI is allowed to update entire files.",
-            AppConfig.STRATEGY_INJECTION_POINTS: "Injection Points: AI is only allowed to update specific points in the code.",
-            AppConfig.STRATEGY_BLOCKS: "Update Blocks: AI is only allowed to update specific blocks in the code.",
+            AppConfig.MODE_FILES: "Files: AI is allowed to update entire files.",
+            AppConfig.MODE_BLOCKS: "Blocks: AI is only allowed to update specific blocks in the code.",
         }[x],
     )
 
@@ -35,7 +33,7 @@ if __name__ == "__main__":
     cfg = AppConfig.get_config(None)
 
     Utils.setup_page(st, cfg, "Quanta: AI Tools")
-    show_strategy_picker()
+    show_mode_picker()
 
     # Sanity check
     # st.write(st.session_state)

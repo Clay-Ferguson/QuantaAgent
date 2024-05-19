@@ -3,9 +3,9 @@ Remember: If you don't include one or more of the following at least in your int
 | Syntax | Description |
 | --- | --- |
 | `${{/}}` | Include all files in the project folder |
-| `${{/folder_name/}}` | Include all files in the folder |
-| `${{/file_name}}` | Include a specific file |
-| `#{{BlockName}}` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
+| `${{/my/folder/name/}}` | Include all files in the folder |
+| `${{/my/file/name.py}}` | Include a specific file |
+| `${{BlockName}}` | Include a specific code block, identified by `{TAG_BLOCK_BEGIN}` and `{TAG_BLOCK_END}` comment lines in your code |
 
 ----
 

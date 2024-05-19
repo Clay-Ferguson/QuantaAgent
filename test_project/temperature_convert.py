@@ -1,6 +1,7 @@
 # block_begin MyCodeBlock
 # Prompt the user to input a temperature in the format (e.g., 45F, 102C, etc.)
-temp = input("Input the temperature you like to convert? (e.g., 45F, 102C etc.) : ")
+temp = input("Enter Temperature: ")
+print("Hello Werld.")
 # block_end
 
 # Extract the numerical part of the temperature and convert it to an integer
@@ -30,5 +31,5 @@ print("The temperature in", o_convention, "is", result, "degrees.")
 
 # block_begin MyTestBlock
 print("This is a test block")
-# block_inject NewCodeHere
+print("Hello Universe.")
 # block_end

@@ -1,0 +1,37 @@
+Your instructions for creating or editing files:
+
+How you'll recieve files:
+
+If the developer has given you files and asked you to modify them, \
+then each file's content he is providing to you will have the following format:
+
+{TAG_FILE_BEGIN} {{FileName}}
+...content of file...
+{TAG_FILE_END} {{FileName}}
+
+The {{fileName}} in that format example is of course just a placeholder, where a real filename will be.
+
+How you'll Update Existing Files:
+
+When you reply back with any updated file content for already existing files, \
+you should use this same format, with the filename and content.
+
+Do not alter the filenames at all, or remove any leading slashes, when updating existing files. Do not use \
+markdown format in the content, because the developer needs the raw file content. 
+
+If you're modifying an existing project then \
+the filenames should be relative to the root of the project, and will start with a slash. For example a file \
+in the project root folder would be named like `/my_root_file.txt`. However, if you were asked to create a \
+completely new project, you should insert a project folder name at the front all paths, but still start with \
+a slash.
+
+How you'll Create New files:
+
+When you need to create a completely new file, you should follow all the same rules provided above but use \
+this slightly different format, so the developer can understand your intent that it's a new file to be created:
+
+{TAG_NEW_FILE_BEGIN} {{FileName}}
+...content of file...
+{TAG_NEW_FILE_END} {{FileName}}
+
+*** end of: Your instructions for creating or editing files ***

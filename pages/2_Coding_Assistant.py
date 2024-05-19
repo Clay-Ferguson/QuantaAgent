@@ -42,7 +42,7 @@ class AppAgentGUI:
                 agent = QuantaAgent()
                 agent.run(
                     st,
-                    st.session_state.p_update_strategy,
+                    st.session_state.p_mode,
                     "",
                     st.session_state.p_agent_messages,
                     user_input,
@@ -55,11 +55,18 @@ class AppAgentGUI:
         messages = st.session_state.get("p_agent_messages", default_messages)
         for i, msg in enumerate(messages[1:]):
             if isinstance(msg, HumanMessage):
+
+                # I'm not sure if this is a bug or what, when this message is missing, but if so it's related
+                # to clearing the messages with the clear button
+                # if id(msg) is not in user_inputs, just make user_input be "message gone"
+                if id(msg) not in PromptUtils.user_inputs:
+                    PromptUtils.user_inputs[id(msg)] = "Message Gone"
+
                 user_input = PromptUtils.user_inputs[id(msg)]
                 message(user_input, is_user=True, key=str(i) + "_user")
             elif isinstance(msg, AIMessage):
                 content: str = msg.content  # type: ignore
-                content = Utils.sanitize_content(content)
+                content = Utils.sanitize_content(self.cfg, content)
                 message(str(content), is_user=False, key=str(i) + "_ai")
 
     def show_form(self):

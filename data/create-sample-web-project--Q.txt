@@ -1,1 +1,0 @@
-Create a sample web project that has an HTML file, a CSS file, and a Javascript file. It should say "Hello World" and have a button that says "Click Me" which runs a javascript function that does an `alert('Hi There')`. You can make the project folder be named "my_project".

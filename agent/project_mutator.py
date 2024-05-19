@@ -5,11 +5,8 @@ from typing import List, Dict, Optional
 from agent.models import TextBlock
 from agent.string_utils import StringUtils
 from agent.tags import (
-    TAG_BLOCK_INJECT,
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
-    TAG_INJECT_END,
-    TAG_INJECT_BEGIN,
     TAG_FILE_BEGIN,
     TAG_FILE_END,
     TAG_NEW_FILE_BEGIN,
@@ -26,14 +23,16 @@ class ProjectMutator:
 
     def __init__(
         self,
-        update_strategy: str,
+        st,
+        mode: str,
         source_folder: str,
         ai_answer: str,
         ts: str,
         suffix: Optional[str],
     ):
         """Initializes the ProjectMutator object."""
-        self.update_strategy: str = update_strategy
+        self.st = st
+        self.mode: str = mode
         self.source_folder: str = source_folder
         self.source_folder_len: int = len(source_folder)
         self.ai_answer: str = ai_answer
@@ -49,11 +48,11 @@ class ProjectMutator:
             Utils.fail_app("ProjectMutator has already run.")
         self.ran = True
 
-        if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
-            self.parse_blocks(TAG_INJECT_BEGIN, TAG_INJECT_END)
-        if self.update_strategy == AppConfig.STRATEGY_BLOCKS:
+        # blocks
+        if self.mode == AppConfig.MODE_BLOCKS:
             self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
-        elif self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+        # files
+        elif self.mode == AppConfig.MODE_FILES:
             self.process_new_files()
 
         self.process_project()
@@ -69,7 +68,7 @@ class ProjectMutator:
         for line in self.ai_answer.splitlines():
             line = line.strip()
 
-            if line.startswith(begin_tag):
+            if Utils.is_tag_line(line, begin_tag):
                 if collecting:
                     Utils.fail_app("Found Begin tag while still collecting")
 
@@ -78,12 +77,20 @@ class ProjectMutator:
                 collecting = True
                 current_content = []
 
-            elif line.startswith(end_tag):
+            elif Utils.is_tag_line(line, end_tag):
                 # End of the current block
                 if current_block_name and collecting:
-                    self.blocks[current_block_name] = TextBlock(
-                        name=current_block_name, content="\n".join(current_content)
-                    )
+                    content = "\n".join(current_content)
+
+                    if current_block_name in self.blocks:
+                        Utils.fail_app(
+                            f"Duplicate Block Name {current_block_name}. LLM is failing sending duplicate blocks in responses.",
+                            self.st,
+                        )
+                    else:
+                        self.blocks[current_block_name] = TextBlock(
+                            name=current_block_name, content=content
+                        )
                 else:
                     print("No block name or not collecting")
                 collecting = False
@@ -108,7 +115,7 @@ class ProjectMutator:
         for line in self.ai_answer.splitlines():
             line = line.strip()
 
-            if line.startswith(f"""{TAG_NEW_FILE_BEGIN} /"""):
+            if Utils.is_tag_line(line, f"""{TAG_NEW_FILE_BEGIN} /"""):
                 if collecting:
                     Utils.fail_app("Found New File Begin tag while still collecting")
 
@@ -117,10 +124,16 @@ class ProjectMutator:
                 collecting = True
                 file_content = []
 
-            elif line.startswith(f"""{TAG_NEW_FILE_END} /"""):
+            elif Utils.is_tag_line(line, f"""{TAG_NEW_FILE_END} /"""):
                 # End of the current file
                 if file_name and collecting:
                     full_file_name: str = self.source_folder + file_name
+
+                    # Throw error if file exists
+                    if os.path.exists(full_file_name):
+                        Utils.fail_app(
+                            f"Error: The file {full_file_name} already exists. AI accidentally had a filename collision. This is not a bug, just an unfortunate turn of events."
+                        )
 
                     # Ensure folder exisits
                     Utils.ensure_folder_exists(full_file_name)
@@ -139,7 +152,7 @@ class ProjectMutator:
                 file_content.append(line)
 
     def visit_file(self, filename: str, ts: str):
-        """Visit the file, to run all injections on the file"""
+        """Visit the file, to run all code modifications on the file"""
 
         # we need content to be mutable in the methods we pass it to so we hold in a dict
         content: List[str] = [""]
@@ -152,21 +165,15 @@ class ProjectMutator:
             rel_filename: str = filename[self.source_folder_len :]
             new_content: Optional[str] = None
 
-            if self.update_strategy == AppConfig.STRATEGY_WHOLE_FILE:
+            if self.mode == AppConfig.MODE_FILES:
                 new_content = self.parse_modified_file(self.ai_answer, rel_filename)
 
             if new_content is not None:
                 content[0] = new_content
                 modified = True
-            # else if no new content, so we try any injections
+            # else if no new content, so we try any block updates
             else:
-                if self.update_strategy == AppConfig.STRATEGY_INJECTION_POINTS:
-                    # Perform all injections but keep the 'block_inject' lines
-                    for name, block in self.blocks.items():
-                        if self.process_injections(content, block, name, ts):
-                            modified = True
-                if self.update_strategy == AppConfig.STRATEGY_BLOCKS:
-                    # Perform all injections but keep the 'block_inject' lines
+                if self.mode == AppConfig.MODE_BLOCKS:
                     for name, block in self.blocks.items():
                         if self.process_replacements(content, block, name, ts):
                             modified = True
@@ -191,6 +198,9 @@ class ProjectMutator:
     def parse_modified_file(self, ai_answer: str, rel_filename: str) -> Optional[str]:
         """Extract the new content for the given file from the AI answer."""
 
+        # TODO: I had an oversight here where FILE_BEGIN is a substring of NEW_FILE_BEGIN, so this kind
+        #        of check was sloppy, but I got lucky and this is not a bug here, but need to look for similar
+        #        mistakes elsewhere in the code.
         if f"""{TAG_FILE_BEGIN} {rel_filename}""" not in ai_answer:
             return None
 
@@ -200,7 +210,7 @@ class ProjectMutator:
 
         for line in ai_answer.splitlines():
             if started:
-                if Utils.is_tag_line(line, TAG_FILE_END):
+                if Utils.is_tag_and_name_line(line, TAG_FILE_END, rel_filename):
                     started = False
                     break
                 new_content.append(line)
@@ -217,8 +227,8 @@ class ProjectMutator:
         ret: str = "\n".join(new_content)
         return ret
 
-    # TODO: For methods like this currently using the [0] list element for simulating pass-by-reference we
-    # can make them return a tuple of (bool, str) instead
+    # TODO: For methods like this currently using the [0] list element for doing pass-by-reference we
+    # can make them return a tuple of (bool, str) instead, and return the content and a bool
     def process_replacements(
         self, content: List[str], block: TextBlock, name: str, ts: str
     ) -> bool:
@@ -238,54 +248,6 @@ class ProjectMutator:
             or self.do_replacement("#", content, block, name)
         )
         return ret
-
-    def process_injections(
-        self, content: List[str], block: TextBlock, name: str, ts: str
-    ) -> bool:
-        """Process the injections for the given block."""
-
-        # Optimization to avoid unnessary cycles
-        if f" {TAG_BLOCK_INJECT} {name}" not in content[0]:
-            return False
-
-        # we return true here if we did any replacements
-        ret: bool = (
-            self.do_injection("//", content, block, name, ts)
-            or self.do_injection("--", content, block, name, ts)
-            or self.do_injection("#", content, block, name, ts)
-        )
-        return ret
-
-    def do_injection(
-        self,
-        comment_prefix: str,
-        content: List[str],
-        block: TextBlock,
-        name: str,
-        ts: str,
-    ) -> bool:
-        """Process the injections for the given block and comment prefix. This is what does the actual
-        injection of new code into an injection point in a file.
-
-        We replace the first element of the dict content with the new content, so we're treating 'content'
-        as a mutable object.
-        """
-
-        found: bool = False
-        find: str = f"{comment_prefix} {TAG_BLOCK_INJECT} {name}"
-
-        if find in content[0]:
-            found = True
-            content[0] = content[0].replace(
-                find,
-                f"""{find}
-{comment_prefix} {TAG_INJECT_BEGIN} {ts}
-{block.content}
-{comment_prefix} {TAG_INJECT_END}""",
-            )
-        if found:
-            print("Replaced: " + find)
-        return found
 
     def do_replacement(
         self, comment_prefix: str, content: List[str], block: TextBlock, name: str

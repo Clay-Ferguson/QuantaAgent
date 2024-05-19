@@ -15,9 +15,9 @@ Don't forget to activate your "quanta_agent" environment in your IDE. IDE's like
 
 The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml` (outside this project), and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to the repository.
 
-## update_strategy Option
+## mode Option
 
-NOTE: The default config setting for the `update_strategy` config option is `whole_file` (not `injection_points`). When you run the tool you have to set this option to tell it whether it should try to update files based on `Injection Points` or `Whole Files`. The `whole_file` option lets you ask the AI to essentially edit one or more files for you and it will overwrite your existing file(s) with new content as it sees fit based on what you asked it to do in your prompt, where as `injection_points` tells the tool to only insert code where you've defined an injection point in the code.
+NOTE: The default config setting for the `mode` option is `files`. When you run the tool you have to set this option to tell it whether it should try to update files based on updating entire files (`mode="file"`), or only by updating only `Named Blocks` in files (`mode="blocks"`).
 
 
 # AI Dry-Run Testing

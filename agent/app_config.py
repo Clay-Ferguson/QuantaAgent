@@ -13,9 +13,8 @@ class AppConfig:
     ext_list: List[str] = []
     ext_set: Set[str] = set()
 
-    STRATEGY_WHOLE_FILE: str = "whole_file"
-    STRATEGY_INJECTION_POINTS: str = "injection_points"
-    STRATEGY_BLOCKS: str = "blocks"
+    MODE_FILES: str = "files"
+    MODE_BLOCKS: str = "blocks"
 
     @classmethod
     def get_config(cls, config_file: Optional[str] = None) -> argparse.Namespace:
@@ -66,9 +65,9 @@ class AppConfig:
             "--source_folder", required=True, help="Folder with source files to scan"
         )
         p.add_argument(
-            "--update_strategy",
+            "--mode",
             required=True,
-            help="Update strategy for the files (whole_file or injection_points, or blocks)",
+            help="Update mode for the files (files or blocks)",
         )
         p.add_argument(
             "--max_prompt_length", required=True, help="Max characters in prompt"

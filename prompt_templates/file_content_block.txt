@@ -1,3 +1,0 @@
-{TAG_FILE_BEGIN} {file_name}
-{content}
-{TAG_FILE_END} {file_name}

@@ -1,0 +1,210 @@
+OpenAI Model Used: gpt-4o, Mode: files, Timestamp: 1716079360864
+____________________________________________________________________________________
+Input Prompt: 
+Add an example of a simple table in my HTML file: ${/}
+____________________________________________________________________________________
+LLM Output: 
+Here is the updated content of the `/my-web-project/index.html` file with a simple table added:
+
+file_begin /my-web-project/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Web Project</h1>
+    </header>
+    <main>
+        <p>This is a simple web project.</p>
+        <h2>Sample Table</h2>
+        <table border="1">
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>City</th>
+            </tr>
+            <tr>
+                <td>John Doe</td>
+                <td>30</td>
+                <td>New York</td>
+            </tr>
+            <tr>
+                <td>Jane Smith</td>
+                <td>25</td>
+                <td>Los Angeles</td>
+            </tr>
+            <tr>
+                <td>Emily Johnson</td>
+                <td>35</td>
+                <td>Chicago</td>
+            </tr>
+        </table>
+    </main>
+    <footer>
+        <p>&copy; 2023 My Web Project</p>
+    </footer>
+</body>
+</html>
+file_end /my-web-project/index.html
+____________________________________________________________________________________
+System Prompt: 
+
+
+You are an expert Software Engineer working to assist another expert developer. You may be asked general software questions, or you may be asked to edit, refactor, or write code. Don't assume you will always be asked to write code, but be prepared to do so, and follow the instructions below:
+----
+Additional Instructions:
+
+
+Your instructions for creating or editing files:
+
+How you'll recieve files:
+
+If the developer has given you files and asked you to modify them, then each file's content he is providing to you will have the following format:
+
+file_begin {FileName}
+...content of file...
+file_end {FileName}
+
+The {fileName} in that format example is of course just a placeholder, where a real filename will be.
+
+How you'll Update Existing Files:
+
+When you reply back with any updated file content for already existing files, you should use this same format, with the filename and content.
+
+Do not alter the filenames at all, or remove any leading slashes, when updating existing files. Do not use markdown format in the content, because the developer needs the raw file content.
+
+If you're modifying an existing project then the filenames should be relative to the root of the project, and will start with a slash. For example a file in the project root folder would be named like `/my_root_file.txt`. However, if you were asked to create a completely new project, you should insert a project folder name at the front all paths, but still start with a slash.
+
+How you'll Create New files:
+
+When you need to create a completely new file, you should follow all the same rules provided above but use this slightly different format, so the developer can understand your intent that it's a new file to be created:
+
+new_file_begin {FileName}
+...content of file...
+new_file_end {FileName}
+
+*** end of: Your instructions for creating or editing files ***
+____________________________________________________________________________________
+Final Prompt: 
+Add an example of a simple table in my HTML file: 
+
+Below is the content of the files in the folder named test_project (using file_begin and file_end tags to delimit the files):
+        
+file_begin /temperature_convert.py
+# block_begin MyCodeBlock
+# Prompt the user to input a temperature in the format (e.g., 45F, 102C, etc.)
+temp = input("Enter Temperature: ")
+print("Hello Werld.")
+# block_end
+
+# Extract the numerical part of the temperature and convert it to an integer
+degree = int(temp[:-1])
+
+# Extract the convention part of the temperature input (either 'C' or 'F')
+i_convention = temp[-1]
+
+# Check if the input convention is in uppercase 'C' (Celsius)
+if i_convention.upper() == "C":
+    # Convert the Celsius temperature to Fahrenheit
+    result = int(round((9 * degree) / 5 + 32))
+    o_convention = "Fahrenheit"  # Set the output convention as Fahrenheit
+# Check if the input convention is in uppercase 'F' (Fahrenheit)
+elif i_convention.upper() == "F":
+    # Convert the Fahrenheit temperature to Celsius
+    result = int(round((degree - 32) * 5 / 9))
+    o_convention = "Celsius"  # Set the output convention as Celsius
+else:
+    # If the input convention is neither 'C' nor 'F', print an error message and exit the program
+    print("Input proper convention.")
+    quit()
+
+# Display the converted temperature in the specified output convention
+print("The temperature in", o_convention, "is", result, "degrees.")
+
+
+# block_begin MyTestBlock
+print("This is a test block")
+# block_end
+
+file_end /temperature_convert.py
+
+file_begin /my-web-project/styles.css
+body {
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 0;
+background-color: #f4f4f4;
+}
+
+header {
+background-color: #333;
+color: #fff;
+padding: 1rem;
+text-align: center;
+}
+
+main {
+padding: 1rem;
+}
+
+footer {
+background-color: #333;
+color: #fff;
+text-align: center;
+padding: 0.5rem;
+position: fixed;
+width: 100%;
+bottom: 0;
+}
+file_end /my-web-project/styles.css
+
+file_begin /my-web-project/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Web Project</h1>
+    </header>
+    <main>
+        <p>This is a simple web project.</p>
+    </main>
+    <footer>
+        <p>&copy; 2023 My Web Project</p>
+    </footer>
+</body>
+</html>
+file_end /my-web-project/index.html
+
+file_begin /utils/add_numbers.py
+# This program adds three numbers
+
+num1 = 1.5
+num2 = 6.3
+num3 = 2.4  # Added a third number
+
+# Add three numbers
+sum = num1 + num2 + num3  # Updated to add three numbers
+
+# Display the sum
+print("The sum of {0}, {1}, and {2} is {3}".format(num1, num2, num3, sum))
+
+file_end /utils/add_numbers.py
+
+file_begin /utils/hello_world.py
+# This program prints Hello, world!
+
+print("Hello, world!")
+
+file_end /utils/hello_world.py
+
