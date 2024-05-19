@@ -52,13 +52,13 @@ To use this tool, follow these steps:
 
 # Modes
 
-## Files
+## Files Mode
 
-`Files` Mode will allow the agent to update entire files. Only entire files are sent to the LLM, and the LLM will send back entire files which automatically get saved into your project according to the LLM's edits.
+`Files Mode` will allow the agent to update entire files. Only entire files are sent to the LLM, and the LLM will send back entire files which automatically get saved into your project according to the LLM's edits.
 
-## Blocks
+## Blocks Mode
 
-`Blocks` Mode expects you to have defined `Named Blocks` in your code, to identify specific areas which you'd like to ask questions about by name, to save you from having to continually paste those sections of code into your AI prompts. There's a simple syntax used to allow you to enclose pieces of your code into blocks by putting comments around them that the AI will detect and unserstand automatically. Here are the docs on [Named Blocks](./docs/named-blocks.md)
+`Blocks Mode` expects you to have defined `Named Blocks` in your code, to identify specific areas which you'd like to ask questions about by name, to save you from having to continually paste those sections of code into your AI prompts. There's a simple syntax used to allow you to enclose pieces of your code into blocks by putting comments around them that the AI will detect and unserstand automatically. Here are the docs on [Named Blocks](./docs/named-blocks.md)
 
 # Example 1. Trivial Refactoring
 

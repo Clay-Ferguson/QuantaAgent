@@ -5,7 +5,6 @@ import re
 import os
 import argparse
 from typing import List, Set, Optional
-import streamlit as st
 from agent.app_config import AppConfig
 from agent.tags import (
     TAG_FILE_BEGIN,
@@ -188,11 +187,11 @@ class Utils:
         with col2:
             st.image("img/logo-100px-tr.jpg", width=100)
 
-        Utils.set_default_session_vars(cfg)
-        Utils.keep_session_vars()
+        Utils.set_default_session_vars(st, cfg)
+        Utils.keep_session_vars(st)
 
     @staticmethod
-    def set_default_session_vars(cfg: argparse.Namespace):
+    def set_default_session_vars(st, cfg: argparse.Namespace):
         """Sets the default session variables."""
         if "p_mode" not in st.session_state:
             st.session_state.p_mode = cfg.mode
@@ -204,7 +203,7 @@ class Utils:
             st.session_state.p_chatbot_user_input = ""
 
     @staticmethod
-    def keep_session_vars():
+    def keep_session_vars(st):
         """
         Keeps the session state variables from being deleted by Streamlit.
 
@@ -216,7 +215,7 @@ class Utils:
                 st.session_state[prop] = st.session_state[prop]
 
     @staticmethod
-    def st_markdown(markdown_string):
+    def st_markdown(st, markdown_string):
         """Renders markdown with images in Streamlit.
         We need this method only because Streamlit's markdown does not support localhost images.
         """

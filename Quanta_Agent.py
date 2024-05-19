@@ -1,12 +1,11 @@
 """Runs the Agent"""
 
-import streamlit as st
-
 from agent.app_config import AppConfig
 from agent.utils import Utils
+import streamlit as st
 
 
-def show_mode_picker():
+def show_mode_picker(st):
     """Show the mode picker."""
 
     # Define the mapping between keys and display values
@@ -33,7 +32,7 @@ if __name__ == "__main__":
     cfg = AppConfig.get_config(None)
 
     Utils.setup_page(st, cfg, "Quanta: AI Tools")
-    show_mode_picker()
+    show_mode_picker(st)
 
     # Sanity check
     # st.write(st.session_state)

@@ -34,7 +34,7 @@ class Documentation:
         # Display the content of the selected file in the right column
         with col2:
             content = Utils.read_file(selected_file)
-            Utils.st_markdown(content)
+            Utils.st_markdown(st, content)
 
         # Sanity check
         # st.write(st.session_state)
