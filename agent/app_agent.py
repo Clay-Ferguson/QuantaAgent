@@ -29,6 +29,7 @@ class QuantaAgent:
     folder_names: List[str] = []
 
     def __init__(self):
+        self.st = None
         self.cfg: argparse.Namespace = AppConfig.get_config(None)
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
@@ -166,7 +167,6 @@ class QuantaAgent:
                         trimmed, TAG_BLOCK_BEGIN
                     )
 
-                    # TODO: Verify all calls to fail_app have 'st' if they need to.
                     if name in self.blocks:
                         Utils.fail_app(
                             f"Duplicate Block Name {name}. Block Names must be unique across all files.",
@@ -178,7 +178,8 @@ class QuantaAgent:
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     if block is None:
                         Utils.fail_app(
-                            f"""Encountered {TAG_BLOCK_END} without a corresponding {TAG_BLOCK_BEGIN}"""
+                            f"""Encountered {TAG_BLOCK_END} without a corresponding {TAG_BLOCK_BEGIN}""",
+                            self.st,
                         )
                     block = None
                 else:

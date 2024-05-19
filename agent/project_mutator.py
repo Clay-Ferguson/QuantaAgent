@@ -45,7 +45,7 @@ class ProjectMutator:
         """Performs all the project mutations which may be new files, updated files, or updated blocks in files."""
 
         if self.ran:
-            Utils.fail_app("ProjectMutator has already run.")
+            Utils.fail_app("ProjectMutator has already run.", self.st)
         self.ran = True
 
         # blocks
@@ -70,7 +70,7 @@ class ProjectMutator:
 
             if Utils.is_tag_line(line, begin_tag):
                 if collecting:
-                    Utils.fail_app("Found Begin tag while still collecting")
+                    Utils.fail_app("Found Begin tag while still collecting", self.st)
 
                 # Start of a new block
                 current_block_name = Utils.parse_block_name_from_line(line, begin_tag)
@@ -117,7 +117,9 @@ class ProjectMutator:
 
             if Utils.is_tag_line(line, f"""{TAG_NEW_FILE_BEGIN} /"""):
                 if collecting:
-                    Utils.fail_app("Found New File Begin tag while still collecting")
+                    Utils.fail_app(
+                        "Found New File Begin tag while still collecting", self.st
+                    )
 
                 # Start of a new file
                 file_name = Utils.parse_block_name_from_line(line, TAG_NEW_FILE_BEGIN)
@@ -132,7 +134,8 @@ class ProjectMutator:
                     # Throw error if file exists
                     if os.path.exists(full_file_name):
                         Utils.fail_app(
-                            f"Error: The file {full_file_name} already exists. AI accidentally had a filename collision. This is not a bug, just an unfortunate turn of events."
+                            f"Error: The file {full_file_name} already exists. AI accidentally had a filename collision. This is not a bug, just an unfortunate turn of events.",
+                            self.st,
                         )
 
                     # Ensure folder exisits
@@ -217,7 +220,8 @@ class ProjectMutator:
             elif Utils.is_tag_and_name_line(line, TAG_FILE_BEGIN, rel_filename):
                 if len(new_content) > 0:
                     Utils.fail_app(
-                        f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing."
+                        f"Error: {TAG_FILE_BEGIN} {rel_filename} exists multiple times in ai response. The LLM itself is failing.",
+                        self.st,
                     )
                 started = True
 

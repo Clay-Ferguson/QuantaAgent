@@ -57,32 +57,22 @@ class AppOpenAI:
 
             # messages is none this is a one-shot query with no prior context
             if messages is None:
-                # TODO: this is an ugly way to crate system and user message, use the way below instead, with
-                # HumanMessage etc
-                prompt = ChatPromptTemplate.from_messages(
-                    [("system", self.system_prompt), ("user", "{input}")]
-                )
-                output_parser = StrOutputParser()
-                chain = prompt | llm | output_parser
-                print("Waiting for OpenAI...")
-                ret = chain.invoke({"input": query})
+                # We end up here for the command line interface, where we have no prior context
+                messages = []
+
+            # Check the first 'message' to see if it's a SystemMessage and if not then insert one
+            if len(messages) == 0 or not isinstance(messages[0], SystemMessage):
+                messages.insert(0, SystemMessage(content=self.system_prompt))
+            # else we set the first message to the system prompt
             else:
-                # Else we're doing a chat with context, so we append the question and also the answer, and leave
-                # the self.chat_response as the last response.
+                messages[0] = SystemMessage(content=self.system_prompt)
 
-                # Check the first 'message' to see if it's a SystemMessage and if not then insert one
-                if len(messages) == 0 or not isinstance(messages[0], SystemMessage):
-                    messages.insert(0, SystemMessage(content=self.system_prompt))
-                # else we set the first message to the system prompt
-                else:
-                    messages[0] = SystemMessage(content=self.system_prompt)
-
-                human_message = HumanMessage(content=query)
-                PromptUtils.user_inputs[id(human_message)] = input_prompt
-                messages.append(human_message)
-                response = llm(list(messages))
-                ret = response.content  # type: ignore
-                messages.append(AIMessage(content=response.content))
+            human_message = HumanMessage(content=query)
+            PromptUtils.user_inputs[id(human_message)] = input_prompt
+            messages.append(human_message)
+            response = llm(list(messages))
+            ret = response.content  # type: ignore
+            messages.append(AIMessage(content=response.content))
 
         output = f"""OpenAI Model Used: {self.model}, Mode: {self.mode}, Timestamp: {ts}
 ____________________________________________________________________________________
