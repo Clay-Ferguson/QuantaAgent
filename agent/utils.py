@@ -200,6 +200,8 @@ class Utils:
             st.session_state.p_source_provided = False
         if "p_agent_user_input" not in st.session_state:
             st.session_state.p_agent_user_input = ""
+        if "p_chatbot_user_input" not in st.session_state:
+            st.session_state.p_chatbot_user_input = ""
 
     @staticmethod
     def keep_session_vars():
