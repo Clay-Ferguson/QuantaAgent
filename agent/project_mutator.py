@@ -1,6 +1,7 @@
 """Injects data into files."""
 
 import os
+import re
 from typing import List, Dict, Optional
 from agent.models import TextBlock
 from agent.string_utils import StringUtils
@@ -183,7 +184,7 @@ class ProjectMutator:
             else:
                 if self.mode == AppConfig.MODE_BLOCKS:
                     for name, block in self.blocks.items():
-                        if self.replace_blocks(content, block, name):
+                        if self.replace_block(content, block, name):
                             modified = True
 
             if modified:
@@ -233,47 +234,32 @@ class ProjectMutator:
         ret: str = "\n".join(new_content)
         return ret
 
-    def replace_blocks(self, content: List[str], block: TextBlock, name: str) -> bool:
-        """Process the replacements for the given block."""
-
-        if f"{TAG_BLOCK_BEGIN} {name}" not in content[0]:
-            return False
-
-        # we return true here if we did any replacements
-        ret: bool = (
-            self.replace_block("//", content, block, name)
-            or self.replace_block("--", content, block, name)
-            or self.replace_block("#", content, block, name)
-        )
-        return ret
-
-    # TODO: Can we refactor this method to have regex that accepts ANY comment prefix, so we only have
-    #       to call it once rather than for each comment prefix?
-    def replace_block(
-        self, comment_prefix: str, content: List[str], block: TextBlock, name: str
-    ) -> bool:
-        """Process the replacement for the given block and comment prefix. This is what does the actual
+    def replace_block(self, content: List[str], block: TextBlock, name: str) -> bool:
+        """Process the replacement for the given block. This is what does the actual
         replacement of a named block of code in the file
 
         We replace the first element of the dict content with the new content, so we're treating 'content'
         as a mutable object.
         """
 
+        if f"{TAG_BLOCK_BEGIN} {name}" not in content[0]:
+            return False
+
         found: bool = False
         lines = content[0].splitlines()
         new_lines = []
         in_block = False
-        # We will break up content into lines and then iterate over them to find the block we want to replace
-        # We will then replace the block with the new block content
+        comment_pattern = r"(//|--|#)"
+
         for line in lines:
             trimmed = line.strip()
             if in_block:
-                if trimmed == f"{comment_prefix} {TAG_BLOCK_END}":
+                if re.match(rf"{comment_pattern} {TAG_BLOCK_END}", trimmed):
                     in_block = False
                     new_lines.append(block.content)
                     new_lines.append(line)
                     found = True
-            elif trimmed == f"{comment_prefix} {TAG_BLOCK_BEGIN} {name}":
+            elif re.match(rf"{comment_pattern} {TAG_BLOCK_BEGIN} {name}", trimmed):
                 in_block = True
                 new_lines.append(line)
             else:
