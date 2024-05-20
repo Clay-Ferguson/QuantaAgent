@@ -76,7 +76,7 @@ class AppOpenAI:
                 ret = "Dry Run: No API call made."
         else:
             # NOTE: Pylance is incorrectly choking on the following line, so leave the `type: ignore` in place
-            llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key)  # type: ignore
+            llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key, verbose=True)  # type: ignore
 
             # Part of Langchain Tool Use experimentation
             # We're not useing pydantic for now, so we pass an actual method
@@ -106,7 +106,7 @@ class AppOpenAI:
             # response = chain.invoke(list(messages))
             # END_PYDANTIC
 
-            response = llm(list(messages))
+            response = llm.invoke(list(messages))
             ret = response.content  # type: ignore
             messages.append(AIMessage(content=response.content))
 

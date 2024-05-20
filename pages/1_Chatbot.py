@@ -49,7 +49,7 @@ class AppChatbotGUI:
                     temperature=0.7,
                     api_key=self.cfg.openai_api_key,
                 )
-                response = chat(list(st.session_state.p_chatbot_messages))
+                response = chat.invoke(list(st.session_state.p_chatbot_messages))
 
             st.session_state.p_chatbot_messages.append(
                 AIMessage(content=response.content)
