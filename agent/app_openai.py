@@ -3,12 +3,35 @@
 import os
 from typing import List, Optional
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from langchain.schema import HumanMessage, AIMessage, BaseMessage, SystemMessage
 
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
+
+# DO NOT DELETE THESE IMPORTS
+# from langchain_core.tools import tool
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.output_parsers.openai_tools import PydanticToolsParser
+# from langchain_core.pydantic_v1 import BaseModel, Field
+
+
+# DO NOT DELETE THIS FUNCTION
+# This was part of some experimentation with Langchain Tool Use you'll find
+# below which is commented out. Tool use doesn't fit into conversational flow
+# as well as our approach does, so we're not using Langchain tools for now.
+# @tool
+# def update_block(block_name: str, block_content: str) -> str:
+#     """Updates and saves a named block of text"""
+#     return f"Tool Call: update_block({block_name}, {block_content})"
+
+# DO NOT DELETE THIS CLASS
+# Note that the docstrings here are crucial, as they will be passed along
+# to the model along with the class name.
+# This class not used for now, but the pydantic example below uses this
+# class UpdateBlock(BaseModel):
+#     """Updates and saves a named block of text"""
+#     block_name: str = Field(..., description="Block Name")
+#     block_content: str = Field(..., description="Block Content")
 
 
 class AppOpenAI:
@@ -55,6 +78,10 @@ class AppOpenAI:
             # NOTE: Pylance is incorrectly choking on the following line, so leave the `type: ignore` in place
             llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key)  # type: ignore
 
+            # Part of Langchain Tool Use experimentation
+            # We're not useing pydantic for now, so we pass an actual method
+            # llm_with_tools = llm.bind_tools([update_block])
+
             # messages is none this is a one-shot query with no prior context
             if messages is None:
                 # We end up here for the command line interface, where we have no prior context
@@ -70,6 +97,15 @@ class AppOpenAI:
             human_message = HumanMessage(content=query)
             PromptUtils.user_inputs[id(human_message)] = input_prompt
             messages.append(human_message)
+
+            # BEGIN_NON_PYDANTIC
+            # response = llm_with_tools.invoke(list(messages))
+            # ret = response.content  # type: ignore
+            # BEGIN_PYDANTIC
+            # chain = llm_with_tools | PydanticToolsParser(tools=[Updateblock])
+            # response = chain.invoke(list(messages))
+            # END_PYDANTIC
+
             response = llm(list(messages))
             ret = response.content  # type: ignore
             messages.append(AIMessage(content=response.content))

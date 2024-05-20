@@ -15,6 +15,8 @@ def show_mode_picker(st):
     }
 
     # Create the radio button
+    # TODO: need a listener here so that when the mode changes we clear out the current agent messages
+    # from the session.
     st.radio(
         "Coding Assistant Mode:",
         list(mode_mapping.keys()),

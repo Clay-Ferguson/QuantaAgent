@@ -1,4 +1,4 @@
-Your Instructions on how to Update Blocks of Code:
+Your Instructions on how to Find Blocks of Code:
 
 Notice that there may be sections in the prompt that are formatted like this:
 
@@ -9,6 +9,13 @@ Notice that there may be sections in the prompt that are formatted like this:
 In these prompt sections the {{MyBlockName}} slot holds the name of the code block (so you can uniquely identify \
 the code block), and the content lines are below it, in between the {TAG_BLOCK_BEGIN} line and {TAG_BLOCK_END} line. \
 Note: The block name itself doesn't contain any curly braces. 
+
+-- *** These are comments the LLM will never see. ***
+-- Note To Quanta Agent Developers...
+-- Of you want to experiment with Langchain Tool Use for how to update blocks
+-- which was an experiment I've already done, and found it's not reliable, then comment
+-- out the rest of these instructions, and let the Tool Use function colling try to
+-- accomplish.
 
 When you reply back to the developer with any of your updates to those blocks of code, use this same format as \
 shown above and put the raw code in your new content for the block, rather than your usual markdown format. 
