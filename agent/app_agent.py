@@ -50,7 +50,7 @@ class QuantaAgent:
         st,
         mode: str,
         output_file_name: str,
-        messages: Optional[List[BaseMessage]],
+        messages: List[BaseMessage],
         input_prompt: str,
     ):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
@@ -95,6 +95,7 @@ class QuantaAgent:
             self.cfg.openai_model,
             self.system_prompt,
             self.cfg.data_folder,
+            self.blocks,
         )
 
         # Need to be sure the current `self.system_prompt`` is in these messages every time we send
@@ -115,6 +116,7 @@ class QuantaAgent:
                 self.answer,
                 self.ts,
                 None,
+                self.blocks,
             ).run()
 
     def build_system_prompt(self):
@@ -163,6 +165,10 @@ class QuantaAgent:
         and saving that text for later use
         """
 
+        # get the file name relative to the source folder
+        relative_file_name: str = path[self.source_folder_len :]
+        self.file_names.append(relative_file_name)
+
         # Open the file using 'with' which ensures the file is closed after reading
         with Utils.open_file(path) as file:
             block: Optional[TextBlock] = None
@@ -184,7 +190,7 @@ class QuantaAgent:
                     else:
                         # n is a non-optional string
                         n = name if name is not None else ""
-                        block = TextBlock(n, "")
+                        block = TextBlock(relative_file_name, n, "")
                         self.blocks[n] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     if block is None:
@@ -216,8 +222,6 @@ class QuantaAgent:
                 if Utils.should_include_file(AppConfig.ext_set, filename):
                     # build the full path
                     path: str = os.path.join(dirpath, filename)
-                    # get the file name relative to the source folder
-                    self.file_names.append(path[self.source_folder_len :])
                     # Call the visitor function for each file
                     self.visit_file(path)
 

@@ -10,6 +10,14 @@ import configargparse
 class AppConfig:
     """Loads configuration from config.yaml and secrets.yaml files."""
 
+    # TODO: move into yaml
+    tool_use = True
+
+    # WARNING: If you set agentic to FALSE here and you want tools recognized (but not called) be sure to
+    # uncomment the `@tool` annotation above the tool functions above.
+    # TODO: move into yaml
+    agentic = True
+
     ext_list: List[str] = []
     ext_set: Set[str] = set()
 

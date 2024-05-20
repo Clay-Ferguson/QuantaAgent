@@ -30,6 +30,7 @@ class ProjectMutator:
         ai_answer: str,
         ts: str,
         suffix: Optional[str],
+        blocks: Dict[str, TextBlock],
     ):
         """Initializes the ProjectMutator object."""
         self.st = st
@@ -40,7 +41,7 @@ class ProjectMutator:
         self.suffix: Optional[str] = suffix
         self.ts: str = ts
         self.ran = False
-        self.blocks = {}
+        self.blocks = blocks
 
     def run(self):
         """Performs all the project mutations which may be new files, updated files, or updated blocks in files."""
@@ -51,7 +52,10 @@ class ProjectMutator:
 
         # blocks
         if self.mode == AppConfig.MODE_BLOCKS:
-            self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
+            # If we have a tool_use or agentic, we don't need to parse blocks because the tool itself
+            # will handle the population of 'blocks' for updating.
+            if not AppConfig.tool_use and not AppConfig.agentic:
+                self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
         # files
         elif self.mode == AppConfig.MODE_FILES:
             self.process_new_files()
@@ -90,7 +94,7 @@ class ProjectMutator:
                         )
                     else:
                         self.blocks[current_block_name] = TextBlock(
-                            name=current_block_name, content=content
+                            None, name=current_block_name, content=content
                         )
                 else:
                     print("No block name or not collecting")

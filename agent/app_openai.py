@@ -1,37 +1,16 @@
 """Makes a query to OpenAI's API and writes the response to a file."""
 
 import os
-from typing import List, Optional
+from typing import Dict, List
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, AIMessage, BaseMessage, SystemMessage
+from langgraph.prebuilt import chat_agent_executor
 
+from agent.app_config import AppConfig
+from agent.models import TextBlock
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
-
-# DO NOT DELETE THESE IMPORTS
-# from langchain_core.tools import tool
-# from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.output_parsers.openai_tools import PydanticToolsParser
-# from langchain_core.pydantic_v1 import BaseModel, Field
-
-
-# DO NOT DELETE THIS FUNCTION
-# This was part of some experimentation with Langchain Tool Use you'll find
-# below which is commented out. Tool use doesn't fit into conversational flow
-# as well as our approach does, so we're not using Langchain tools for now.
-# @tool
-# def update_block(block_name: str, block_content: str) -> str:
-#     """Updates and saves a named block of text"""
-#     return f"Tool Call: update_block({block_name}, {block_content})"
-
-# DO NOT DELETE THIS CLASS
-# Note that the docstrings here are crucial, as they will be passed along
-# to the model along with the class name.
-# This class not used for now, but the pydantic example below uses this
-# class UpdateBlock(BaseModel):
-#     """Updates and saves a named block of text"""
-#     block_name: str = Field(..., description="Block Name")
-#     block_content: str = Field(..., description="Block Content")
+from agent.tools.block_mods import UpdateBlockTool, update_block
 
 
 class AppOpenAI:
@@ -46,16 +25,18 @@ class AppOpenAI:
         model: str,
         system_prompt: str,
         data_folder: str,
+        blocks: Dict[str, TextBlock] = {},
     ):
         self.mode = mode
         self.api_key: str = api_key
         self.model: str = model
         self.system_prompt: str = system_prompt
         self.data_folder: str = data_folder
+        self.blocks = blocks
 
     def query(
         self,
-        messages: Optional[List[BaseMessage]],
+        messages: List[BaseMessage],
         query: str,
         input_prompt: str,
         output_file_name: str,
@@ -78,15 +59,6 @@ class AppOpenAI:
             # NOTE: Pylance is incorrectly choking on the following line, so leave the `type: ignore` in place
             llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key, verbose=True)  # type: ignore
 
-            # Part of Langchain Tool Use experimentation
-            # We're not useing pydantic for now, so we pass an actual method
-            # llm_with_tools = llm.bind_tools([update_block])
-
-            # messages is none this is a one-shot query with no prior context
-            if messages is None:
-                # We end up here for the command line interface, where we have no prior context
-                messages = []
-
             # Check the first 'message' to see if it's a SystemMessage and if not then insert one
             if len(messages) == 0 or not isinstance(messages[0], SystemMessage):
                 messages.insert(0, SystemMessage(content=self.system_prompt))
@@ -98,17 +70,46 @@ class AppOpenAI:
             PromptUtils.user_inputs[id(human_message)] = input_prompt
             messages.append(human_message)
 
-            # BEGIN_NON_PYDANTIC
-            # response = llm_with_tools.invoke(list(messages))
-            # ret = response.content  # type: ignore
-            # BEGIN_PYDANTIC
-            # chain = llm_with_tools | PydanticToolsParser(tools=[Updateblock])
-            # response = chain.invoke(list(messages))
-            # END_PYDANTIC
+            if AppConfig.tool_use:
+                # https://python.langchain.com/v0.2/docs/tutorials/agents/
+                if AppConfig.agentic:
+                    tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]  # type: ignore
+                    agent_executor = chat_agent_executor.create_tool_calling_executor(
+                        llm, tools
+                    )
+                    initial_message_len = len(messages)
+                    response = agent_executor.invoke({"messages": list(messages)})
+                    # print(f"Response: {response}")
+                    resp_messages = response["messages"]
 
-            response = llm.invoke(list(messages))
-            ret = response.content  # type: ignore
-            messages.append(AIMessage(content=response.content))
+                    new_messages = resp_messages[initial_message_len:]
+                    ret = ""
+                    ai_response: int = 0
+                    for message in new_messages:
+                        if isinstance(message, AIMessage):
+                            ai_response += 1
+                            ret += f"AI Response {ai_response}:\n{message.content}\n==============\n"  # type: ignore
+
+                    # Agents may add multiple new messages, so we need to update the messages list
+                    messages[:] = resp_messages
+
+                else:
+                    # With this approach (as opposed to the agent_executor above), and it will be designating a call to
+                    # the @tool annotated update_block funtion (above), but the tool won't have been executed automatically
+                    # in this non-agentic approach. So, we need to call the tool manually, in this case, however we will
+                    # probably always keep `AppConfig.agentic=True` permanent in this app, so this block of code is just for
+                    # reference, and we will probably never use it.
+                    tools = [update_block]
+                    llm_with_tools = llm.bind_tools(tools)
+                    response = llm_with_tools.invoke(list(messages))
+                    print(f"Response: {response}")
+                    ret = response.content  # type: ignore
+                    messages.append(AIMessage(content=response.content))
+
+            else:
+                response = llm.invoke(list(messages))
+                ret = response.content  # type: ignore
+                messages.append(AIMessage(content=response.content))
 
         output = f"""OpenAI Model Used: {self.model}, Mode: {self.mode}, Timestamp: {ts}
 ____________________________________________________________________________________
