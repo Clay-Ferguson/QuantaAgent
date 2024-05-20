@@ -1,6 +1,18 @@
 
 # Development Environment Setup
 
+## Architectural and Design Notes
+
+### No Langchain `Tool Use`? Why not?
+
+This app doesn't use any **Langchain Tools or Function Calling**, but instead uses more conventional prompt engineering. Tool use in Langchain is still only reliable when the message has only one single directive per prompt.
+
+For example with Langchain Tools enabled for updating code blocks, a prompt like "Save a block with name 'myblock' and content 'My Block Conent'" works well and generates a call to the correct tool with the correct arguments. However if you do that same prompt but with one more sentence added like perhaps "And tell me what is 1+1?" then the Langchain Tool calling mechanism will fail to generate the block saving function call.
+
+The Quanta Agent therefore cannot use Langchain Tools because our goal is go allow a free flow conversation between a developer and the Agent. So our instructions to the agent (System Prompt) simply tell the agent how to embed updates into it's normal conversational flow, and those embedded formats are detected by us and whatever calls we need to do (updating and/or creating source files) we handle ourselves.
+
+There's actually a lot of moving parts in Tool Calling AI systems as well, and not all LLMs support it. Since we can give more clear instructions in a single System Prompt that will work on any LLM we therefore also benefit by not only keeping things simpler with our non-tool approach, but we also achieve better compatibility with all LLMs.
+
 ## Create a conda environment
 
     We recommend 'conda' (specifically miniconda) but that's optional of course. All that's really required is Python.
