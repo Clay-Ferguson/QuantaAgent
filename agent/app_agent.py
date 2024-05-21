@@ -91,6 +91,7 @@ class QuantaAgent:
 
         open_ai = AppOpenAI(
             self.mode,
+            self.cfg.source_folder,
             self.cfg.openai_api_key,
             self.cfg.openai_model,
             self.system_prompt,

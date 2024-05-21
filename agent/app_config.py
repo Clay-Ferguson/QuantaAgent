@@ -34,10 +34,10 @@ class AppConfig:
             config_file = "config/config.yaml"
         secrets_file: str = "../secrets/secrets.yaml"
 
-        if not os.path.exists(config_file):
+        if not os.path.isfile(config_file):
             print(f"WARNING: File not found: {config_file}")
 
-        if not os.path.exists(secrets_file):
+        if not os.path.isfile(secrets_file):
             print(f"WARNING: File not found: {secrets_file}")
 
         p = configargparse.ArgParser(default_config_files=[config_file, secrets_file])

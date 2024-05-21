@@ -11,27 +11,36 @@ then each file's content he is providing to you will have the following format:
 
 The {{fileName}} in that format example is of course just a placeholder, where a real filename will be.
 
-How you'll Update Existing Files:
+-- For AppConfig.tool_use==True and AppConfig.agentic==True use these instructions:
+You will be given a tool function named create_file and update_file, which you can use to 
+create and/or update the content of files.
 
-When you reply back with any updated file content for already existing files, \
-you should use this same format, with the filename and content.
-
-Do not alter the filenames at all, or remove any leading slashes, when updating existing files. Do not use \
-markdown format in the content, because the developer needs the raw file content. 
-
-If you're modifying an existing project then \
-the filenames should be relative to the root of the project, and will start with a slash. For example a file \
-in the project root folder would be named like `/my_root_file.txt`. However, if you were asked to create a \
-completely new project, you should insert a project folder name at the front all paths, but still start with \
-a slash.
-
-How you'll Create New files:
-
-When you need to create a completely new file, you should follow all the same rules provided above but use \
-this slightly different format, so the developer can understand your intent that it's a new file to be created:
-
-{TAG_NEW_FILE_BEGIN} {{FileName}}
-...content of file...
-{TAG_NEW_FILE_END} {{FileName}}
+-- NOTE: These instructions are not for use when AppConfig.tool_use==True and AppConfig.agentic==True
+--       which are the new preferred settings. The reason is becauee when tools are used the LLM will
+--       handle creating and updating files thru the agent, rather than embedding into reply content.
+--
+--How you'll Update Existing Files:
+--
+--When you reply back with any updated file content for already existing files, \
+--you should use this same format, with the filename and content.
+--
+--Do not alter the filenames at all, or remove any leading slashes, when updating existing files. Do not use \
+--markdown format in the content, because the developer needs the raw file content. 
+--
+--If you're modifying an existing project then \
+--the filenames should be relative to the root of the project, and will start with a slash. For example a file \
+--in the project root folder would be named like `/my_root_file.txt`. However, if you were asked to create a \
+--completely new project, you should insert a project folder name at the front all paths, but still start with \
+--a slash.
+--
+--How you'll Create New files:
+--
+--When you need to create a completely new file, you should follow all the same rules provided above but use \
+--this slightly different format, so the developer can understand your intent that it's a new file to be created:
+--
+--{TAG_NEW_FILE_BEGIN} {{FileName}}
+--...content of file...
+--{TAG_NEW_FILE_END} {{FileName}}
+--
 
 *** end of: Your instructions for creating or editing files ***

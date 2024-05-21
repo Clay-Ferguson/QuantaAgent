@@ -138,7 +138,7 @@ class ProjectMutator:
                     full_file_name: str = self.source_folder + file_name
 
                     # Throw error if file exists
-                    if os.path.exists(full_file_name):
+                    if os.path.isfile(full_file_name):
                         Utils.fail_app(
                             f"Error: The file {full_file_name} already exists. AI accidentally had a filename collision. This is not a bug, just an unfortunate turn of events.",
                             self.st,

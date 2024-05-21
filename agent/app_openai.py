@@ -10,7 +10,14 @@ from agent.app_config import AppConfig
 from agent.models import TextBlock
 from agent.prompt_utils import PromptUtils
 from agent.utils import Utils
-from agent.tools.block_mods import UpdateBlockTool, update_block
+from agent.tools.block_mods import (
+    UpdateBlockTool,
+    CreateFileTool,
+    UpdateFileTool,
+    update_block,
+    create_file,
+    update_file,
+)
 
 
 class AppOpenAI:
@@ -21,6 +28,7 @@ class AppOpenAI:
     def __init__(
         self,
         mode: str,
+        source_folder: str,
         api_key: str,
         model: str,
         system_prompt: str,
@@ -28,6 +36,7 @@ class AppOpenAI:
         blocks: Dict[str, TextBlock] = {},
     ):
         self.mode = mode
+        self.source_folder: str = source_folder
         self.api_key: str = api_key
         self.model: str = model
         self.system_prompt: str = system_prompt
@@ -50,7 +59,7 @@ class AppOpenAI:
             # if we canfind that file or else we return a default response.
             answer_file: str = f"{self.data_folder}/dry-run-answer.txt"
 
-            if os.path.exists(answer_file):
+            if os.path.isfile(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")
                 ret = Utils.read_file(answer_file)
             else:
@@ -73,7 +82,11 @@ class AppOpenAI:
             if AppConfig.tool_use:
                 # https://python.langchain.com/v0.2/docs/tutorials/agents/
                 if AppConfig.agentic:
-                    tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]  # type: ignore
+                    tools = [
+                        UpdateBlockTool("Block Updater Tool", self.blocks),
+                        CreateFileTool("File Creator Tool", self.source_folder),
+                        UpdateFileTool("File Updater Tool", self.source_folder),
+                    ]  # type: ignore
                     agent_executor = chat_agent_executor.create_tool_calling_executor(
                         llm, tools
                     )
@@ -88,18 +101,21 @@ class AppOpenAI:
                     for message in new_messages:
                         if isinstance(message, AIMessage):
                             ai_response += 1
-                            ret += f"AI Response {ai_response}:\n{message.content}\n==============\n"  # type: ignore
+                            content = message.content
+                            if not content:
+                                content = "No Content. Probably a tool call."
+                            ret += f"AI Response {ai_response}:\n{content}\n==============\n"  # type: ignore
 
                     # Agents may add multiple new messages, so we need to update the messages list
                     messages[:] = resp_messages
 
                 else:
                     # With this approach (as opposed to the agent_executor above), and it will be designating a call to
-                    # the @tool annotated update_block funtion (above), but the tool won't have been executed automatically
+                    # the @tool annotated functions, but the tool won't have been executed automatically
                     # in this non-agentic approach. So, we need to call the tool manually, in this case, however we will
                     # probably always keep `AppConfig.agentic=True` permanent in this app, so this block of code is just for
                     # reference, and we will probably never use it.
-                    tools = [update_block]
+                    tools = [update_block, create_file, update_file]
                     llm_with_tools = llm.bind_tools(tools)
                     response = llm_with_tools.invoke(list(messages))
                     print(f"Response: {response}")
