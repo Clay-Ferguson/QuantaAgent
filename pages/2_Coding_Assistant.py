@@ -77,15 +77,16 @@ class AppAgentGUI:
 
     def show_form(self):
         """Show the form for user input."""
-        st.text_area(
-            label="Ask the AI a Question (or ask for a Code Refactor to be done): ",
-            key="p_agent_user_input",
-        )
-        col1, col2 = st.columns(2)
-        with col1:
-            st.button("Ask AI", on_click=self.ask_ai)
-        with col2:
-            st.button("Clear", on_click=self.clear_all)
+        with st.form("agent_form"):
+            st.text_area(
+                label="Ask the AI a Question (or ask for a Code Refactor to be done): ",
+                key="p_agent_user_input",
+            )
+            col1, col2 = st.columns(2)
+            with col1:
+                st.form_submit_button("Ask AI", on_click=self.ask_ai)
+            with col2:
+                st.form_submit_button("Clear", on_click=self.clear_all)
 
     def run(self):
         """Main function for the Streamlit GUI."""
