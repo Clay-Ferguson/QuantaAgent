@@ -1,6 +1,17 @@
 
 # Development Environment Setup
 
+## Latest Project News!
+
+Quanta Agent is now using a Langchain Agent with Tools, to perform all file editing that it does to your code (i.e. editing of your files)!! This is a huge advancement!!
+
+We initially developed this project using only formatting of the prompts and responses (i.e. old-school `Prompt Engineering`) to accomplish refactoring of code, and we still support the "non-Tool and non-Agentic" way of doing things, so that we can be sure to keep supporting LLMs for which there is no Langchain Agent and/or Tool support. So we will keep that legacy (i.e. a whole week old!) code in place until we're sure we can go 100% with Langchain Agents and Tools going forward, which will happen very likely during the next year.
+
+We still have non-agentic code for detecting `block(), file() and folder()` references in your prompts and injecting those blocks, files, and folders directly into the prompt, and we will possibly never make that part agentic, because replacing those parts of a prompt with contents of your files doesn't require any intelligence or need to be in the Agent's set of tools. In other words if you reference `file(/my/file/name.py)` in your promt we detect that manually and replace it with the content of the file right into the prompt itself, although theoretically we could be using an agent to do that.
+
+So the part of this codebase that has been converted to "Agentic" is just the part where the LLM decides what code to create or write. All of that reply logic to write to your files, is, as stated, fully Langchain Agentic and Tools based.
+
+
 ## Create a conda environment
 
     We recommend 'conda' (specifically miniconda) but that's optional of course. All that's really required is Python.
