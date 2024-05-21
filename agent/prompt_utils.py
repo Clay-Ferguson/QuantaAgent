@@ -16,9 +16,6 @@ from agent.utils import Utils
 class PromptUtils:
     """Contains the prompt templates for the agent."""
 
-    # Dictionary to store user inputs keyed by id(HumanMessage)
-    user_inputs: Dict[int, str] = {}
-
     tplt_file_content_block: Optional[PromptTemplate] = None
 
     # caches the version of a template file, after core substitutions have been made from template_info
@@ -32,10 +29,7 @@ class PromptUtils:
         else we assume it's in prompt_templates folder
         """
         if file_name not in PromptUtils.template_cache:
-            if "/" in file_name:
-                pt = PromptTemplate.from_file(f"{file_name}.txt")
-            else:
-                pt = PromptTemplate.from_file(f"prompt_templates/{file_name}.txt")
+            pt = PromptTemplate.from_file(file_name)
             PromptUtils.template_cache[file_name] = (
                 "\n\n" + StringUtils.post_process_template(pt.format(**template_info))
             )

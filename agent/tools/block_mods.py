@@ -51,12 +51,14 @@ def update_file(file_name: str, file_content: str) -> str:
 
 
 class UpdateBlockTool(BaseTool):
-    """Tool to update a block of text."""
+    """Tool for updating named blocks of text to set new content"""
 
     # Warning there is a reference to this block name in "block_update_instructions.txt", although things do work
     # fine even without mentioning "block_update" in those instructions.
     name = "update_block"
-    description = "useful for when you need to update blocks of text, with new content"
+    description = (
+        "useful for when you need to update named blocks of text to set new content"
+    )
     args_schema: Type[BaseModel] = UpdateBlockInput
     return_direct: bool = False
     blocks: Dict[str, TextBlock] = {}
@@ -64,6 +66,7 @@ class UpdateBlockTool(BaseTool):
     def __init__(self, description, blocks):
         super().__init__(description=description)
         self.blocks = blocks
+        print(f"Created UpdateBlockTool with {len(blocks)} blocks")
 
     def _run(
         self,
@@ -72,10 +75,14 @@ class UpdateBlockTool(BaseTool):
         # run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
+        print(f"UpdateBlockTool._run {block_name}")
         msg = f"Tool Updated Block: {block_name} with content: {block_content}"
         block: Optional[TextBlock] = self.blocks.get(block_name)
         if block is not None:
             block.content = block_content
+            block.dirty = True
+        else:
+            print(f"Warning: Block not found: {block_name}")
         return msg
 
     # This async stuff is optional and performance related, so for now we omit.

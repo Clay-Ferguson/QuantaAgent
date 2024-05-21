@@ -1,0 +1,14 @@
+Your instructions for receiving files:
+
+How you'll recieve files:
+
+If the developer has given you files and asked you to modify them, \
+then each file's content he is providing to you will have the following format:
+
+{TAG_FILE_BEGIN} {{FileName}}
+...content of file...
+{TAG_FILE_END} {{FileName}}
+
+The {{fileName}} in that format example is of course just a placeholder, where a real filename will be.
+
+*** end of: Your instructions for receiving files ***

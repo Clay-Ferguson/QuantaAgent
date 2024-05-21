@@ -97,6 +97,7 @@ class QuantaAgent:
             self.system_prompt,
             self.cfg.data_folder,
             self.blocks,
+            self.st,
         )
 
         # Need to be sure the current `self.system_prompt`` is in these messages every time we send
@@ -108,7 +109,6 @@ class QuantaAgent:
             self.ts,
         )
 
-        # Only if set to one of these two strategies, do we ever alter any files
         if self.mode == AppConfig.MODE_FILES or self.mode == AppConfig.MODE_BLOCKS:
             ProjectMutator(
                 self.st,
@@ -129,23 +129,45 @@ class QuantaAgent:
         the AI query is made.
         """
 
-        self.system_prompt = PromptUtils.get_template("agent_system_prompt")
+        self.system_prompt = PromptUtils.get_template(
+            "prompt_templates/agent_system_prompt.txt"
+        )
         self.system_prompt += MORE_INSTRUCTIONS
-        self.add_file_edit_instructions()
-        self.add_block_update_instructions()
+        self.add_file_handling_instructions()
+        self.add_block_handling_instructions()
 
-    def add_block_update_instructions(self):
+    def add_block_handling_instructions(self):
         """Adds instructions for updating blocks. If the prompt contains ${BlockName} tags, then we need to provide
         instructions for how to provide the new block content."""
         if self.mode == AppConfig.MODE_BLOCKS and len(self.blocks) > 0:
-            self.system_prompt += PromptUtils.get_template("block_update_instructions")
+            self.system_prompt += PromptUtils.get_template(
+                "prompt_templates/block_access_instructions.txt"
+            )
+            if AppConfig.tool_use:
+                self.system_prompt += PromptUtils.get_template(
+                    "prompt_templates/with_tools/block_update_instructions.txt"
+                )
+            else:
+                self.system_prompt += PromptUtils.get_template(
+                    "prompt_templates/without_tools/block_update_instructions.txt"
+                )
 
-    def add_file_edit_instructions(self):
+    def add_file_handling_instructions(self):
         """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
         we need to provide instructions for how to provide the new file or folder names.
         """
         if self.mode == AppConfig.MODE_FILES:
-            self.system_prompt += PromptUtils.get_template("file_edit_instructions")
+            self.system_prompt += PromptUtils.get_template(
+                "prompt_templates/file_access_instructions.txt"
+            )
+            if AppConfig.tool_use:
+                self.system_prompt += PromptUtils.get_template(
+                    "prompt_templates/with_tools/file_edit_instructions.txt"
+                )
+            else:
+                self.system_prompt += PromptUtils.get_template(
+                    "prompt_templates/without_tools/file_edit_instructions.txt"
+                )
 
     def insert_files_and_folders_into_prompt(self) -> bool:
         """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags
@@ -191,7 +213,7 @@ class QuantaAgent:
                     else:
                         # n is a non-optional string
                         n = name if name is not None else ""
-                        block = TextBlock(relative_file_name, n, "")
+                        block = TextBlock(relative_file_name, n, "", False)
                         self.blocks[n] = block
                 elif Utils.is_tag_line(trimmed, TAG_BLOCK_END):
                     if block is None:

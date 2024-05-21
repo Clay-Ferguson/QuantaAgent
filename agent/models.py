@@ -9,3 +9,4 @@ class TextBlock:
     rel_filename: Optional[str]
     name: str
     content: str
+    dirty: bool = False

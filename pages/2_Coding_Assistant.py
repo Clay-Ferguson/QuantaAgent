@@ -23,7 +23,7 @@ class AppAgentGUI:
         st.session_state.p_agent_messages = messages
         st.session_state.p_source_provided = False
         st.session_state.p_agent_user_input = ""
-        PromptUtils.user_inputs = {}
+        st.session_state.p_user_inputs = {}
 
     def ask_ai(self):
         """Ask the AI."""
@@ -64,10 +64,10 @@ class AppAgentGUI:
                 # I'm not sure if this is a bug or what, when this message is missing, but if so it's related
                 # to clearing the messages with the clear button
                 # if id(msg) is not in user_inputs, just make user_input be "message gone"
-                if id(msg) not in PromptUtils.user_inputs:
-                    PromptUtils.user_inputs[id(msg)] = "Message Gone"
+                if id(msg) not in st.session_state.p_user_inputs:
+                    st.session_state.p_user_inputs[id(msg)] = "Message Gone"
 
-                user_input = PromptUtils.user_inputs[id(msg)]
+                user_input = st.session_state.p_user_inputs[id(msg)]
                 message(user_input, is_user=True, key=str(i) + "_user")
             elif isinstance(msg, AIMessage):
                 content: str = msg.content  # type: ignore
@@ -96,7 +96,7 @@ class AppAgentGUI:
         self.show_form()
 
         with st.expander("Helpful Tips. Read this first!"):
-            st.markdown(PromptUtils.get_template("config/agent_chat_tips"))
+            st.markdown(PromptUtils.get_template("config/agent_chat_tips.txt"))
 
         # Sanity check
         # st.write(st.session_state)

@@ -1,0 +1,13 @@
+Your Instructions on how to Find Blocks of Code:
+
+Notice that there may be sections in the prompt that are formatted like this:
+
+{TAG_BLOCK_BEGIN} {{MyBlockName}}
+... content of a code block ...
+{TAG_BLOCK_END}
+
+In these prompt sections the {{MyBlockName}} slot holds the name of the code block (so you can uniquely identify \
+the code block), and the content lines are below it, in between the {TAG_BLOCK_BEGIN} line and {TAG_BLOCK_END} line. \
+Note: The block name itself doesn't contain any curly braces.
+
+*** end of: Your Instructions on how to Find Blocks of Code ***

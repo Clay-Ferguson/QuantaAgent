@@ -58,7 +58,10 @@ class ProjectMutator:
                 self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
         # files
         elif self.mode == AppConfig.MODE_FILES:
-            self.process_new_files()
+            # If we have a tool_use or agentic, we don't need to create new files this way because the
+            # tool will handle it
+            if not AppConfig.tool_use and not AppConfig.agentic:
+                self.process_new_files()
 
         self.process_project()
 
@@ -94,7 +97,7 @@ class ProjectMutator:
                         )
                     else:
                         self.blocks[current_block_name] = TextBlock(
-                            None, name=current_block_name, content=content
+                            None, name=current_block_name, content=content, dirty=True
                         )
                 else:
                     print("No block name or not collecting")
@@ -188,8 +191,9 @@ class ProjectMutator:
             else:
                 if self.mode == AppConfig.MODE_BLOCKS:
                     for name, block in self.blocks.items():
-                        if self.replace_block(content, block, name):
-                            modified = True
+                        if block.dirty:
+                            if self.replace_block(content, block, name):
+                                modified = True
 
             if modified:
                 print(f"Updated File: {filename}")
@@ -258,12 +262,12 @@ class ProjectMutator:
         for line in lines:
             trimmed = line.strip()
             if in_block:
-                if re.match(rf"{comment_pattern} {TAG_BLOCK_END}", trimmed):
+                if re.match(rf"{comment_pattern} {TAG_BLOCK_END}$", trimmed):
                     in_block = False
                     new_lines.append(block.content)
                     new_lines.append(line)
                     found = True
-            elif re.match(rf"{comment_pattern} {TAG_BLOCK_BEGIN} {name}", trimmed):
+            elif re.match(rf"{comment_pattern} {TAG_BLOCK_BEGIN} {name}$", trimmed):
                 in_block = True
                 new_lines.append(line)
             else:

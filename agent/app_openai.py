@@ -34,6 +34,7 @@ class AppOpenAI:
         system_prompt: str,
         data_folder: str,
         blocks: Dict[str, TextBlock] = {},
+        st=None,
     ):
         self.mode = mode
         self.source_folder: str = source_folder
@@ -42,6 +43,7 @@ class AppOpenAI:
         self.system_prompt: str = system_prompt
         self.data_folder: str = data_folder
         self.blocks = blocks
+        self.st = st
 
     def query(
         self,
@@ -76,7 +78,10 @@ class AppOpenAI:
                 messages[0] = SystemMessage(content=self.system_prompt)
 
             human_message = HumanMessage(content=query)
-            PromptUtils.user_inputs[id(human_message)] = input_prompt
+
+            if self.st is not None:
+                self.st.session_state.p_user_inputs[id(human_message)] = input_prompt
+
             messages.append(human_message)
 
             if AppConfig.tool_use:
