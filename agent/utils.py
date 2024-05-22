@@ -5,6 +5,9 @@ import re
 import os
 import argparse
 from typing import List, Set, Optional
+import streamlit as st
+from langchain.schema import BaseMessage
+
 from agent.app_config import AppConfig
 from agent.tags import (
     TAG_FILE_BEGIN,
@@ -18,6 +21,15 @@ from agent.tags import (
 
 class Utils:
     """Utilities Class"""
+
+    @staticmethod
+    def clear_agent_state():
+        """Clear all agent session state."""
+        messages: List[BaseMessage] = []
+        st.session_state.p_agent_messages = messages
+        st.session_state.p_source_provided = False
+        st.session_state.p_agent_user_input = ""
+        st.session_state.p_user_inputs = {}
 
     @staticmethod
     def open_file(filename: str) -> TextIOWrapper:

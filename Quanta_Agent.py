@@ -1,8 +1,8 @@
 """Runs the Agent"""
 
+import streamlit as st
 from agent.app_config import AppConfig
 from agent.utils import Utils
-import streamlit as st
 
 
 def show_mode_picker(st):
@@ -14,9 +14,9 @@ def show_mode_picker(st):
         AppConfig.MODE_BLOCKS: "Update Blocks",
     }
 
-    # Create the radio button
-    # TODO: need a listener here so that when the mode changes we clear out the current agent messages
-    # from the session.
+    def mode_changed():
+        Utils.clear_agent_state()
+
     st.radio(
         "Coding Assistant Mode:",
         list(mode_mapping.keys()),
@@ -25,6 +25,7 @@ def show_mode_picker(st):
             AppConfig.MODE_FILES: "Files: AI is allowed to update entire files.",
             AppConfig.MODE_BLOCKS: "Blocks: AI is only allowed to update specific blocks in the code.",
         }[x],
+        on_change=mode_changed,
     )
 
 

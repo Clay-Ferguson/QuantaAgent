@@ -17,14 +17,6 @@ class AppAgentGUI:
     def __init__(self):
         self.cfg = AppConfig.get_config(None)
 
-    def clear_all(self):
-        """Clear all messages."""
-        messages: List[BaseMessage] = []
-        st.session_state.p_agent_messages = messages
-        st.session_state.p_source_provided = False
-        st.session_state.p_agent_user_input = ""
-        st.session_state.p_user_inputs = {}
-
     def ask_ai(self):
         """Ask the AI."""
         # initialize message history
@@ -86,7 +78,7 @@ class AppAgentGUI:
             with col1:
                 st.form_submit_button("Ask AI", on_click=self.ask_ai)
             with col2:
-                st.form_submit_button("Clear", on_click=self.clear_all)
+                st.form_submit_button("Clear", on_click=Utils.clear_agent_state)
 
     def run(self):
         """Main function for the Streamlit GUI."""
