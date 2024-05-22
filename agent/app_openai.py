@@ -107,18 +107,22 @@ class AppOpenAI:
                             ai_response += 1
                             content = message.content
                             if not content:
-                                content = "No Content. Probably a tool call."
+                                content = Utils.get_tool_calls_str(message)
+                                print(f"TOOL CALLS:\n{content}")
                             ret += f"AI Response {ai_response}:\n{content}\n==============\n"  # type: ignore
 
                     # Agents may add multiple new messages, so we need to update the messages list
+                    # This [:] syntax is a way to update the list in place
                     messages[:] = resp_messages
 
                 else:
-                    # With this approach (as opposed to the agent_executor above), and it will be designating a call to
-                    # the @tool annotated functions, but the tool won't have been executed automatically
-                    # in this non-agentic approach. So, we need to call the tool manually, in this case, however we will
+                    # With this approach (as opposed to the agent_executor above), it will be designating a call to
+                    # the @tool annotated functions in thet response, but the tool won't have been executed automatically
+                    # in this non-agentic approach. So, we need to call the tool manually, in this case. However we will
                     # probably always keep `AppConfig.agentic=True` permanent in this app, so this block of code is just for
-                    # reference, and we will probably never use it.
+                    # reference, and we will probably never use it. Also since this branch of the code was never completed
+                    # to the point where the tool calls were actually made, this codepath (i.e. tool_use=True, and agentic=False)
+                    # will not actually directly refactor any of your code.
                     tools = [update_block, create_file, update_file]
                     llm_with_tools = llm.bind_tools(tools)
                     response = llm_with_tools.invoke(list(messages))

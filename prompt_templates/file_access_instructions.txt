@@ -1,7 +1,5 @@
 Your instructions for receiving files:
 
-How you'll recieve files:
-
 If the developer has given you files and asked you to modify them, \
 then each file's content he is providing to you will have the following format:
 

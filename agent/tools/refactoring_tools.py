@@ -71,7 +71,7 @@ class UpdateBlockTool(BaseTool):
         # run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
-        print(f"UpdateBlockTool._run {block_name}")
+        print(f"UpdateBlockTool: {block_name}")
         msg = f"Tool Updated Block: {block_name} with content: {block_content}"
         block: Optional[TextBlock] = self.blocks.get(block_name)
         if block is not None:
@@ -116,7 +116,7 @@ class CreateFileTool(BaseTool):
     ) -> str:
         """Use the tool."""
         msg = f"File Created: {file_name} with content: {file_content}"
-        print(f"Creating file: {file_name}")
+        print(f"File Created: {file_name}")
 
         if not file_name.startswith("/"):
             file_name = "/" + file_name
@@ -126,6 +126,7 @@ class CreateFileTool(BaseTool):
         if os.path.isfile(full_file_name):
             # TODO: Need to investigate how the LLM and our GUI shuold report failures in tools to the user
             print(f"Warning: File already exists: {full_file_name}")
+            # st.error(f"Error: File already exists: {full_file_name}")
         else:
             # ensure that folder 'self.base_path' exists
             Utils.ensure_folder_exists(full_file_name)
@@ -156,7 +157,7 @@ class UpdateFileTool(BaseTool):
     ) -> str:
         """Use the tool."""
         msg = f"File Updated: {file_name} with content: {file_content}"
-        print(f"Writing file: {file_name}")
+        print(f"File Updated: {file_name}")
         if not file_name.startswith("/"):
             file_name = "/" + file_name
         full_file_name = self.base_path + file_name
