@@ -10,12 +10,14 @@ import configargparse
 class AppConfig:
     """Loads configuration from config.yaml and secrets.yaml files."""
 
-    # TODO: move into yaml
     tool_use = True
 
     # WARNING: If you set agentic to FALSE here and you want tools recognized (but not called) be sure to
-    # uncomment the `@tool` annotation above the tool functions above.
-    # TODO: move into yaml
+    # uncomment the `@tool` annotation in this code where you see it, and also beware that will break the code
+    # because we don't have the ability to actually EXECUTE the tool calls that the LLM will inject into it's
+    # responses. So this app can run only with agentic and tool_use BOTH set to True, or both set to false. Setting
+    # both to false should allow the app to run using basic prompt engineering and parsing of outputs, but no Langchain
+    # tool calls will be recognized or executed.
     agentic = True
 
     ext_list: List[str] = []

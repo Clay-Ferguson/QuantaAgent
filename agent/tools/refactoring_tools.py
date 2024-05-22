@@ -1,9 +1,5 @@
 """Tools for updating blocks of text."""
 
-# TODO: rename this file, it's not just for 'block' stuff now.
-# TODO: Need to document why we don't lead reading of files be agentic, and the reason is to cut down
-#       on the background chatter between agent and tooling for things we can better parse and load ourselves.
-
 import os
 from typing import Dict, Optional, Type
 
