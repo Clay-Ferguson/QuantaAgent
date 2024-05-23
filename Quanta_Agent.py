@@ -29,12 +29,34 @@ def show_mode_picker(st):
     )
 
 
+def show_ai_model_picker(st):
+    """Show the AI model picker."""
+
+    # Define the mapping between keys and display values
+    mode_mapping = {
+        "openai": "OpenAI",
+        "anth": "Anthropic",
+    }
+
+    st.radio(
+        "Select AI Service:",
+        list(mode_mapping.keys()),
+        key="p_ai_service",
+        format_func=lambda x: {
+            "openai": "OpenAI",
+            "anth": "Anthropic",
+        }[x],
+        # on_change=mode_changed,
+    )
+
+
 # to Run: `streamlit run Quanta_Agent.py`
 
 if __name__ == "__main__":
     cfg = AppConfig.get_config(None)
 
     Utils.setup_page(st, cfg, "Quanta: AI Tools")
+    show_ai_model_picker(st)
     show_mode_picker(st)
 
     # Sanity check

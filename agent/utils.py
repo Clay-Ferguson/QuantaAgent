@@ -7,8 +7,13 @@ import argparse
 from typing import List, Set, Optional
 import streamlit as st
 from langchain.schema import BaseMessage, AIMessage
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+
+from pydantic.v1.types import SecretStr
 
 from agent.app_config import AppConfig
+
 from agent.tags import (
     TAG_FILE_BEGIN,
     TAG_FILE_END,
@@ -221,6 +226,8 @@ class Utils:
         """Sets the default session variables."""
         if "p_mode" not in st.session_state:
             st.session_state.p_mode = cfg.mode
+        if "p_ai_service" not in st.session_state:
+            st.session_state.p_ai_service = cfg.ai_service
         if "p_source_provided" not in st.session_state:
             st.session_state.p_source_provided = False
         if "p_agent_user_input" not in st.session_state:
@@ -255,3 +262,32 @@ class Utils:
                 title = part
             else:
                 st.image(part)  # Add caption if you want -> , caption=title)
+
+    # Need to make cfg typesafe so we can get rid of all the `type: ignore` comments
+    @staticmethod
+    def create_llm(
+        cfg,
+        ai_service: str,
+        temperature: float,
+    ):  # TODO: make this typesafe and returning -> BaseChatModel:
+        """Creates a language model based on the AI service."""
+        if ai_service == "openai":
+            print("Creating OpenAI service")
+            llm = ChatOpenAI(
+                # TODO: check if this is model, or model_name. Can't count on type checker here for some reason.
+                model=cfg.openai_model,
+                temperature=temperature,
+                api_key=cfg.openai_api_key,
+                verbose=True,
+            )
+        elif ai_service == "anth":
+            print("Creating Anthropic service")
+            llm = ChatAnthropic(
+                model_name=cfg.anth_model,
+                temperature=temperature,
+                timeout=60,  # timeout in seconds
+                api_key=SecretStr(cfg.anth_api_key),
+            )
+        else:
+            Utils.fail_app(f"Invalid AI Service: {ai_service}")
+        return llm

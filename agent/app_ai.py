@@ -1,8 +1,8 @@
-"""Makes a query to OpenAI's API and writes the response to a file."""
+"""Makes a query to AI API and writes the response to a file."""
 
+import argparse
 import os
 from typing import Dict, List
-from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, AIMessage, BaseMessage, SystemMessage
 from langgraph.prebuilt import chat_agent_executor
 
@@ -19,46 +19,42 @@ from agent.tools.refactoring_tools import (
 )
 
 
-class AppOpenAI:
-    """Makes calls to OpenAI"""
+class AppAI:
+    """Makes calls to AI"""
 
     dry_run: bool = False
 
     def __init__(
         self,
+        cfg: argparse.Namespace,
         mode: str,
-        source_folder: str,
-        api_key: str,
-        model: str,
         system_prompt: str,
-        data_folder: str,
         blocks: Dict[str, TextBlock] = {},
         st=None,
     ):
+        self.cfg = cfg
         self.mode = mode
-        self.source_folder: str = source_folder
-        self.api_key: str = api_key
-        self.model: str = model
         self.system_prompt: str = system_prompt
-        self.data_folder: str = data_folder
         self.blocks = blocks
         self.st = st
 
     def query(
         self,
+        ai_service: str,
         messages: List[BaseMessage],
         query: str,
         input_prompt: str,
         output_file_name: str,
         ts: str,
+        temperature: float,
     ) -> str:
-        """Makes a query to OpenAI's API and writes the response to a file."""
+        """Makes a query to AI API and writes the response to a file."""
         ret: str = ""
 
         if self.dry_run:
             # If dry_run is True, we simulate the AI response by reading from a file
             # if we canfind that file or else we return a default response.
-            answer_file: str = f"{self.data_folder}/dry-run-answer.txt"
+            answer_file: str = f"{self.cfg.data_folder}/dry-run-answer.txt"
 
             if os.path.isfile(answer_file):
                 print(f"Simulating AI Response by reading answer from {answer_file}")
@@ -66,8 +62,7 @@ class AppOpenAI:
             else:
                 ret = "Dry Run: No API call made."
         else:
-            # NOTE: Pylance is incorrectly choking on the following line, so leave the `type: ignore` in place
-            llm = ChatOpenAI(model=self.model, temperature=0.0, api_key=self.api_key, verbose=True)  # type: ignore
+            llm = Utils.create_llm(self.cfg, ai_service, temperature)
 
             # Check the first 'message' to see if it's a SystemMessage and if not then insert one
             if len(messages) == 0 or not isinstance(messages[0], SystemMessage):
@@ -88,8 +83,8 @@ class AppOpenAI:
                 if AppConfig.agentic:
                     tools = [
                         UpdateBlockTool("Block Updater Tool", self.blocks),
-                        CreateFileTool("File Creator Tool", self.source_folder),
-                        UpdateFileTool("File Updater Tool", self.source_folder),
+                        CreateFileTool("File Creator Tool", self.cfg.source_folder),
+                        UpdateFileTool("File Updater Tool", self.cfg.source_folder),
                     ]  # type: ignore
                     agent_executor = chat_agent_executor.create_tool_calling_executor(
                         llm, tools
@@ -135,7 +130,7 @@ class AppOpenAI:
                 ret = response.content  # type: ignore
                 messages.append(AIMessage(content=response.content))
 
-        output = f"""OpenAI Model Used: {self.model}, Mode: {self.mode}, Timestamp: {ts}
+        output = f"""AI Model Used: {ai_service}, Mode: {self.mode}, Timestamp: {ts}
 ____________________________________________________________________________________
 Input Prompt: 
 {input_prompt}
@@ -150,7 +145,7 @@ Final Prompt:
 {query}
 """
 
-        filename = f"{self.data_folder}/{output_file_name}.txt"
+        filename = f"{self.cfg.data_folder}/{output_file_name}.txt"
         Utils.write_file(filename, output)
         print(f"Wrote Log File: {filename}")
         return ret

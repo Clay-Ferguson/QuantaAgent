@@ -15,4 +15,12 @@ if __name__ == "__main__":
 
     with Utils.open_file(f"{agent.cfg.data_folder}/question.txt") as file:
         prompt = file.read()
-        agent.run(None, agent.cfg.mode, output_file_name, [], prompt)
+        agent.run(
+            agent.cfg.ai_service,
+            None,
+            agent.cfg.mode,
+            output_file_name,
+            [],
+            prompt,
+            0.7,
+        )

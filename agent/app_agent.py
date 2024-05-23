@@ -5,7 +5,7 @@ import time
 import argparse
 from typing import List, Dict, Optional
 from langchain.schema import BaseMessage
-from agent.app_openai import AppOpenAI
+from agent.app_ai import AppAI
 from agent.app_config import AppConfig
 from agent.project_mutator import ProjectMutator
 
@@ -47,11 +47,13 @@ class QuantaAgent:
 
     def run(
         self,
+        ai_service: str,
         st,
         mode: str,
         output_file_name: str,
         messages: List[BaseMessage],
         input_prompt: str,
+        temperature: float,
     ):
         """Runs the agent. We assume that if messages is not `None` then we are in the Streamlit GUI mode, and these messages
         represent the chatbot context. If messages is `None` then we are in the CLI mode, and we will use the `prompt` parameter
@@ -89,24 +91,23 @@ class QuantaAgent:
 
         self.build_system_prompt()
 
-        open_ai = AppOpenAI(
+        open_ai = AppAI(
+            self.cfg,
             self.mode,
-            self.cfg.source_folder,
-            self.cfg.openai_api_key,
-            self.cfg.openai_model,
             self.system_prompt,
-            self.cfg.data_folder,
             self.blocks,
             self.st,
         )
 
         # Need to be sure the current `self.system_prompt`` is in these messages every time we send
         self.answer = open_ai.query(
+            ai_service,
             messages,
             self.prompt,
             input_prompt,
             output_file_name,
             self.ts,
+            temperature,
         )
 
         if self.mode == AppConfig.MODE_FILES or self.mode == AppConfig.MODE_BLOCKS:

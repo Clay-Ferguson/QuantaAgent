@@ -31,11 +31,13 @@ class AppAgentGUI:
             with st.spinner("Thinking..."):
                 agent = QuantaAgent()
                 agent.run(
+                    st.session_state.p_ai_service,
                     st,
                     st.session_state.p_mode,
                     "",
                     st.session_state.p_agent_messages,
                     user_input,
+                    0.0,  # Use zero temp for code refactoring
                 )
 
                 if not st.session_state.p_source_provided:
