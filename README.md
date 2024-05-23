@@ -39,6 +39,13 @@ You can mention specific files and/or folders in your prompt to request AI to ma
 
 # Tool Usage
 
+## To Run
+
+* Command Line version `./run_cmd.sh`
+* Streamlit Web App `./run_streamlie.sh`
+
+## Configuration
+
 To use this tool, follow these steps:
 
 1) Edit the `config.yaml` to make it point to a software project folder you want to analyze.

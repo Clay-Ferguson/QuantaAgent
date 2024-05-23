@@ -4,35 +4,32 @@
         {
             "label": "Run Quanta Agent - CMD",
             "type": "shell",
-            "command": "python3",
-            "args": [
-                "${workspaceFolder}/quanta-agent.py"
-            ],
+            "command": "./run_cmd.sh",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
+                "panel": "dedicated",
+                "focus": true,
+                "clear": true
             },
             "problemMatcher": []
         },
         {
             "label": "Run Quanta Agent - GUI",
             "type": "shell",
-            "command": "streamlit",
-            "args": [
-                "run",
-                "${workspaceFolder}/Quanta_Agent.py"
-            ],
+            "command": "./run_streamlit.sh",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
+                "panel": "dedicated",
+                "focus": true,
+                "clear": true
             },
             "problemMatcher": []
         },
