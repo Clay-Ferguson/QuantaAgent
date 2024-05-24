@@ -109,7 +109,7 @@ class AppAI:
                             content = message.content
                             if not content:
                                 content = Utils.get_tool_calls_str(message)
-                                print(f"TOOL CALLS:\n{content}")
+                                # print(f"TOOL CALLS:\n{content}")
                             ret += f"AI Response {ai_response}:\n{content}\n==============\n"  # type: ignore
 
                     # Agents may add multiple new messages, so we need to update the messages list

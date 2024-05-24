@@ -124,7 +124,7 @@ class CreateFileTool(BaseTool):
 
         # if the file already exists print a warning message
         if os.path.isfile(full_file_name):
-            # TODO: Need to investigate how the LLM and our GUI shuold report failures in tools to the user
+            # TODO: Need to investigate how the LLM and our GUI should report failures in tools to the user
             print(f"Warning: File already exists: {full_file_name}")
             # st.error(f"Error: File already exists: {full_file_name}")
         else:
