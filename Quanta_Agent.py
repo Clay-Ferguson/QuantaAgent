@@ -2,7 +2,7 @@
 
 import streamlit as st
 from agent.app_config import AppConfig
-from agent.utils import Utils
+from agent.utils import Utils, AIService
 
 
 def show_mode_picker(st):
@@ -34,8 +34,8 @@ def show_ai_model_picker(st):
 
     # Define the mapping between keys and display values
     mode_mapping = {
-        "openai": "OpenAI",
-        "anth": "Anthropic",
+        AIService.OPENAI.value: "OpenAI",
+        AIService.ANTHROPIC.value: "Anthropic",
     }
 
     st.radio(
@@ -43,8 +43,8 @@ def show_ai_model_picker(st):
         list(mode_mapping.keys()),
         key="p_ai_service",
         format_func=lambda x: {
-            "openai": "OpenAI",
-            "anth": "Anthropic",
+            AIService.OPENAI.value: "OpenAI",
+            AIService.ANTHROPIC.value: "Anthropic",
         }[x],
         # on_change=mode_changed,
     )

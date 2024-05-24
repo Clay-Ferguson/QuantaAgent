@@ -4,6 +4,7 @@ from io import TextIOWrapper
 import re
 import os
 import argparse
+from enum import Enum
 from typing import List, Set, Optional
 import streamlit as st
 from langchain.schema import BaseMessage, AIMessage
@@ -23,6 +24,11 @@ from agent.tags import (
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
 )
+
+
+class AIService(Enum):
+    OPENAI = "openai"
+    ANTHROPIC = "anth"
 
 
 class Utils:
@@ -272,7 +278,7 @@ class Utils:
         temperature: float,
     ) -> BaseChatModel:
         """Creates a language model based on the AI service."""
-        if ai_service == "openai":
+        if ai_service == AIService.OPENAI.value:
             print("Creating OpenAI service")
             llm = ChatOpenAI(
                 model=cfg.openai_model,
@@ -280,7 +286,7 @@ class Utils:
                 api_key=cfg.openai_api_key,
                 verbose=True,
             )
-        elif ai_service == "anth":
+        elif ai_service == AIService.ANTHROPIC.value:
             print("Creating Anthropic service")
             llm = ChatAnthropic(
                 model_name=cfg.anth_model,
