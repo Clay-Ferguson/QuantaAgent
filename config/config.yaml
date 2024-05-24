@@ -15,9 +15,8 @@ ai_service: "openai"
 source_folder: "test_project"
 scan_extensions: ".java, .sql, .py, .html, .htm, .js, .ts, .css"
 data_folder: "data"
-
-# mode: "files" 
-mode: "blocks"
+ 
+mode: "none"
 
 # Units are in characters (bytes). This is just a safegard mainly to keep from accidentally spending too much money
 max_prompt_length: 100000

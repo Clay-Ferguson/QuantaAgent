@@ -12,6 +12,7 @@ def show_mode_picker(st):
     mode_mapping = {
         AppConfig.MODE_FILES: "Whole File",
         AppConfig.MODE_BLOCKS: "Update Blocks",
+        AppConfig.MODE_NONE: "None",
     }
 
     def mode_changed():
@@ -24,6 +25,7 @@ def show_mode_picker(st):
         format_func=lambda x: {
             AppConfig.MODE_FILES: "Files: AI is allowed to update entire files.",
             AppConfig.MODE_BLOCKS: "Blocks: AI is only allowed to update specific blocks in the code.",
+            AppConfig.MODE_NONE: "None: No Code Refactoring",
         }[x],
         on_change=mode_changed,
     )

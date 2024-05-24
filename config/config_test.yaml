@@ -15,7 +15,7 @@ ai_service: "openai"
 source_folder: "test_project"
 scan_extensions: ".java, .py, .sql"
 data_folder: "/home/clay/ferguson/QuantaAgent_data"
-mode: "files"
+mode: "none"
 
 # Units are in characters (bytes). This is just a safegard mainly to keep from accidentally spending too much money
 max_prompt_length: 100000

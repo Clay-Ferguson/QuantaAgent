@@ -34,7 +34,7 @@ class QuantaAgent:
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
-        self.mode = AppConfig.MODE_FILES
+        self.mode = AppConfig.MODE_NONE
         self.ran: bool = False
         self.prompt: str = ""
         self.system_prompt: str = ""

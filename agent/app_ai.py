@@ -80,14 +80,19 @@ class AppAI:
 
             messages.append(human_message)
 
-            if AppConfig.tool_use:
+            if AppConfig.tool_use and self.mode != AppConfig.MODE_NONE:
                 # https://python.langchain.com/v0.2/docs/tutorials/agents/
                 if AppConfig.agentic:
-                    tools = [
-                        UpdateBlockTool("Block Updater Tool", self.blocks),
-                        CreateFileTool("File Creator Tool", self.cfg.source_folder),
-                        UpdateFileTool("File Updater Tool", self.cfg.source_folder),
-                    ]  # type: ignore
+                    tools = []
+
+                    if self.mode == AppConfig.MODE_BLOCKS:
+                        tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]
+                    elif self.mode == AppConfig.MODE_FILES:
+                        tools = [
+                            CreateFileTool("File Creator Tool", self.cfg.source_folder),
+                            UpdateFileTool("File Updater Tool", self.cfg.source_folder),
+                        ]
+
                     agent_executor = chat_agent_executor.create_tool_calling_executor(
                         llm, tools
                     )
@@ -95,7 +100,6 @@ class AppAI:
                     response = agent_executor.invoke({"messages": list(messages)})
                     # print(f"Response: {response}")
                     resp_messages = response["messages"]
-
                     new_messages = resp_messages[initial_message_len:]
                     ret = ""
                     ai_response: int = 0
@@ -120,7 +124,12 @@ class AppAI:
                     # reference, and we will probably never use it. Also since this branch of the code was never completed
                     # to the point where the tool calls were actually made, this codepath (i.e. tool_use=True, and agentic=False)
                     # will not actually directly refactor any of your code.
-                    tools = [update_block, create_file, update_file]
+                    tools = []
+                    if self.mode == AppConfig.MODE_BLOCKS:
+                        tools = [update_block]
+                    elif self.mode == AppConfig.MODE_FILES:
+                        tools = [create_file, update_file]
+
                     llm_with_tools = llm.bind_tools(tools)
                     response = llm_with_tools.invoke(list(messages))
                     print(f"Response: {response}")
