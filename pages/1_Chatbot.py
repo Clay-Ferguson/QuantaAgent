@@ -4,6 +4,7 @@ from typing import List
 import streamlit as st
 from streamlit_chat import message
 from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
+from langchain.chat_models.base import BaseChatModel
 
 
 from agent.app_config import AppConfig
@@ -44,8 +45,10 @@ class AppChatbotGUI:
 
             st.session_state.p_chatbot_messages.append(HumanMessage(content=user_input))
             with st.spinner("Thinking..."):
-                chat = Utils.create_llm(self.cfg, st.session_state.p_ai_service, 0.7)
-                response = chat.invoke(list(st.session_state.p_chatbot_messages))
+                llm: BaseChatModel = Utils.create_llm(
+                    self.cfg, st.session_state.p_ai_service, 0.7
+                )
+                response = llm.invoke(list(st.session_state.p_chatbot_messages))
 
             st.session_state.p_chatbot_messages.append(
                 AIMessage(content=response.content)

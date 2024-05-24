@@ -4,7 +4,9 @@ import argparse
 import os
 from typing import Dict, List
 from langchain.schema import HumanMessage, AIMessage, BaseMessage, SystemMessage
+from langchain.chat_models.base import BaseChatModel
 from langgraph.prebuilt import chat_agent_executor
+
 
 from agent.app_config import AppConfig
 from agent.models import TextBlock
@@ -62,7 +64,7 @@ class AppAI:
             else:
                 ret = "Dry Run: No API call made."
         else:
-            llm = Utils.create_llm(self.cfg, ai_service, temperature)
+            llm: BaseChatModel = Utils.create_llm(self.cfg, ai_service, temperature)
 
             # Check the first 'message' to see if it's a SystemMessage and if not then insert one
             if len(messages) == 0 or not isinstance(messages[0], SystemMessage):

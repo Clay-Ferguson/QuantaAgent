@@ -7,6 +7,7 @@ import argparse
 from typing import List, Set, Optional
 import streamlit as st
 from langchain.schema import BaseMessage, AIMessage
+from langchain.chat_models.base import BaseChatModel
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
@@ -269,12 +270,11 @@ class Utils:
         cfg,
         ai_service: str,
         temperature: float,
-    ):  # TODO: make this typesafe and returning -> BaseChatModel:
+    ) -> BaseChatModel:
         """Creates a language model based on the AI service."""
         if ai_service == "openai":
             print("Creating OpenAI service")
             llm = ChatOpenAI(
-                # TODO: check if this is model, or model_name. Can't count on type checker here for some reason.
                 model=cfg.openai_model,
                 temperature=temperature,
                 api_key=cfg.openai_api_key,
