@@ -60,7 +60,7 @@ class AppChatbotGUI:
     def show_messages(self):
         """display message history"""
         messages = st.session_state.get("p_chatbot_messages", [])
-        for i, msg in enumerate(messages[1:]):
+        for i, msg in enumerate(messages):
             if isinstance(msg, HumanMessage):
                 message(str(msg.content), is_user=True, key=str(i) + "_user")
             elif isinstance(msg, AIMessage):
@@ -87,7 +87,7 @@ class AppChatbotGUI:
         self.show_form()
 
         # Sanity check
-        # st.write(st.session_state)
+        # st.write(st.session_state.p_chatbot_messages)
 
 
 AppChatbotGUI().run()

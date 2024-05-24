@@ -52,9 +52,8 @@ class AppAgentGUI:
         """display message history"""
         default_messages: List[BaseMessage] = []
         messages = st.session_state.get("p_agent_messages", default_messages)
-        for i, msg in enumerate(messages[1:]):
+        for i, msg in enumerate(messages):
             if isinstance(msg, HumanMessage):
-
                 # I'm not sure if this is a bug or what, when this message is missing, but if so it's related
                 # to clearing the messages with the clear button
                 # if id(msg) is not in user_inputs, just make user_input be "message gone"

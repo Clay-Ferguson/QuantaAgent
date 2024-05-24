@@ -1,4 +1,4 @@
-"""Tools for updating blocks of text."""
+"""Tools for updating files, creating new files, or updating blocks of text."""
 
 import os
 from typing import Dict, Optional, Type
