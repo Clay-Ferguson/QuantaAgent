@@ -13,7 +13,7 @@ from agent.tags import (
     TAG_NEW_FILE_BEGIN,
     TAG_NEW_FILE_END,
 )
-from agent.utils import Utils
+from agent.utils import RefactorMode, Utils
 from agent.app_config import AppConfig
 
 
@@ -51,13 +51,13 @@ class ProjectMutator:
         self.ran = True
 
         # blocks
-        if self.mode == AppConfig.MODE_BLOCKS:
+        if self.mode == RefactorMode.BLOCKS.value:
             # If we have a tool_use or agentic, we don't need to parse blocks because the tool itself
             # will handle the population of 'blocks' for updating.
             if not AppConfig.tool_use and not AppConfig.agentic:
                 self.parse_blocks(TAG_BLOCK_BEGIN, TAG_BLOCK_END)
         # files
-        elif self.mode == AppConfig.MODE_FILES:
+        elif self.mode == RefactorMode.FILES.value:
             # If we have a tool_use or agentic, we don't need to create new files this way because the
             # tool will handle it
             if not AppConfig.tool_use and not AppConfig.agentic:
@@ -181,7 +181,7 @@ class ProjectMutator:
             rel_filename: str = filename[self.source_folder_len :]
             new_content: Optional[str] = None
 
-            if self.mode == AppConfig.MODE_FILES:
+            if self.mode == RefactorMode.FILES.value:
                 new_content = self.parse_modified_file(self.ai_answer, rel_filename)
 
             if new_content is not None:
@@ -189,7 +189,7 @@ class ProjectMutator:
                 modified = True
             # else if no new content, so we try any block updates
             else:
-                if self.mode == AppConfig.MODE_BLOCKS:
+                if self.mode == RefactorMode.BLOCKS.value:
                     for name, block in self.blocks.items():
                         if block.dirty:
                             if self.replace_block(content, block, name):

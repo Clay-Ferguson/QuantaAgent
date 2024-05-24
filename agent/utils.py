@@ -31,6 +31,12 @@ class AIService(Enum):
     ANTHROPIC = "anth"
 
 
+class RefactorMode(Enum):
+    FILES = "files"
+    BLOCKS = "blocks"
+    NONE = "none"
+
+
 class Utils:
     """Utilities Class"""
 
@@ -167,7 +173,7 @@ class Utils:
 
         # to support blocks in blocks we use a counter to keep track of how many blocks we're in
         started_counter: int = 0
-        block_mode = cfg.mode == AppConfig.MODE_BLOCKS
+        block_mode = cfg.mode == RefactorMode.BLOCKS.value
 
         for line in content.splitlines():
             # ENDS

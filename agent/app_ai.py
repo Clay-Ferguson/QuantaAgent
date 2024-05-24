@@ -10,7 +10,7 @@ from langgraph.prebuilt import chat_agent_executor
 
 from agent.app_config import AppConfig
 from agent.models import TextBlock
-from agent.utils import Utils
+from agent.utils import RefactorMode, Utils
 from agent.tools.refactoring_tools import (
     UpdateBlockTool,
     CreateFileTool,
@@ -80,14 +80,14 @@ class AppAI:
 
             messages.append(human_message)
 
-            if AppConfig.tool_use and self.mode != AppConfig.MODE_NONE:
+            if AppConfig.tool_use and self.mode != RefactorMode.NONE.value:
                 # https://python.langchain.com/v0.2/docs/tutorials/agents/
                 if AppConfig.agentic:
                     tools = []
 
-                    if self.mode == AppConfig.MODE_BLOCKS:
+                    if self.mode == RefactorMode.BLOCKS.value:
                         tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]
-                    elif self.mode == AppConfig.MODE_FILES:
+                    elif self.mode == RefactorMode.FILES.value:
                         tools = [
                             CreateFileTool("File Creator Tool", self.cfg.source_folder),
                             UpdateFileTool("File Updater Tool", self.cfg.source_folder),
@@ -125,9 +125,9 @@ class AppAI:
                     # to the point where the tool calls were actually made, this codepath (i.e. tool_use=True, and agentic=False)
                     # will not actually directly refactor any of your code.
                     tools = []
-                    if self.mode == AppConfig.MODE_BLOCKS:
+                    if self.mode == RefactorMode.BLOCKS.value:
                         tools = [update_block]
-                    elif self.mode == AppConfig.MODE_FILES:
+                    elif self.mode == RefactorMode.FILES.value:
                         tools = [create_file, update_file]
 
                     llm_with_tools = llm.bind_tools(tools)

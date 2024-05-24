@@ -23,12 +23,6 @@ class AppConfig:
     ext_list: List[str] = []
     ext_set: Set[str] = set()
 
-    # TODO: put these in an enum
-    # TODO: make a third option for "no refactor" which disables any code editing.
-    MODE_FILES: str = "files"
-    MODE_BLOCKS: str = "blocks"
-    MODE_NONE: str = "none"
-
     @classmethod
     def get_config(cls, config_file: Optional[str] = None) -> argparse.Namespace:
         """Loads configuration from config.yaml and secrets.yaml files."""

@@ -15,7 +15,7 @@ from agent.tags import (
     TAG_BLOCK_END,
     MORE_INSTRUCTIONS,
 )
-from agent.utils import Utils
+from agent.utils import RefactorMode, Utils
 from agent.prompt_utils import PromptUtils
 
 
@@ -34,7 +34,7 @@ class QuantaAgent:
         self.source_folder_len: int = len(self.cfg.source_folder)
         self.ts: str = str(int(time.time() * 1000))
         self.answer: str = ""
-        self.mode = AppConfig.MODE_NONE
+        self.mode = RefactorMode.NONE.value
         self.ran: bool = False
         self.prompt: str = ""
         self.system_prompt: str = ""
@@ -110,7 +110,10 @@ class QuantaAgent:
             temperature,
         )
 
-        if self.mode == AppConfig.MODE_FILES or self.mode == AppConfig.MODE_BLOCKS:
+        if (
+            self.mode == RefactorMode.FILES.value
+            or self.mode == RefactorMode.BLOCKS.value
+        ):
             ProjectMutator(
                 self.st,
                 self.mode,
@@ -140,7 +143,7 @@ class QuantaAgent:
     def add_block_handling_instructions(self):
         """Adds instructions for updating blocks. If the prompt contains ${BlockName} tags, then we need to provide
         instructions for how to provide the new block content."""
-        if self.mode == AppConfig.MODE_BLOCKS and len(self.blocks) > 0:
+        if self.mode == RefactorMode.BLOCKS.value and len(self.blocks) > 0:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/block_access_instructions.txt"
             )
@@ -157,7 +160,7 @@ class QuantaAgent:
         """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
         we need to provide instructions for how to provide the new file or folder names.
         """
-        if self.mode == AppConfig.MODE_FILES:
+        if self.mode == RefactorMode.FILES.value:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/file_access_instructions.txt"
             )
