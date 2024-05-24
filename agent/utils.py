@@ -165,7 +165,7 @@ class Utils:
             os.makedirs(directory)
 
     @staticmethod
-    def sanitize_content(cfg: argparse.Namespace, content: str) -> str:
+    def sanitize_content(cfg: argparse.Namespace, content) -> str:
         """Makes an AI response string presentable in on screen."""
 
         # Scan all the lines in content one by one and extract the new content
@@ -175,42 +175,59 @@ class Utils:
         started_counter: int = 0
         block_mode = cfg.mode == RefactorMode.BLOCKS.value
 
-        for line in content.splitlines():
-            # ENDS
-            if Utils.is_tag_line(line, TAG_FILE_END):
-                started_counter -= 1
-            elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
-                started_counter -= 1
-            elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_END):
-                started_counter -= 1
+        # of content is a string type. Note: When Anthropic is running tool calls we get here with
+        # content being a list of dictionaries. We need to handle that case.
+        if not isinstance(content, str):
+            # if type is a list then iteratively print the elements of the list
+            if isinstance(content, list):
+                for item in content:
+                    # if item is a dict type then get the 'text' element and print it or
+                    # if no text element then print the item
+                    if isinstance(item, dict):
+                        if "text" in item:
+                            # This will normally be Anthropic's <thinking> message
+                            new_content.append(item["text"])
+                        # else:
+                        #     TODO: Right here we could print the names of the tools used.
+                        #     new_content.append(str(item))
 
-            # BEGINS
-            elif Utils.is_tag_line(line, TAG_FILE_BEGIN):
-                name: Optional[str] = Utils.parse_name_from_tag_line(
-                    line, TAG_FILE_BEGIN
-                )
-                started_counter += 1
-                if started_counter == 1:
-                    new_content.append(f"File Updated: {name}")
+        else:
+            for line in content.splitlines():
+                # ENDS
+                if Utils.is_tag_line(line, TAG_FILE_END):
+                    started_counter -= 1
+                elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
+                    started_counter -= 1
+                elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_END):
+                    started_counter -= 1
 
-            elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
-                name: Optional[str] = Utils.parse_name_from_tag_line(
-                    line, TAG_NEW_FILE_BEGIN
-                )
-                started_counter += 1
-                if started_counter == 1:
-                    new_content.append(f"File Created: {name}")
+                # BEGINS
+                elif Utils.is_tag_line(line, TAG_FILE_BEGIN):
+                    name: Optional[str] = Utils.parse_name_from_tag_line(
+                        line, TAG_FILE_BEGIN
+                    )
+                    started_counter += 1
+                    if started_counter == 1:
+                        new_content.append(f"File Updated: {name}")
 
-            elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
-                name: Optional[str] = Utils.parse_name_from_tag_line(
-                    line, TAG_BLOCK_BEGIN
-                )
-                started_counter += 1
-                if started_counter == 1:
-                    new_content.append(f"Code Block Updated: {name}")
+                elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
+                    name: Optional[str] = Utils.parse_name_from_tag_line(
+                        line, TAG_NEW_FILE_BEGIN
+                    )
+                    started_counter += 1
+                    if started_counter == 1:
+                        new_content.append(f"File Created: {name}")
 
-            elif started_counter == 0:
-                new_content.append(line)
+                elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
+                    name: Optional[str] = Utils.parse_name_from_tag_line(
+                        line, TAG_BLOCK_BEGIN
+                    )
+                    started_counter += 1
+                    if started_counter == 1:
+                        new_content.append(f"Code Block Updated: {name}")
+
+                elif started_counter == 0:
+                    new_content.append(line)
 
         ret: str = "\n".join(new_content)
         return ret
