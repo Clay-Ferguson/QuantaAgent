@@ -2,6 +2,18 @@
 # NOTE: You only need to run this once.
 # conda create -n quanta_agent python=3.11.5
 
-source activate quanta_agent
-# conda activate quanta_agent <--- this command randomly fails, so we use source activate instead
-streamlit run Quanta_Agent.py
+conda_path="/home/clay/miniconda3"
+export PATH="$conda_path/bin:$PATH"
+source $conda_path/bin/activate quanta_agent
+
+if [[ "$CONDA_DEFAULT_ENV" == "quanta_agent" ]]; then
+  # pip install langchain_openai
+  # pip install langchain_anthropic
+  # pip install streamlit_chat
+  # pip freeze > requirements.txt
+  streamlit run Quanta_Agent.py
+else
+  echo "Failed to set Conda Environment: Expected quanta_agent but found $CONDA_DEFAULT_ENV"
+  sleep 10s
+  exit 1
+fi
