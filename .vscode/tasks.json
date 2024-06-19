@@ -4,7 +4,7 @@
         {
             "label": "Run Quanta Agent - CMD",
             "type": "shell",
-            "command": "./run_cmd.sh",
+            "command": "python3 quanta-agent.py",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -20,7 +20,7 @@
         {
             "label": "Run Quanta Agent - GUI",
             "type": "shell",
-            "command": "./run_streamlit.sh",
+            "command": "streamlit run Quanta_Agent.py",
             "group": {
                 "kind": "build",
                 "isDefault": true

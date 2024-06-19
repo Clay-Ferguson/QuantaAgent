@@ -3,6 +3,8 @@
 # NOTE: You only need to run this once.
 # conda create -n quanta_agent python=3.11.5
 
+source ./conda_init.sh
+
 conda_path="/home/clay/miniconda3"
 export PATH="$conda_path/bin:$PATH"
 source $conda_path/bin/activate quanta_agent
