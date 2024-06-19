@@ -4,7 +4,7 @@ import os
 from agent.models import TextBlock
 from agent.app_config import AppConfig
 from agent.utils import Utils
-from agent.tags import TAG_BLOCK_BEGIN, TAG_BLOCK_END
+from agent.tags import TAG_BLOCK_BEGIN, TAG_BLOCK_END, TAG_BLOCK_OFF, TAG_BLOCK_ON
 
 
 class ProjectLoader:
@@ -36,6 +36,7 @@ class ProjectLoader:
         # Open the file using 'with' which ensures the file is closed after reading
         with Utils.open_file(path) as file:
             block: Optional[TextBlock] = None
+            block_on: bool = True
 
             for line in file:  # NOTE: There's no way do to typesafety in loop vars
                 # Print each line; using end='' to avoid adding extra newline
@@ -63,8 +64,15 @@ class ProjectLoader:
                             self.st,
                         )
                     block = None
-                else:
+                elif Utils.is_tag_line(trimmed, TAG_BLOCK_OFF):
                     if block is not None:
+                        block.updateable = False
+                        block_on = False
+                elif Utils.is_tag_line(trimmed, TAG_BLOCK_ON):
+                    if block is not None:
+                        block_on = True
+                else:
+                    if block is not None and block_on:
                         block.content += line
 
     def scan_directory(self, scan_dir: str):

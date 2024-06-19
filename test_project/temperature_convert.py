@@ -32,4 +32,8 @@ print("The temperature in", o_convention, "is", result, "degrees.")
 # block_begin MyTestBlock
 print("This is a test block")
 print("Hello Universe.")
+# block_off
+print("hidden code")
+# block_on
+print("Final print message")
 # block_end

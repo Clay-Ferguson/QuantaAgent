@@ -2,6 +2,6 @@
 
 -- Instructions for how you will update blocks of code:
 
--- You will be given an tool function named update_block, which you can use to update the content of named blocks as needed.
+-- You will be given a tool function named update_block, which you can use to update the content of named blocks as needed.
 
 -- end of: Instructions for how you will update blocks of code

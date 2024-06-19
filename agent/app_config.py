@@ -12,6 +12,7 @@ class AppConfig:
 
     tool_use = True
 
+    # TL;DR: Always leave `agentic` set to True. The code path when thsi is false is not fully implemented.
     # WARNING: If you set agentic to FALSE here and you want tools recognized (but not called) be sure to
     # uncomment the `@tool` annotation in this code where you see it, and also beware that will break the code
     # because we don't have the ability to actually EXECUTE the tool calls that the LLM will inject into it's

@@ -65,6 +65,9 @@ class ProjectMutator:
 
         self.process_project()
 
+    # NOTE: If we're using the UpdateBlockTool, we don't need to parse the blocks here because the tool will have already
+    # had the blocks populated for by the tool, and we won't find any blocks being passed back to us in this format, and indeed 
+    # the prompt to the AI will not have even given any instructions for how to format blocks like this in the response.
     def parse_blocks(self, begin_tag: str, end_tag: str):
         """Parses the ai answer to find and extract blocks of text defined by '{begin_tag} {Name}'
         and {end_tag}. The output of this method is stored in the 'blocks' dictionary.

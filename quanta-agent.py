@@ -1,4 +1,4 @@
-"""Runs the Agent"""
+"""Runs the Agent, as a command line tool."""
 
 from agent.app_agent import QuantaAgent
 from agent.utils import Utils

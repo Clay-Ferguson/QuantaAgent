@@ -1,4 +1,4 @@
-"""Runs the Agent"""
+"""Runs the Agent, as a Streamlit app."""
 
 import streamlit as st
 from agent.app_config import AppConfig
