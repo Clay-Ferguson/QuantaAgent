@@ -17,9 +17,6 @@ TAG_BLOCK_ON = "block_on"
 TAG_FILE_BEGIN = "file_begin"
 TAG_FILE_END = "file_end"
 
-TAG_NEW_FILE_BEGIN = "new_file_begin"
-TAG_NEW_FILE_END = "new_file_end"
-
 TAG_BLOCK_BEGIN_LEN = len(TAG_BLOCK_BEGIN)
 
 template_info: Dict[str, str] = {
@@ -27,6 +24,4 @@ template_info: Dict[str, str] = {
     "TAG_BLOCK_END": f"""{TAG_BLOCK_END}""",
     "TAG_FILE_BEGIN": f"""{TAG_FILE_BEGIN}""",
     "TAG_FILE_END": f"""{TAG_FILE_END}""",
-    "TAG_NEW_FILE_BEGIN": f"""{TAG_NEW_FILE_BEGIN}""",
-    "TAG_NEW_FILE_END": f"""{TAG_NEW_FILE_END}""",
 }

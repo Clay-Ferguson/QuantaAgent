@@ -10,8 +10,6 @@ from agent.tags import (
     TAG_BLOCK_END,
     TAG_FILE_BEGIN,
     TAG_FILE_END,
-    TAG_NEW_FILE_BEGIN,
-    TAG_NEW_FILE_END,
 )
 from agent.utils import RefactorMode, Utils
 from agent.app_config import AppConfig

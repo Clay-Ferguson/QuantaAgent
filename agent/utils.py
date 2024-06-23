@@ -19,8 +19,6 @@ from agent.app_config import AppConfig
 from agent.tags import (
     TAG_FILE_BEGIN,
     TAG_FILE_END,
-    TAG_NEW_FILE_BEGIN,
-    TAG_NEW_FILE_END,
     TAG_BLOCK_BEGIN,
     TAG_BLOCK_END,
 )
@@ -97,14 +95,6 @@ class Utils:
         return re.search(pattern, prompt) is not None
 
     @staticmethod
-    def has_new_files(content: str) -> bool:
-        """Checks if the content has new files."""
-        return (
-            f"""{TAG_NEW_FILE_BEGIN} /""" in content
-            and f"""{TAG_NEW_FILE_END} /""" in content
-        )
-
-    @staticmethod
     def is_tag_and_name_line(line: str, tag: str, name: str) -> bool:
         """Checks if the line is a pattern like
         `-- block_begin {Name}` or `// block_begin {Name}` or `# block_begin {Name}`
@@ -166,7 +156,7 @@ class Utils:
 
     @staticmethod
     def sanitize_content(cfg: argparse.Namespace, content) -> str:
-        """Makes an AI response string presentable in on screen."""
+        """Makes an AI response string presentable on screen."""
 
         # Scan all the lines in content one by one and extract the new content
         new_content: List[str] = []
@@ -196,8 +186,6 @@ class Utils:
                 # ENDS
                 if Utils.is_tag_line(line, TAG_FILE_END):
                     started_counter -= 1
-                elif Utils.is_tag_line(line, TAG_NEW_FILE_END):
-                    started_counter -= 1
                 elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_END):
                     started_counter -= 1
 
@@ -209,14 +197,6 @@ class Utils:
                     started_counter += 1
                     if started_counter == 1:
                         new_content.append(f"File Updated: {name}")
-
-                elif Utils.is_tag_line(line, TAG_NEW_FILE_BEGIN):
-                    name: Optional[str] = Utils.parse_name_from_tag_line(
-                        line, TAG_NEW_FILE_BEGIN
-                    )
-                    started_counter += 1
-                    if started_counter == 1:
-                        new_content.append(f"File Created: {name}")
 
                 elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
                     name: Optional[str] = Utils.parse_name_from_tag_line(
