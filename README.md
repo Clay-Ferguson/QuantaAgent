@@ -52,8 +52,6 @@ To use this tool, follow these steps:
 2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
 4) Make sure your `config.yaml` has `mode: "files"` if you want the tool to be free to update any of your files in their entirety, or set `mode: "blocks"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `files`.
-5) If you're using the command line version, then put a `question.txt` file (your AI Prompt) into your data folder and run `python3 quanta-agent.py`. Make up any arbitrary filename when prompted for one when the tool runs.
---or--
 5) Run the Streamlit-based Web interface with this command: `streamlit run Quanta_Agent.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
 7) That's it. After running the tool you will have the a log files about this run saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated as well, to accomplish whatever you asked for.
 
@@ -151,27 +149,6 @@ For example, if you need to add a new feature, it might require a new Button on 
 ## Code Reviews
 
 Developer teams can theoretically use a standard where (perhaps only temporarily) specific block names are required to be put in the code around all changes or specific types of changes. Then you can use AI to run various kinds of automated code reviews, security audits, code correctness audits; or even just get AI suggestions for improvement that specifically look at all the parts of the code involved in any bug fix or new feature that has been implemented and identified using `Named Blocks`.
-
-# Streamlit GUI or Commane Line
-
-This tool can be run either as a Streamlit Web app, or as a command line utility.
-
-## Streamlit GUI
-
-If you run the Streamlit app, you will be having a standard AI Chat-type experience in the GUI.
-
-## Command Line Runs: Configuration and Usage Flow
-
-NOTE: The `question.txt` file discussed in this section doesn't apply when running the Streamlit web app, because that app never reads prompts from files, since it's a GUI app.
-
-To run this tool, you should create a data folder and then point the `config.yaml data_folder` property to that folder location. This folder will be where the input (the LLM Prompt) is read from (for command line runs) and also where the output logs (AI generated responses) are written to. For ease of use in this prototype app, we always expect the prompt itself to be in `${data_folder}\question.txt`. When you run this app it assumes that you have created a file named `question.txt` that contains your prompt. 
-
-As you edit your `question.txt` file and then run the tool to generate answers you don't need to worry about maintaining a history of the questions and answers, because they're all stored as part of the output in the `data_folder` log files. So you can just resave your next `question.txt` file before you run the tool, and it's a fairly good user experience (again, for the command line tool, not the GUI). 
-
-When you run this app, first all your source is scanned (i.e. `source_folder` config property), to build up your named blocks of code. Then your `question.txt` file is read, and all the template substitutions are made in it (leaving the `question.txt` file as is), and then the call to OpenAI is made to generate the response. The response file is then written into the output folder, so you will have your entire history of questions & answers saved permanently in your `data_folder`. If your prompt had requested any code changes then your actual project files will have been automatically edited to accomplish what you asked for.
-
-An example `data_folder` (named `data` in the project root) is included in this project so you can see examples, to get a better undersanding of how this tool works.
-
 
 # Project Documentation
 

@@ -70,7 +70,7 @@ class AppConfig:
         p.add_argument(
             "--data_folder",
             required=True,
-            help="Holds the question.txt file and also all generated response files",
+            help="Holds all generated response files, logged for analysis, debugging, or just record keeping",
         )
         p.add_argument(
             "--source_folder", required=True, help="Folder with source files to scan"
