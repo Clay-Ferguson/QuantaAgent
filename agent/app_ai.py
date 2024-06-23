@@ -14,10 +14,7 @@ from agent.utils import RefactorMode, Utils
 from agent.tools.refactoring_tools import (
     UpdateBlockTool,
     CreateFileTool,
-    UpdateFileTool,
-    update_block,
-    create_file,
-    update_file,
+    UpdateFileTool
 )
 
 
@@ -80,61 +77,40 @@ class AppAI:
 
             messages.append(human_message)
 
-            if AppConfig.tool_use and self.mode != RefactorMode.NONE.value:
+            if self.mode != RefactorMode.NONE.value:
                 # https://python.langchain.com/v0.2/docs/tutorials/agents/
-                if AppConfig.agentic:
-                    tools = []
+                tools = []
 
-                    if self.mode == RefactorMode.BLOCKS.value:
-                        tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]
-                    elif self.mode == RefactorMode.FILES.value:
-                        tools = [
-                            CreateFileTool("File Creator Tool", self.cfg.source_folder),
-                            UpdateFileTool("File Updater Tool", self.cfg.source_folder),
-                        ]
+                if self.mode == RefactorMode.BLOCKS.value:
+                    tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]
+                elif self.mode == RefactorMode.FILES.value:
+                    tools = [
+                        CreateFileTool("File Creator Tool", self.cfg.source_folder),
+                        UpdateFileTool("File Updater Tool", self.cfg.source_folder),
+                    ]
 
-                    agent_executor = chat_agent_executor.create_tool_calling_executor(
-                        llm, tools
-                    )
-                    initial_message_len = len(messages)
-                    response = agent_executor.invoke({"messages": list(messages)})
-                    # print(f"Response: {response}")
-                    resp_messages = response["messages"]
-                    new_messages = resp_messages[initial_message_len:]
-                    ret = ""
-                    ai_response: int = 0
-                    for message in new_messages:
-                        if isinstance(message, AIMessage):
-                            ai_response += 1
-                            content = message.content
-                            if not content:
-                                content = Utils.get_tool_calls_str(message)
-                                # print(f"TOOL CALLS:\n{content}")
-                            ret += f"AI Response {ai_response}:\n{content}\n==============\n"  # type: ignore
+                agent_executor = chat_agent_executor.create_tool_calling_executor(
+                    llm, tools
+                )
+                initial_message_len = len(messages)
+                response = agent_executor.invoke({"messages": list(messages)})
+                # print(f"Response: {response}")
+                resp_messages = response["messages"]
+                new_messages = resp_messages[initial_message_len:]
+                ret = ""
+                ai_response: int = 0
+                for message in new_messages:
+                    if isinstance(message, AIMessage):
+                        ai_response += 1
+                        content = message.content
+                        if not content:
+                            content = Utils.get_tool_calls_str(message)
+                            # print(f"TOOL CALLS:\n{content}")
+                        ret += f"AI Response {ai_response}:\n{content}\n==============\n"  # type: ignore
 
-                    # Agents may add multiple new messages, so we need to update the messages list
-                    # This [:] syntax is a way to update the list in place
-                    messages[:] = resp_messages
-
-                else:
-                    # With this approach (as opposed to the agent_executor above), it will be designating a call to
-                    # the @tool annotated functions in thet response, but the tool won't have been executed automatically
-                    # in this non-agentic approach. So, we need to call the tool manually, in this case. However we will
-                    # probably always keep `AppConfig.agentic=True` permanent in this app, so this block of code is just for
-                    # reference, and we will probably never use it. Also since this branch of the code was never completed
-                    # to the point where the tool calls were actually made, this codepath (i.e. tool_use=True, and agentic=False)
-                    # will not actually directly refactor any of your code.
-                    tools = []
-                    if self.mode == RefactorMode.BLOCKS.value:
-                        tools = [update_block]
-                    elif self.mode == RefactorMode.FILES.value:
-                        tools = [create_file, update_file]
-
-                    llm_with_tools = llm.bind_tools(tools)
-                    response = llm_with_tools.invoke(list(messages))
-                    print(f"Response: {response}")
-                    ret = response.content  # type: ignore
-                    messages.append(AIMessage(content=response.content))
+                # Agents may add multiple new messages, so we need to update the messages list
+                # This [:] syntax is a way to update the list in place
+                messages[:] = resp_messages
 
             else:
                 response = llm.invoke(list(messages))

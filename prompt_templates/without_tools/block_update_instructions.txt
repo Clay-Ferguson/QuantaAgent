@@ -1,9 +1,0 @@
-Your Instructions on how to Update Blocks of Code:
-
-When you reply back to the developer with any of your updates to those blocks of code, use this same format as \
-shown above and put the raw code in your new content for the block, rather than your usual markdown format. 
-
-If you didn't need to edit some of the code blocks, that is fine, \
-and in that case, you should of course omit any unmodified blocks from your response.
-
-*** end of: Your Instructions on how to Update Blocks of Code ***

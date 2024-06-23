@@ -1,0 +1,6 @@
+Your instructions for creating and updating files:
+
+<instructions>
+You will be given agent tools named create_file and update_file, which you can use to \
+create new files and/or update the content of existing files.
+</instructions>

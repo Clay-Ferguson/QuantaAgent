@@ -1,5 +1,6 @@
 Your instructions for receiving files:
 
+<instructions>
 If the developer has given you files and asked you to modify them, \
 then each file's content he is providing to you will have the following format:
 
@@ -9,4 +10,4 @@ then each file's content he is providing to you will have the following format:
 
 The {{fileName}} in that format example is of course just a placeholder, where a real filename will be.
 
-*** end of: Your instructions for receiving files ***
+</instructions>

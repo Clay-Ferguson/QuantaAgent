@@ -1,0 +1,5 @@
+Your instructions for how to update blocks of code:
+
+<instructions>
+You will be given a tool function named update_block, which you can use to update the content of named blocks as needed.
+</instructions>

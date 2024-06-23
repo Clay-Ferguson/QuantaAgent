@@ -1,7 +1,0 @@
-Your instructions for creating and updating files:
-
--- For AppConfig.tool_use==True and AppConfig.agentic==True use these instructions:
-You will be given agent tools named create_file and update_file, which you can use to 
-create new files and/or update the content of existing files.
-
-*** end of: Your instructions for creating and updating files ***

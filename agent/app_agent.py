@@ -137,14 +137,11 @@ class QuantaAgent:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/block_access_instructions.txt"
             )
-            if AppConfig.tool_use:
-                self.system_prompt += PromptUtils.get_template(
-                    "prompt_templates/with_tools/block_update_instructions.txt"
-                )
-            else:
-                self.system_prompt += PromptUtils.get_template(
-                    "prompt_templates/without_tools/block_update_instructions.txt"
-                )
+            
+            self.system_prompt += PromptUtils.get_template(
+                "prompt_templates/block_update_instructions.txt"
+            )
+           
 
     def add_file_handling_instructions(self):
         """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
@@ -154,14 +151,11 @@ class QuantaAgent:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/file_access_instructions.txt"
             )
-            if AppConfig.tool_use:
-                self.system_prompt += PromptUtils.get_template(
-                    "prompt_templates/with_tools/file_edit_instructions.txt"
-                )
-            else:
-                self.system_prompt += PromptUtils.get_template(
-                    "prompt_templates/without_tools/file_edit_instructions.txt"
-                )
+            
+            self.system_prompt += PromptUtils.get_template(
+                "prompt_templates/file_edit_instructions.txt"
+            )
+           
 
     def insert_files_and_folders_into_prompt(self) -> bool:
         """Inserts the file and folder names into the prompt. Prompts can contain ${FileName} and ${FolderName/} tags
