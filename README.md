@@ -23,7 +23,7 @@ You're probably a developer if you're even reading this so be sure to check out 
 * Open Source Python (MIT License)
 * Uses Python Langchain giving you flexibility in which LLM you use, including either locally hosted LLMs or Cloud AI Services.
 
-*Note: Current codebase only includes OpenAI connectivity, but with Langchain it's easy to add support for the other Cloud AIs or Local LLMS.*
+*Note: Current codebase only includes OpenAI ChatGPT, and Anthropic Claud connectivity, but with Langchain it's easy to add support for the other Cloud AIs or Local LLMS.*
 
 If you're a software developer and you want to be able to ask AI (like OpenAI's ChatGPT for example) questions about your code, this tool helps do that. This tool can also implement entire complex features in your code base, by updating existing entire files, or by updating only specific labeled `Named Bocks`, discussed below, to add code to specific locations in specific files as directed by you. 
 
@@ -41,8 +41,7 @@ You can mention specific files and/or folders in your prompt to request AI to ma
 
 ## To Run
 
-* Command Line version `./run_cmd.sh`
-* Streamlit Web App `./run_streamlie.sh`
+* Streamlit Web App `./run_streamlit.sh`
 
 ## Configuration
 
