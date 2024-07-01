@@ -101,8 +101,7 @@ class QuantaAgent:
         )
 
         if (
-            self.mode == RefactorMode.FILES.value
-            or self.mode == RefactorMode.BLOCKS.value
+            self.mode == RefactorMode.REFACTOR.value
         ):
             ProjectMutator(
                 self.st,
@@ -133,7 +132,7 @@ class QuantaAgent:
     def add_block_handling_instructions(self):
         """Adds instructions for updating blocks. If the prompt contains ${BlockName} tags, then we need to provide
         instructions for how to provide the new block content."""
-        if self.mode == RefactorMode.BLOCKS.value and len(self.prj_loader.blocks) > 0:
+        if self.mode == RefactorMode.REFACTOR.value and len(self.prj_loader.blocks) > 0:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/block_access_instructions.txt"
             )
@@ -147,7 +146,7 @@ class QuantaAgent:
         """Adds instructions for inserting files. If the prompt contains ${FileName} or ${FolderName/} tags, then
         we need to provide instructions for how to provide the new file or folder names.
         """
-        if self.mode == RefactorMode.FILES.value:
+        if self.mode == RefactorMode.REFACTOR.value:
             self.system_prompt += PromptUtils.get_template(
                 "prompt_templates/file_access_instructions.txt"
             )

@@ -64,7 +64,7 @@ class ProjectMutator:
             rel_filename: str = filename[self.source_folder_len :]
             new_content: Optional[str] = None
 
-            if self.mode == RefactorMode.FILES.value:
+            if self.mode == RefactorMode.REFACTOR.value:
                 new_content = self.parse_modified_file(self.ai_answer, rel_filename)
 
             if new_content is not None:
@@ -72,7 +72,7 @@ class ProjectMutator:
                 modified = True
             # else if no new content, so we try any block updates
             else:
-                if self.mode == RefactorMode.BLOCKS.value:
+                if self.mode == RefactorMode.REFACTOR.value:
                     for name, block in self.blocks.items():
                         if block.dirty:
                             if self.replace_block(content, block, name):

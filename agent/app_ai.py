@@ -81,10 +81,9 @@ class AppAI:
                 # https://python.langchain.com/v0.2/docs/tutorials/agents/
                 tools = []
 
-                if self.mode == RefactorMode.BLOCKS.value:
-                    tools = [UpdateBlockTool("Block Updater Tool", self.blocks)]
-                elif self.mode == RefactorMode.FILES.value:
+                if self.mode == RefactorMode.REFACTOR.value:
                     tools = [
+                        UpdateBlockTool("Block Updater Tool", self.blocks),
                         CreateFileTool("File Creator Tool", self.cfg.source_folder),
                         UpdateFileTool("File Updater Tool", self.cfg.source_folder),
                     ]

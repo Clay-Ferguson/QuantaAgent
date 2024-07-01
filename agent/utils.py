@@ -30,8 +30,7 @@ class AIService(Enum):
 
 
 class RefactorMode(Enum):
-    FILES = "files"
-    BLOCKS = "blocks"
+    REFACTOR = "refactor"
     NONE = "none"
 
 
@@ -163,7 +162,6 @@ class Utils:
 
         # to support blocks in blocks we use a counter to keep track of how many blocks we're in
         started_counter: int = 0
-        block_mode = cfg.mode == RefactorMode.BLOCKS.value
 
         # of content is a string type. Note: When Anthropic is running tool calls we get here with
         # content being a list of dictionaries. We need to handle that case.
@@ -186,7 +184,7 @@ class Utils:
                 # ENDS
                 if Utils.is_tag_line(line, TAG_FILE_END):
                     started_counter -= 1
-                elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_END):
+                elif Utils.is_tag_line(line, TAG_BLOCK_END):
                     started_counter -= 1
 
                 # BEGINS
@@ -198,7 +196,7 @@ class Utils:
                     if started_counter == 1:
                         new_content.append(f"File Updated: {name}")
 
-                elif block_mode and Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
+                elif Utils.is_tag_line(line, TAG_BLOCK_BEGIN):
                     name: Optional[str] = Utils.parse_name_from_tag_line(
                         line, TAG_BLOCK_BEGIN
                     )

@@ -10,9 +10,8 @@ def show_mode_picker(st):
 
     # Define the mapping between keys and display values
     mode_mapping = {
-        RefactorMode.FILES.value: "Whole File",
-        RefactorMode.BLOCKS.value: "Update Blocks",
-        RefactorMode.NONE.value: "None",
+        RefactorMode.REFACTOR.value: "Allow Refactoring",
+        RefactorMode.NONE.value: "No Refactoring",
     }
 
     def mode_changed():
@@ -23,9 +22,8 @@ def show_mode_picker(st):
         list(mode_mapping.keys()),
         key="p_mode",
         format_func=lambda x: {
-            RefactorMode.FILES.value: "Files: AI is allowed to update entire files.",
-            RefactorMode.BLOCKS.value: "Blocks: AI is only allowed to update specific blocks in the code.",
-            RefactorMode.NONE.value: "None: No Code Refactoring",
+            RefactorMode.REFACTOR.value: "AI is allowed to create and update files.",
+            RefactorMode.NONE.value: "No refactoring. Only question answering.",
         }[x],
         on_change=mode_changed,
     )

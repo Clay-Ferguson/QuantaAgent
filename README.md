@@ -50,22 +50,10 @@ To use this tool, follow these steps:
 1) Edit the `config.yaml` to make it point to a software project folder you want to analyze.
 2) Put your `OpenAI API Key` in the `config.yaml` (or command line, or env var)
 3) Create an empty `data` folder where your output files will go (also in `config.yaml`)
-4) Make sure your `config.yaml` has `mode: "files"` if you want the tool to be free to update any of your files in their entirety, or set `mode: "blocks"` if you only want the AI to make changes in places you've pre-designated yourself. Obviously the simpler approach is `files`.
-5) Run the Streamlit-based Web interface with this command: `streamlit run Quanta_Agent.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
-7) That's it. After running the tool you will have the a log files about this run saved into your `data` folder based of the filename you specified. If you had requested for any refactorings to have been done then your actual project files will have been updated as well, to accomplish whatever you asked for.
+4) Run the Streamlit-based Web interface with this command: `streamlit run Quanta_Agent.py`, and just use the app like a chatbot or and agent which can do code refactoring just like an expert software developer!
 
 *Tip: When requesting project refactorings, it's best to be in a clean project version, so that if you don't like the changes the tool made to your code you can roll them back easily, using `git`.
 
-
-# Modes
-
-## Files Mode
-
-`Files Mode` will allow the agent to update entire files. Only entire files are sent to the LLM, and the LLM will send back entire files which automatically get saved into your project according to the LLM's edits.
-
-## Blocks Mode
-
-`Blocks Mode` expects you to have defined `Named Blocks` in your code, to identify specific areas which you'd like to ask questions about by name, to save you from having to continually paste those sections of code into your AI prompts. There's a simple syntax used to allow you to enclose pieces of your code into blocks by putting comments around them that the AI will detect and unserstand automatically. Here are the docs on [Named Blocks](./docs/named-blocks.md)
 
 # Example 1. Trivial Refactoring
 

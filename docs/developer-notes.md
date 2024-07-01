@@ -15,10 +15,6 @@ Don't forget to activate your "quanta_agent" environment in your IDE. IDE's like
 
 The current `config.py` will automatically find the API keys from `..\secrets\secrets.yaml` (outside this project), and it's not recommended to put them directly into config.yaml itself, because of risk of accidental commits to the repository.
 
-## mode Option
-
-NOTE: The default config setting for the `mode` option is `files`. When you run the tool you have to set this option to tell it whether it should try to update files based on updating entire files (`mode="file"`), or only by updating only `Named Blocks` in files (`mode="blocks"`).
-
 
 # AI Dry-Run Testing
 
